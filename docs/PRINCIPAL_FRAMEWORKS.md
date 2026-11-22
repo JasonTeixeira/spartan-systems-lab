@@ -34,13 +34,13 @@ You do **not** build 30 separate apps. Every interview system in Alex Xu Vol 1 &
 | **1** | **High-Throughput Write & Metering** | Datadog, Metrics Monitor, Ad Click Aggregator, Stripe Metering, IoT Telemetry | **Lab 1 + Lab 3** (FastAPI + Kafka/Redpanda + ClickHouse + Redis) |
 | **2** | **Strong-Consistency Financial / Booking Ledger** | Stripe Payments, Digital Wallet, Hotel Booking, Ticketmaster, Stock Exchange | **Lab 1** (ACID Postgres, MVCC/Isolation Anomalies, `SELECT FOR UPDATE`, Double-Entry Ledger, Outbox) |
 | **3** | **Read-Heavy Feeds, Caching & Edge CDN** | Twitter/X Feed, Instagram, URL Shortener, Reddit, Multi-Tier CDN | **Lab 2 + Lab 3** (Nginx Edge/CDN headers, Redis Cache-Aside/SingleFlight, Read Replicas) |
-| **4** | **Real-Time Bidirectional Sync & Presence** | **Discord**, Slack, WhatsApp, Live Notifications, Figma/Docs | **Lab 1 + Lab 6** (WebSockets/SSE + Redis Pub/Sub fanout + Consistent Hashing + CRDTs) |
+| **4** | **Real-Time Bidirectional Sync, Voice & Presence** | **Discord**, Zoom/Voice AI Assistants (WebRTC STT->LLM->TTS), Slack, WhatsApp, Figma/Docs | **Lab 1 + Lab 4 + Lab 6** (WebSockets/SSE + Redis Pub/Sub + **WebRTC/LiveKit Voice AI <500ms** + CRDTs) |
 | **5** | **Search, Autocomplete & Geospatial** | **Google Search**, Typeahead Autocomplete, **Uber / Nearby Friends**, Yelp, Google Maps | **Lab 1 + Lab 4** (Trie drill + PostGIS/Geohash drill + Qdrant Inverted BM25 + HNSW Vector) |
 | **6** | **Large Blob / Media Pipeline & Transcoding DAG** | **Netflix / YouTube**, Dropbox, Google Drive, S3 Object Storage | **Lab 2 + Lab 3** (MinIO/S3 multipart upload + Airflow DAG workers + HTTP Range/CDN streaming) |
 | **7** | **Distributed Coordination, Scheduling & Sandboxes** | Distributed Cron, GitHub Actions, Temporal, Rate Limiter, Snowflake IDs | **Lab 1 + Lab 5 + Lab 6** (Token Bucket, Raft Consensus, Leases/Fencing Tokens, Linux Namespaces/K8s) |
 | **8** | **Batch & Streaming Data Lakehouse** | Uber Data Platform, Enterprise BI Warehouse, Feature Store | **Lab 3** (Apache Kafka + Iceberg + Arrow/Parquet + PySpark/DuckDB + Airflow + Watermarks) |
-| **9** | **Production GenAI, Agents, MCP & Classical RecSys/ML** | **ChatGPT / Perplexity**, Enterprise Agents + MCP, YouTube/TikTok Two-Tower RecSys, RLHF Flywheel | **Lab 4** (MCP Server, Agent State Machines, Qdrant RAG, Ollama/vLLM, LiteLLM, MLflow + LightGBM/PyTorch, Phoenix Evals) |
-| **10** | **Zero-Trust Security, Chaos & Brownfield Migration** | Legacy Monolith Rescue, Multi-Region DR, Enterprise Zero-Trust Cloud | **Lab 2 + Lab 6** (`nftables`/DNS/TLS/Bastion, Vault/OIDC/mTLS, Debezium CDC + Strangler Fig, 12 Outages, Real AWS) |
+| **9** | **Production GenAI, Agents, MCP & Classical RecSys/ML** | **ChatGPT / Perplexity**, Enterprise Agents + MCP, Voice AI Agents, YouTube/TikTok Two-Tower RecSys, RLHF | **Lab 4** (MCP Server, Agent State Machines, Voice AI/WebRTC, Qdrant RAG, Ollama/vLLM, LiteLLM, MLflow + LightGBM/PyTorch, Phoenix Evals) |
+| **10** | **Virtualization, Zero-Trust Security, Chaos & Brownfield** | Bare-Metal/VM vs Container vs MicroVM, Legacy Monolith Rescue, Multi-Region DR, Enterprise Cloud | **Lab 2 + Lab 6** (**Lima Linux VM** + `nftables`/DNS/TLS/Bastion, Vault/OIDC/mTLS, Debezium CDC + Strangler Fig, 12 Outages, Real AWS) |
 
 ---
 
@@ -120,3 +120,14 @@ Once a lab works on the happy path, run **Nightmare Mode** on it before moving o
 3. **10M-Row Reality Check:** Never validate a SQL query or Python script on 100 rows—always test at `1M-10M` rows with capped container RAM (`256MB`) so naive code gets OOMKilled (`Exit 137`) on purpose.
 4. **Live 2-Terminal DDIA Anomalies:** Reproduce a real **Lost Update** and **Write Skew** race condition live in PostgreSQL, watch money disappear, then prove your fix prevents it under concurrent load.
 5. **Timed Cold Oral Defense:** Close all notes, draw the system on a blank sheet, calculate QPS/storage/cost math out loud, and survive 5 rapid-fire hostile Staff-interview failure probes.
+
+---
+
+## 7. Turning Homelab Proof Into Inbound Offers & Consulting Clients (Zero Fake Metrics)
+
+Never fabricate company claims. Publish **100% reproducible, clone-and-verify engineering studies** from your labs:
+1. **Reproducible Benchmark Repo:** Every optimization ships with `make bench` + Before/After `EXPLAIN ANALYZE` + `k6` p99 + Grafana screenshot + `Infracost` monthly cloud delta (e.g., *"10M rows: 14.2s -> 6ms p99; projected RDS/token spend cut 68%-91%"*).
+2. **1 Technical Teardown Per Milestone (LinkedIn / X / Substack):** Diagram + real terminal proof + exact root cause + dollar impact + GitHub link.
+3. **1 3-Minute Live Terminal Video (Loom / YouTube):** Trigger a live outage in `tmux` + `k9s` + Grafana + `tcpdump` and isolate/fix it cold in 3 minutes. Real engineers, recruiters, and CTOs recognize authentic mastery in 60 seconds.
+4. **Upstream Open-Source PRs & Real Live Production Proof:** Once Labs 1-6 are complete, ship 1 live public HTTPS product/tool and land 2-3 real PRs in core repos (e.g., `vLLM`, `Qdrant`, `OpenTofu`, `FastAPI`) to stack undeniable real-world production proof.
+
