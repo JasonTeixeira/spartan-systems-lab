@@ -147,4 +147,59 @@ Every single lab (Labs 1-6) enforces the same production quality & recovery life
 - **Disaster Recovery Drill (Measure RPO/RTO):** `make backup` (`pg_dump` / WAL) -> destroy volumes with `make reset` -> `make up` -> `make restore` -> verify exact row counts & checksums.
 - **Clean Zero-State Reset Anytime:** `make reset` wipes all containers & volumes back to spotless Day-0 state in seconds without losing your Git history, ADRs, benchmarks, or archived incident bundles.
 
+---
+
+## 9. Enterprise-Grade Architecture Frameworks & Distributed Systems Pattern Kit
+
+Master the foundational primitives first—then apply these exact enterprise architecture frameworks to **any** distributed system:
+
+1. **The C4 Model (4 Zoom Levels for Every Audience):**
+   - **L1 Context:** System + users + external dependencies (for CEOs/CFOs/PMs).
+   - **L2 Containers:** Deployable runtime units (API, Postgres, Kafka, Qdrant, Metabase) + network boundaries.
+   - **L3 Components:** Internal modules (Domain, Services, Adapters, Workers).
+   - **L4 Code:** Classes, schemas, SQL migrations, and invariants.
+2. **Cloud-Neutral Well-Architected 6 Pillars:**
+   - Operational Excellence, Security, Reliability, Performance Efficiency, **Cost Optimization (FinOps)**, Sustainability.
+3. **Complete Distributed Systems Pattern Field Kit:**
+   - **Data & Consistency:** Transactional Outbox, Saga (Orchestration vs. Choreography), CQRS + Event Sourcing, Idempotent Receiver, Change Data Capture (CDC), Dead-Letter Queues (DLQs), Fencing Tokens.
+   - **Stability & Traffic:** Circuit Breaker, Bulkhead / Cell-Based Isolation, Retry with Full Jitter, Hedged Requests, Backpressure & Load Shedding, Token/Leaky Bucket Rate Limiter, SingleFlight (Cache Stampede Coalescing).
+   - **Evolution & Delivery:** Strangler Fig, Anti-Corruption Layer (ACL), Expand-and-Contract Zero-Downtime Migrations, Shadow Traffic Mirroring, Blue/Green & Canary Rollouts.
+   - **Code-Level Architecture:** Modular ("Fractal") Monolith first, Hexagonal (Ports & Adapters), Domain-Driven Design (Bounded Contexts & Invariants), Dependency Injection.
+4. **Architecture Fitness Functions (Automated Governance in CI):**
+   - Automated tests enforcing architecture rules on every PR: p99 < 300ms (`k6`), zero CVE criticals (`Trivy`), zero circular domain imports, zero cross-tenant RLS leaks, RAG faithfulness >= 0.95, and Infracost delta < budget threshold.
+
+---
+
+## 10. Google / Industry SRE Mastery Frameworks, Models & Patterns
+
+1. **SLI -> SLO -> SLA & Error Budgets:**
+   - **SLI** (measured signal: `% of requests < 300ms and non-5xx`), **SLO** (internal target: `99.9%` = **43.2 min/mo** error budget), **SLA** (external customer contract).
+   - **Error Budget Policy:** Budget healthy -> ship features fast; budget exhausted -> freeze features and fix reliability only.
+2. **The 3 Observability Signal Frameworks (Know When to Use Each):**
+   - **4 Golden Signals (Google SRE - Any Service):** Latency, Traffic, Errors, Saturation.
+   - **RED (APIs/Microservices):** Rate, Errors, Duration.
+   - **USE (Linux OS/Hardware/Pools):** Utilization, Saturation, Errors.
+3. **Multi-Window, Multi-Burn-Rate Alerting (Zero Alert Fatigue):**
+   - Never page on raw CPU spikes. Page on **error budget burn rate** (e.g., *2% of 30-day budget burned in 1 hr = Page*; *5% burned in 6 hrs = Ticket*).
+4. **Toil Elimination & The 50% Engineering Cap:**
+   - Toil = manual, repetitive, automatable work scaling linearly with traffic. Cap toil at `<50%` and invest `>=50%` into permanent automation (`Ansible`, `Terraform`, `spartan-cli`, self-healing K8s).
+5. **Incident Command System (ICS) & Blameless Post-Mortems:**
+   - Clear war-room roles: **Incident Commander (IC)** (coordinates, never types blindly), **Comms Lead** (updates execs/status page), **SMEs** (hands on terminal).
+   - Blameless post-mortems fix *systems and guardrails*, never people.
+6. **Capacity Planning, Chaos Game Days & Wheel of Misfortune:**
+   - Little's Law (`L = lambda * W`), N+1/N+2 redundancy, Chaos steady-state hypotheses, and timed blind team/solo outage simulations (**Chaos Roulette**).
+
+---
+
+## 11. Primitives-First Platform Architecture: Core 6-Lab Spine + Additive Modular Packs
+
+Master the **Core 6-Lab Spine** first so the underlying primitives are automatic—then snap in any **Additive Pack** cleanly:
+- **`pack-exec-bi` (Live in Lab 1 via Metabase + upgraded in Lab 3 with Apache Superset):** Executive KPI & FinOps Savings Dashboards wired to real SQL/OLAP pipelines (`v_exec_tenant_unit_economics`, `v_exec_daily_burn`, `v_exec_cost_drivers`).
+- **`pack-ops-automation`:** Reusable **Ansible** server playbooks (Ubuntu + Rocky/RHEL), **Defensive Bash** (`ShellCheck` + `bats`), and packaged Python **`spartan-cli`** ops automation library.
+- **`pack-api-mastery`:** Complete **REST/OpenAPI 3.1 + gRPC/Protobuf + GraphQL (DataLoader) + Signed Webhooks (HMAC) + SSE/WebSockets** reference suite.
+- **`pack-governance-ai-compliance`:** **PostgreSQL Row-Level Security (RLS)**, **Presidio PII Redaction**, **OpenLineage** data lineage, and **Unleash** feature flags + A/B guardrails.
+- **`pack-polyglot-db-siem`:** Hands-on **MongoDB** (aggregations/indexes), **Apache Cassandra** (quorum/partition keys), and **OpenSearch / Splunk Dev** SIEM log analytics.
+- **`pack-cloud-trials`:** Weekend live-fire playbooks for **real AWS**, **30-day Snowflake trial**, and **3-hr RunPod NVIDIA GPU vLLM**.
+
+
 

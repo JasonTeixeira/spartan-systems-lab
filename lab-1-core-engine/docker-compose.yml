@@ -113,6 +113,25 @@ services:
       - private_data_net
 
   # ------------------------------------------------------------------
+  # EXECUTIVE BI & FINOPS KPI DASHBOARD (Metabase -> Real Postgres Views)
+  # Open http://localhost:3000 -> Connect to postgres:5432 / spartan_lab
+  # ------------------------------------------------------------------
+  metabase:
+    image: metabase/metabase:latest
+    container_name: spartan-metabase
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      MB_DB_FILE: /metabase-data/metabase.db
+    volumes:
+      - metabase_data:/metabase-data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - private_data_net
+
+  # ------------------------------------------------------------------
   # LINUX SRE & NETWORK FORENSICS TOOLBOX
   # Attached to all subnets so you can run ss, tcpdump, strace, dig, tc, iostat, psql
   # ------------------------------------------------------------------
@@ -142,3 +161,4 @@ networks:
 
 volumes:
   pg_data:
+  metabase_data:

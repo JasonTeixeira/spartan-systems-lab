@@ -23,7 +23,9 @@ ci: lint typecheck test
 # --- Lab 1 Container Stack & Clean Reset-to-Zero ---
 up:
 	$(COMPOSE) up -d --build
-	@echo "Lab 1 booted. Edge proxy: http://localhost:8080/healthz"
+	@echo "Lab 1 booted:"
+	@echo "  Edge API (Nginx):      http://localhost:8080/healthz"
+	@echo "  Executive BI (Metabase): http://localhost:3000 (connect to host=postgres port=5432 db=spartan_lab)"
 
 down:
 	$(COMPOSE) down
