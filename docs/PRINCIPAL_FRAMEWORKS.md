@@ -131,3 +131,20 @@ Never fabricate company claims. Publish **100% reproducible, clone-and-verify en
 3. **1 3-Minute Live Terminal Video (Loom / YouTube):** Trigger a live outage in `tmux` + `k9s` + Grafana + `tcpdump` and isolate/fix it cold in 3 minutes. Real engineers, recruiters, and CTOs recognize authentic mastery in 60 seconds.
 4. **Upstream Open-Source PRs & Real Live Production Proof:** Once Labs 1-6 are complete, ship 1 live public HTTPS product/tool and land 2-3 real PRs in core repos (e.g., `vLLM`, `Qdrant`, `OpenTofu`, `FastAPI`) to stack undeniable real-world production proof.
 
+---
+
+## 8. The 5-Layer QA, Evals, Disaster Recovery & Reset-to-Zero Standard
+
+Every single lab (Labs 1-6) enforces the same production quality & recovery lifecycle:
+1. **Unit & Property-Based QA:** `pytest` + `hypothesis` (fuzzing edge cases: NULLs, overflow, negative balances, unicode).
+2. **Real Integration & Contract QA:** Real Postgres/Redis integration tests (never fake SQL mocks) + OpenAPI/Protobuf backward-compatibility contract tests.
+3. **Load, Soak & Chaos QA:** `k6` SLO thresholds (fail if p99 > 300ms or error rate > 1%) + Chaos Mesh fault-injection verification.
+4. **Security & Supply-Chain QA:** `Trivy` CVE image scanning, SAST/linting (`ruff`/`bandit`), secret scanning (`gitleaks`), and OWASP LLM prompt-injection tests.
+5. **AI/ML Evals & Data Quality QA:** Golden-dataset RAG/Agent trajectory evals (`Phoenix`/`Promptfoo`), SQL reconciliation assertions (row-count & FK integrity), and ML drift gates (`MLflow`).
+
+### Break-Archive-Reset Loop (Infinite Reps + Permanent Proof History)
+- **Archive Forensic Evidence Before Resetting:** `make snapshot-incident NAME=lock-storm-01` saves container logs, `pg_stat_activity`, `pg_locks`, `ss`/`vmstat`/`ip route`, and `git diff` permanently into `docs/incidents/<timestamp>_<name>/`.
+- **Disaster Recovery Drill (Measure RPO/RTO):** `make backup` (`pg_dump` / WAL) -> destroy volumes with `make reset` -> `make up` -> `make restore` -> verify exact row counts & checksums.
+- **Clean Zero-State Reset Anytime:** `make reset` wipes all containers & volumes back to spotless Day-0 state in seconds without losing your Git history, ADRs, benchmarks, or archived incident bundles.
+
+

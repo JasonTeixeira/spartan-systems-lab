@@ -15,6 +15,7 @@ __pycache__/
 # Local lab state
 .localstack/
 .lab-data/
+backups/
 *.db
 *.wal
 *.sst

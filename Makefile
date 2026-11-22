@@ -1,8 +1,10 @@
-.PHONY: setup lint typecheck test ci up down logs ps sre-shell psql seed drill-py chaos pdf
+.PHONY: setup lint typecheck test ci up down reset logs ps sre-shell psql seed drill-py chaos backup restore snapshot-incident pdf
 
 COMPOSE := docker compose -f lab-1-core-engine/docker-compose.yml
 ROWS ?= 100000
 SCENARIO ?= lock-storm
+NAME ?= drill
+BACKUP_FILE ?= backups/spartan_lab_latest.sql
 
 setup:
 	uv sync
@@ -18,13 +20,17 @@ test:
 
 ci: lint typecheck test
 
-# --- Lab 1 Container Stack ---
+# --- Lab 1 Container Stack & Clean Reset-to-Zero ---
 up:
 	$(COMPOSE) up -d --build
 	@echo "Lab 1 booted. Edge proxy: http://localhost:8080/healthz"
 
 down:
 	$(COMPOSE) down
+
+reset:
+	$(COMPOSE) down -v --remove-orphans
+	@echo "Lab 1 wiped to spotless zero-state. Run 'make up' to boot fresh."
 
 logs:
 	$(COMPOSE) logs -f --tail=100
@@ -39,12 +45,24 @@ sre-shell:
 psql:
 	$(COMPOSE) exec postgres psql -U spartan -d spartan_lab
 
-# --- Data Seeding & Chaos Drills ---
+# --- Data Seeding, Chaos Drills & Disaster Recovery (Backup/Restore) ---
 seed:
 	uv run python lab-1-core-engine/scripts/seed_events.py --rows $(ROWS)
 
 chaos:
 	bash lab-1-core-engine/scripts/chaos_lab1.sh $(SCENARIO)
+
+backup:
+	mkdir -p backups
+	$(COMPOSE) exec -T postgres pg_dump -U spartan -d spartan_lab --clean --if-exists > $(BACKUP_FILE)
+	@ls -lh $(BACKUP_FILE)
+
+restore:
+	$(COMPOSE) exec -T postgres psql -U spartan -d spartan_lab < $(BACKUP_FILE)
+	@echo "DR restore completed from $(BACKUP_FILE). Verify row counts now!"
+
+snapshot-incident:
+	bash scripts/snapshot_incident.sh $(NAME)
 
 # --- Spartan Daily Cold Drills (intentionally red until YOU implement the stubs!) ---
 drill-py:
