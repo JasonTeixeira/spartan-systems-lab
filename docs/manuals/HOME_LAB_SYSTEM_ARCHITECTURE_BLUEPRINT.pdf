@@ -1,0 +1,1224 @@
+%PDF-1.4
+%\xE2\xE3\xCF\xD3
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [9 0 R 11 0 R 13 0 R 15 0 R 17 0 R] /Count 5 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Bold >>
+endobj
+8 0 obj
+<< /Length 8292 >>
+stream
+q
+0.06 0.09 0.16 rg
+48.00 629.00 516.00 115.00 re f
+0.15 0.39 0.92 rg
+48.00 740.00 516.00 4.00 re f
+1.0 1.0 1.0 rg
+BT /F2 16 Tf 64.00 718.00 Td (MASTER HOMELAB & ENTERPRISE SYSTEMS BLUEPRINT) Tj ET
+0.75 0.82 0.92 rg
+BT /F1 9.5 Tf 64.00 702.00 Td (The 0.01% CCIE-Caliber Systems, Cloud, Data, AI/MLOps & SRE Execution Manual) Tj ET
+Q
+q
+0.58 0.65 0.76 rg
+BT /F2 7.0 Tf 64.00 651.00 Td ([PRIMITIVES] 16 Categories / 58 Components   |   [ARCHITECTURES] 47 Canonical System Blueprints) Tj ET
+BT /F2 7.0 Tf 64.00 641.00 Td ([HANDS-ON LABS] 6 Enterprise Labs + 2 Micro-Labs   |   [CHAOS DRILLS] 12 Severe Enterprise Outages) Tj ET
+Q
+q
+0.95 0.97 1.00 rg
+48.00 552.00 516.00 57.00 re f
+0.5 w 0.15 0.39 0.92 RG
+48.00 552.00 516.00 57.00 re s
+0.15 0.39 0.92 rg
+48.00 552.00 3.50 57.00 re f
+BT /F2 8.0 Tf 60.00 595.00 Td ([MASTER UNLOCK] The 0.01% Principal Architect Principle) Tj ET
+Q
+q
+0.15 0.22 0.32 rg
+BT /F1 8.0 Tf 60.00 584.00 Td (A top-0.01% Principal Systems Architect does not chase transient framework churn. They master the immutable physics of) Tj ET
+BT /F1 8.0 Tf 60.00 573.00 Td (computing: Linux kernel syscalls \(epoll, sendfile\), memory bus & VRAM bandwidth, CPU cache-line alignment, TCP/IP wire) Tj ET
+BT /F1 8.0 Tf 60.00 562.00 Td (flows, SQL query planners, and distributed consensus math.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 532.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 534.00 Td (1. THE UNIFIED ARCHITECTURE STACK & 4-TIER PROGRESSION) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 526.00 m 564.00 526.00 l S
+Q
+q
+0.09 0.13 0.24 rg
+48.00 498.00 516.00 18.00 re f
+1.0 1.0 1.0 rg
+BT /F2 7.5 Tf 52.00 503.00 Td (Layer / Tier) Tj ET
+BT /F2 7.5 Tf 157.00 503.00 Td (Scope) Tj ET
+BT /F2 7.5 Tf 267.00 503.00 Td (Core Technologies & Physical Primitives) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 482.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 482.00 m 564.00 482.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 488.00 Td (Layer 5: Governance) Tj ET
+BT /F1 7.2 Tf 157.00 488.00 Td (Business & FinOps) Tj ET
+BT /F1 7.2 Tf 267.00 488.00 Td (Unit economics \($/req, $/1M tokens\), SLOs/SLIs, Living ADRs, Compliance.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 457.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 457.00 m 564.00 457.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 472.00 Td (Layer 4: AI & Data) Tj ET
+BT /F1 7.2 Tf 157.00 472.00 Td (Intelligence & Analytics) Tj ET
+BT /F1 7.2 Tf 267.00 472.00 Td (vLLM/Ollama, Qdrant/pgvector, Iceberg Lakehouse, Redpanda/Kafka,) Tj ET
+BT /F1 7.2 Tf 267.00 463.00 Td (ClickHouse, RAG.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 432.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 432.00 m 564.00 432.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 447.00 Td (Layer 3: Orchestration) Tj ET
+BT /F1 7.2 Tf 157.00 447.00 Td (Distributed Runtime) Tj ET
+BT /F1 7.2 Tf 267.00 447.00 Td (Kubernetes \(Kind/k3s\), Raft/etcd, Temporal durable workflows, Multi-Region) Tj ET
+BT /F1 7.2 Tf 267.00 438.00 Td (sync.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 407.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 407.00 m 564.00 407.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 422.00 Td (Layer 2: Network/Mesh) Tj ET
+BT /F1 7.2 Tf 157.00 422.00 Td (East-West & Edge) Tj ET
+BT /F1 7.2 Tf 267.00 422.00 Td (TCP/IP, DNS, TLS/mTLS, Nginx/Envoy, Cilium eBPF, Anycast BGP,) Tj ET
+BT /F1 7.2 Tf 267.00 413.00 Td (NetworkPolicies.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 382.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 382.00 m 564.00 382.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 397.00 Td (Layer 1: OS & Hardware) Tj ET
+BT /F1 7.2 Tf 157.00 397.00 Td (Kernel & Silicon) Tj ET
+BT /F1 7.2 Tf 267.00 397.00 Td (Linux syscalls \(epoll, io_uring, sendfile\), Page Cache, cgroups, NVMe IOPS,) Tj ET
+BT /F1 7.2 Tf 267.00 388.00 Td (GPU HBM.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 367.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 365.50 Td (Tier 1 - Primitives & Mechanics \(90%\):) Tj ET
+BT /F1 8.5 Tf 245.88 365.50 Td (Linux, Python, SQL, DSA, Docker, and the 22 repeating daily operational) Tj ET
+BT /F1 8.5 Tf 62.00 354.00 Td (tasks.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 341.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 339.50 Td (Tier 2 - Classic Distributed Systems \(95%\):) Tj ET
+BT /F1 8.5 Tf 269.68 339.50 Td (29 classic architectural shapes \(Alex Xu Vol 1 & 2\), caching) Tj ET
+BT /F1 8.5 Tf 62.00 328.00 Td (topologies, sharding, and queues.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 315.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 313.50 Td (Tier 3 - Full-Stack Enterprise Labs \(98%\):) Tj ET
+BT /F1 8.5 Tf 264.92 313.50 Td (Production streaming FinOps, hybrid RAG/MLOps, zero-trust security,) Tj ET
+BT /F1 8.5 Tf 62.00 302.00 Td (and zero-downtime migrations.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 289.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 287.50 Td (Tier 4 - Deep Systems & CCIE Forensics \(0.01%\):) Tj ET
+BT /F1 8.5 Tf 288.72 287.50 Td (LSM-tree & Raft from scratch, zero-copy socket I/O, GPU roofline) Tj ET
+BT /F1 8.5 Tf 62.00 276.00 Td (profiling, and blind chaos drills.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 258.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 260.00 Td (2. PERIODIC TABLE OF SYSTEM DESIGN \(16 CATEGORIES / 58 PRIMITIVES\)) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 252.00 m 564.00 252.00 l S
+Q
+q
+0.15 0.20 0.28 rg
+BT /F1 8.5 Tf 48.00 233.50 Td (Every enterprise platform, cloud reference architecture, and AI system is built by wiring together a subset of these) Tj ET
+BT /F1 8.5 Tf 48.00 222.00 Td (58 building blocks across 16 architectural categories:) Tj ET
+Q
+q
+0.09 0.13 0.24 rg
+48.00 197.00 516.00 18.00 re f
+1.0 1.0 1.0 rg
+BT /F2 7.5 Tf 52.00 202.00 Td (Category) Tj ET
+BT /F2 7.5 Tf 174.00 202.00 Td (Components \(58 Total\)) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 181.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 181.00 m 564.00 181.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 187.00 Td (1. Edge & Traffic \(6\)) Tj ET
+BT /F1 7.2 Tf 174.00 187.00 Td (01 Anycast BGP, 02 Geo-DNS, 03 Global CDN, 04 WAF/DDoS, 05 L4/L7 Load Balancer, 06 API Gateway) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 165.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 165.00 m 564.00 165.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 171.00 Td (2. Compute Runtimes \(5\)) Tj ET
+BT /F1 7.2 Tf 174.00 171.00 Td (07 Stateless APIs, 08 K8s Containers, 09 Serverless FaaS, 10 Async Workers, 11 MicroVM Sandbox) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 140.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 140.00 m 564.00 140.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 155.00 Td (3. Storage & DBs \(7\)) Tj ET
+BT /F1 7.2 Tf 174.00 155.00 Td (12 Relational OLTP, 13 Key-Value, 14 Document/Wide, 15 Columnar OLAP, 16 Time-Series, 17 Graph, 18) Tj ET
+BT /F1 7.2 Tf 174.00 146.00 Td (Object S3) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 115.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 115.00 m 564.00 115.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 130.00 Td (4. Caching & Pools \(4\)) Tj ET
+BT /F1 7.2 Tf 174.00 130.00 Td (19 Dist. RAM Cache \(Redis\), 20 In-Process LRU, 21 DB Conn Poolers \(PgBouncer\), 22 Semantic Vector) Tj ET
+BT /F1 7.2 Tf 174.00 121.00 Td (Cache) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 99.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 99.00 m 564.00 99.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 105.00 Td (5. Messaging/Queues \(4\)) Tj ET
+BT /F1 7.2 Tf 174.00 105.00 Td (23 Message Queues \(SQS\), 24 Commit Logs \(Kafka/Redpanda\), 25 Pub/Sub Fanout, 26 Dead-Letter Queues) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 83.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 83.00 m 564.00 83.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 89.00 Td (6. Search & Geo \(3\)) Tj ET
+BT /F1 7.2 Tf 174.00 89.00 Td (27 Full-Text BM25, 28 Vector DB/HNSW \(Qdrant/pgvector\), 29 Geospatial H3/S2/Geohash) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 67.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 67.00 m 564.00 67.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 73.00 Td (7. Real-Time Sync \(3\)) Tj ET
+BT /F1 7.2 Tf 174.00 73.00 Td (30 WebSockets/SSE, 31 WebRTC Relays, 32 CRDTs / Hybrid Logical Clocks \(HLC\)) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SPARTAN SYSTEMS LAB -- PRINCIPAL ARCHITECTURE & SRE MANUAL) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 1 of 5) Tj ET
+Q
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 10286 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (HOMELAB & ENTERPRISE SYSTEMS ARCHITECTURE BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (2. 58 PRIMITIVES) Tj ET
+Q
+q
+0.09 0.13 0.24 rg
+48.00 716.00 516.00 18.00 re f
+1.0 1.0 1.0 rg
+BT /F2 7.5 Tf 52.00 721.00 Td (Category) Tj ET
+BT /F2 7.5 Tf 174.00 721.00 Td (Components \(58 Total\)) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 691.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 691.00 m 564.00 691.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 706.00 Td (8. Consensus/Locks \(4\)) Tj ET
+BT /F1 7.2 Tf 174.00 706.00 Td (33 Raft/Paxos Store \(etcd\), 34 Service Discovery, 35 Dist. Lock/Lease + Fencing, 36) Tj ET
+BT /F1 7.2 Tf 174.00 697.00 Td (Snowflake/UUIDv7) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 666.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 666.00 m 564.00 666.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 681.00 Td (9. Data Pipelines \(3\)) Tj ET
+BT /F1 7.2 Tf 174.00 681.00 Td (37 DAG Schedulers \(Dagster/Prefect\), 38 Real-Time CDC \(Debezium\), 39 Stream/Batch Engines) Tj ET
+BT /F1 7.2 Tf 174.00 672.00 Td (\(Flink/DuckDB\)) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 641.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 641.00 m 564.00 641.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 656.00 Td (10. AI / ML Infra \(3\)) Tj ET
+BT /F1 7.2 Tf 174.00 656.00 Td (40 Model Serving \(vLLM/Ollama\), 41 AI Gateways/Routers \(LiteLLM\), 42 Feature/Eval Pipelines) Tj ET
+BT /F1 7.2 Tf 174.00 647.00 Td (\(MLflow/Phoenix\)) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 625.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 625.00 m 564.00 625.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 631.00 Td (11. Zero-Trust Sec \(3\)) Tj ET
+BT /F1 7.2 Tf 174.00 631.00 Td (43 OIDC/IdP \(Keycloak\), 44 RBAC/OPA IAM, 45 Vault/OpenBao KMS & Envelope Encryption) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 600.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 600.00 m 564.00 600.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 615.00 Td (12. Observability \(3\)) Tj ET
+BT /F1 7.2 Tf 174.00 615.00 Td (46 Metrics/Logs \(Prom/Grafana/Loki\), 47 Dist. Tracing \(OpenTelemetry\), 48 FinOps Engines) Tj ET
+BT /F1 7.2 Tf 174.00 606.00 Td (\(Infracost/OpenCost\)) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 584.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 584.00 m 564.00 584.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 590.00 Td (13. East-West Mesh \(3\)) Tj ET
+BT /F1 7.2 Tf 174.00 590.00 Td (49 Service Mesh \(Envoy/Istio\), 50 eBPF Datapath \(Cilium/Hubble/Tetragon\), 51 Egress Gateway) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 568.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 568.00 m 564.00 568.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 574.00 Td (14. Multi-Region \(3\)) Tj ET
+BT /F1 7.2 Tf 174.00 574.00 Td (52 Global ACID DB \(Spanner/Cockroach\), 53 WAN Sync/CRDT, 54 Geo-Fencing / Data Residency) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 552.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 552.00 m 564.00 552.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 558.00 Td (15. Progressive Eng \(2\)) Tj ET
+BT /F1 7.2 Tf 174.00 558.00 Td (55 Dynamic Feature Flags, 56 Progressive Delivery & Chaos Engine \(Argo Rollouts, Chaos Mesh\)) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 536.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 536.00 m 564.00 536.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 542.00 Td (16. Hardware Physics \(2\)) Tj ET
+BT /F1 7.2 Tf 174.00 542.00 Td (57 GPU Interconnects \(NVLink/InfiniBand/RDMA\), 58 Tiered Storage Media \(RAM/NVMe/EBS/S3\)) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 520.00 Td (Critical Component Failure Modes & Capacity Heuristics) Tj ET
+Q
+q
+0.09 0.13 0.24 rg
+48.00 494.00 516.00 18.00 re f
+1.0 1.0 1.0 rg
+BT /F2 7.5 Tf 52.00 499.00 Td (ID) Tj ET
+BT /F2 7.5 Tf 76.00 499.00 Td (Component) Tj ET
+BT /F2 7.5 Tf 178.00 499.00 Td (Primary Failure Mode at 10M Users) Tj ET
+BT /F2 7.5 Tf 373.00 499.00 Td (Back-of-the-Envelope Capacity Rule) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 469.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 469.00 m 564.00 469.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 484.00 Td (05) Tj ET
+BT /F1 7.2 Tf 76.00 484.00 Td (L4/L7 Load Balancer) Tj ET
+BT /F1 7.2 Tf 178.00 484.00 Td (Ephemeral port exhaustion; conntrack table) Tj ET
+BT /F1 7.2 Tf 178.00 475.00 Td (saturation.) Tj ET
+BT /F1 7.2 Tf 373.00 484.00 Td (Max ~65k concurrent TCP conns per outbound IP.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 444.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 444.00 m 564.00 444.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 459.00 Td (12) Tj ET
+BT /F1 7.2 Tf 76.00 459.00 Td (Relational OLTP \(PG\)) Tj ET
+BT /F1 7.2 Tf 178.00 459.00 Td (Connection pool starvation; lock contention on) Tj ET
+BT /F1 7.2 Tf 178.00 450.00 Td (writes.) Tj ET
+BT /F1 7.2 Tf 373.00 459.00 Td (Sustained writes: ~5k-10k IOPS per disk volume.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 419.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 419.00 m 564.00 419.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 434.00 Td (15) Tj ET
+BT /F1 7.2 Tf 76.00 434.00 Td (Columnar OLAP \(CH\)) Tj ET
+BT /F1 7.2 Tf 178.00 434.00 Td (Too many small parts \(unbatched inserts) Tj ET
+BT /F1 7.2 Tf 178.00 425.00 Td (thrashing disk\).) Tj ET
+BT /F1 7.2 Tf 373.00 434.00 Td (Min batch: 10,000 rows or 1-sec write buffer.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 394.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 394.00 m 564.00 394.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 409.00 Td (19) Tj ET
+BT /F1 7.2 Tf 76.00 409.00 Td (Dist. Cache \(Redis\)) Tj ET
+BT /F1 7.2 Tf 178.00 409.00 Td (Cache stampede \(thundering herd\) on hot key) Tj ET
+BT /F1 7.2 Tf 178.00 400.00 Td (expiry.) Tj ET
+BT /F1 7.2 Tf 373.00 409.00 Td (Reserve 25% RAM overhead for BGSAVE fork.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 378.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 378.00 m 564.00 378.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 384.00 Td (24) Tj ET
+BT /F1 7.2 Tf 76.00 384.00 Td (Commit Log \(Kafka\)) Tj ET
+BT /F1 7.2 Tf 178.00 384.00 Td (Hot partition key causing consumer lag spikes.) Tj ET
+BT /F1 7.2 Tf 373.00 384.00 Td (1 partition ~= 10 MB/s write, 20 MB/s read.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 362.00 516.00 16.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 362.00 m 564.00 362.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 368.00 Td (28) Tj ET
+BT /F1 7.2 Tf 76.00 368.00 Td (Vector DB \(Qdrant\)) Tj ET
+BT /F1 7.2 Tf 178.00 368.00 Td (RAM exhaustion \(HNSW graph memory explosion\).) Tj ET
+BT /F1 7.2 Tf 373.00 368.00 Td (RAM = Vectors * \(Dims*4 + M*8 bytes\).) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 337.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 337.00 m 564.00 337.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 352.00 Td (33) Tj ET
+BT /F1 7.2 Tf 76.00 352.00 Td (Consensus \(etcd\)) Tj ET
+BT /F1 7.2 Tf 178.00 352.00 Td (Disk fsync latency jitter causing leader) Tj ET
+BT /F1 7.2 Tf 178.00 343.00 Td (flip-flops.) Tj ET
+BT /F1 7.2 Tf 373.00 352.00 Td (Require <10ms sustained p99 disk fsync.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 312.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 312.00 m 564.00 312.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 327.00 Td (40) Tj ET
+BT /F1 7.2 Tf 76.00 327.00 Td (Model Serving \(vLLM\)) Tj ET
+BT /F1 7.2 Tf 178.00 327.00 Td (KV-cache VRAM saturation stalling concurrent) Tj ET
+BT /F1 7.2 Tf 178.00 318.00 Td (requests.) Tj ET
+BT /F1 7.2 Tf 373.00 327.00 Td (VRAM = Weights + \(Ctx * Layers * Concurrency\).) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 287.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 287.00 m 564.00 287.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 302.00 Td (50) Tj ET
+BT /F1 7.2 Tf 76.00 302.00 Td (eBPF \(Cilium\)) Tj ET
+BT /F1 7.2 Tf 178.00 302.00 Td (Node BPF map exhaustion \(bpf_map__create) Tj ET
+BT /F1 7.2 Tf 178.00 293.00 Td (limit\).) Tj ET
+BT /F1 7.2 Tf 373.00 302.00 Td (Monitor BPF map memory & tail call metrics.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 267.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 269.00 Td (3. THE 47 CANONICAL SYSTEM ARCHITECTURES CATALOG) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 261.00 m 564.00 261.00 l S
+Q
+q
+0.15 0.39 0.92 rg 52.00 244.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 242.50 Td (Homelab Flagships & Micro-Labs \(1-7\):) Tj ET
+BT /F1 8.5 Tf 241.12 242.50 Td (1. Event & FinOps Plane; 2. Enterprise AI & Agentic RAG; 3. Zero-Trust) Tj ET
+BT /F1 8.5 Tf 62.00 231.00 Td (Workflow & Code Sandbox; 4. Multi-Region CRDT Sync; 5. Zero-Downtime Legacy Monolith Migration; 6. Pure-Code) Tj ET
+BT /F1 8.5 Tf 62.00 219.50 Td (LSM-Tree & 3-Node Raft \(Micro-Lab A\); 7. Zero-Copy Socket Server & GPU Triton Profiler \(Micro-Lab B\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 207.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 205.00 Td (Classic Distributed Systems \(8-21, Alex Xu Vol 1\):) Tj ET
+BT /F1 8.5 Tf 303.00 205.00 Td (8. Rate Limiter; 9. Consistent Hashing Ring; 10. Snowflake) Tj ET
+BT /F1 8.5 Tf 62.00 193.50 Td (Unique ID; 11. URL Shortener; 12. Web Crawler; 13. Notification System; 14. News Feed; 15. Real-Time Chat; 16.) Tj ET
+BT /F1 8.5 Tf 62.00 182.00 Td (Video Transcoding \(HLS/DASH\); 17. Cloud Object Storage; 18. Search Autocomplete \(Trie\); 19. Proximity Service) Tj ET
+BT /F1 8.5 Tf 62.00 170.50 Td (\(Geohash/Quadtree\); 20. Nearby Friends; 21. Google Maps & Routing.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 158.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 156.00 Td (Classic Distributed Systems \(22-36, Alex Xu Vol 2\):) Tj ET
+BT /F1 8.5 Tf 307.76 156.00 Td (22. Distributed Message Queue; 23. Metrics Monitoring; 24. Ad) Tj ET
+BT /F1 8.5 Tf 62.00 144.50 Td (Click Aggregation; 25. Hotel Reservation \(Locking\); 26. Payment Gateway; 27. Digital Wallet \(Double-Entry) Tj ET
+BT /F1 8.5 Tf 62.00 133.00 Td (Ledger\); 28. Stock Exchange Matching Engine \(LMAX\); 29. Dynamo-Style KV Store; 30. Collaborative Editor) Tj ET
+BT /F1 8.5 Tf 62.00 121.50 Td (\(OT/CRDT\); 31. Email Delivery; 32. Social Graph; 33. Multi-Tier CDN; 34. Distributed Task Scheduler; 35. Gaming) Tj ET
+BT /F1 8.5 Tf 62.00 110.00 Td (Leaderboard; 36. Flash Sale / Virtual Queue.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SPARTAN SYSTEMS LAB -- PRINCIPAL ARCHITECTURE & SRE MANUAL) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 2 of 5) Tj ET
+Q
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 8082 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (HOMELAB & ENTERPRISE SYSTEMS ARCHITECTURE BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (3. 47 ARCHITECTURES) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 727.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 725.50 Td (Hyperscale & Frontier AI Infra \(37-47\):) Tj ET
+BT /F1 8.5 Tf 250.64 725.50 Td (37. Multi-Node 3D-Parallel Model Training; 38. Multi-Tenant Iceberg/Flink) Tj ET
+BT /F1 8.5 Tf 62.00 714.00 Td (Lakehouse & Feature Store; 39. Zero-Trust SPIFFE/SPIRE Service Mesh; 40. Global Multi-Raft NewSQL) Tj ET
+BT /F1 8.5 Tf 62.00 702.50 Td (\(Spanner/Cockroach\); 41. 10M-Spans/s OTel Pipeline; 42. Firecracker MicroVM Build Farm; 43. Autonomous) Tj ET
+BT /F1 8.5 Tf 62.00 691.00 Td (Multi-Agent Orchestrator; 44. Two-Tower + DLRM RecSys Funnel; 45. Post-Training RLHF/DPO Data Flywheel; 46.) Tj ET
+BT /F1 8.5 Tf 62.00 679.50 Td (Global Edge Isolate Runtime; 47. Cell-Based Multi-Region DR.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 661.50 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 663.50 Td (4. THE 6-LAB MASTER ENTERPRISE ARCHITECTURE) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 655.50 m 564.00 655.50 l S
+Q
+q
+0.15 0.20 0.28 rg
+BT /F1 8.5 Tf 48.00 637.00 Td (Rather than building disconnected toy demos, wire all layers into one progressive monorepo where every component) Tj ET
+BT /F1 8.5 Tf 48.00 625.50 Td (feeds the next, from declarative cloud/K8s foundations through streaming data, AI/MLOps, security, and chaos.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 610.50 Td (Lab 1: Sovereign Cloud, Multi-Tenancy & GitOps Foundation) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 596.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 594.00 Td (Core Stack:) Tj ET
+BT /F1 8.5 Tf 117.36 594.00 Td (OpenTofu/Terraform, AWS Emulator/LocalStack, Kind \(3-node K8s\), ArgoCD, Cilium eBPF.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 581.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 579.50 Td (Objective:) Tj ET
+BT /F1 8.5 Tf 112.60 579.50 Td (Build a 100% declarative cloud + K8s foundation with zero manual kubectl edits and multi-tenant) Tj ET
+BT /F1 8.5 Tf 62.00 568.00 Td (namespace isolation.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 555.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 553.50 Td (Verification / Drill:) Tj ET
+BT /F1 8.5 Tf 164.96 553.50 Td (Killer Test: Run destroy + apply + cluster rebuild; full platform must self-heal from Git) Tj ET
+BT /F1 8.5 Tf 62.00 542.00 Td (in <7 minutes.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 528.00 Td (Lab 2: Autonomous Enterprise AI, RAG & MLOps Eval Engine) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 513.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 511.50 Td (Core Stack:) Tj ET
+BT /F1 8.5 Tf 117.36 511.50 Td (Ollama/vLLM, Qdrant \(hybrid dense + BM25\), LiteLLM, Redis Semantic Cache, MLflow, Arize Phoenix /) Tj ET
+BT /F1 8.5 Tf 62.00 500.00 Td (Promptfoo.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 487.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 485.50 Td (Objective:) Tj ET
+BT /F1 8.5 Tf 112.60 485.50 Td (Serve sub-2.5s multi-tenant RAG with RBAC filtering, semantic caching \(>0.92 cosine\), model routing,) Tj ET
+BT /F1 8.5 Tf 62.00 474.00 Td (and CI/CD eval gates.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 461.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 459.50 Td (Verification / Drill:) Tj ET
+BT /F1 8.5 Tf 164.96 459.50 Td (Chaos Drill: Saturate inference with 200 concurrent requests + adversarial prompt) Tj ET
+BT /F1 8.5 Tf 62.00 448.00 Td (injections; verify load shedding & zero tenant leaks.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 434.00 Td (Lab 3: Real-Time Data Lakehouse, Streaming & FinOps Control Plane) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 419.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 417.50 Td (Core Stack:) Tj ET
+BT /F1 8.5 Tf 117.36 417.50 Td (Redpanda \(Kafka\), ClickHouse, MinIO \(S3\) + Apache Iceberg, DuckDB, Dagster/Prefect, PostgreSQL,) Tj ET
+BT /F1 8.5 Tf 62.00 406.00 Td (Redis.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 393.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 391.50 Td (Objective:) Tj ET
+BT /F1 8.5 Tf 112.60 391.50 Td (Ingest 15k events/s, track real-time unit cost per tenant, enforce HTTP 429 budget circuit breakers,) Tj ET
+BT /F1 8.5 Tf 62.00 380.00 Td (and tier cold data to S3.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 367.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 365.50 Td (Verification / Drill:) Tj ET
+BT /F1 8.5 Tf 164.96 365.50 Td (Chaos Drill: Inject 5k duplicate events/s during a 3-min ClickHouse outage; verify Redpanda) Tj ET
+BT /F1 8.5 Tf 62.00 354.00 Td (buffering & penny-exact deduplicated billing.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 340.00 Td (Lab 4: Full-Stack App, Multi-Region Sync & Chaos SRE Cockpit) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 325.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 323.50 Td (Core Stack:) Tj ET
+BT /F1 8.5 Tf 117.36 323.50 Td (FastAPI, PostgreSQL HA + PgBouncer, Redis, Nginx/Envoy, OpenTelemetry, Prometheus/Grafana, Chaos) Tj ET
+BT /F1 8.5 Tf 62.00 312.00 Td (Mesh, k6.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 299.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 297.50 Td (Objective:) Tj ET
+BT /F1 8.5 Tf 112.60 297.50 Td (Operate a multi-tenant API under continuous chaos \(20% packet drops, pod kills, DNS drops\) while) Tj ET
+BT /F1 8.5 Tf 62.00 286.00 Td (maintaining <300ms p99.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 273.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 271.50 Td (Verification / Drill:) Tj ET
+BT /F1 8.5 Tf 164.96 271.50 Td (Chaos Drill: Kill active DB node during checkout surge; verify PgBouncer failover, Outbox) Tj ET
+BT /F1 8.5 Tf 62.00 260.00 Td (pattern \(no double charges\), and OTel traces.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 246.00 Td (Lab 5: Zero-Trust Security, Cryptographic Identity & Supply Chain) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 231.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 229.50 Td (Core Stack:) Tj ET
+BT /F1 8.5 Tf 117.36 229.50 Td (OpenBao/Vault, Keycloak \(OIDC\), SPIFFE/SPIRE mTLS, Cosign, Trivy, Cilium Tetragon.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 217.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 215.00 Td (Objective:) Tj ET
+BT /F1 8.5 Tf 112.60 215.00 Td (Zero static secrets \(15-min dynamic DB creds\), short-lived mTLS SVIDs, signed-image admission gates,) Tj ET
+BT /F1 8.5 Tf 62.00 203.50 Td (and runtime syscall kill-switches.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 191.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 189.00 Td (Verification / Drill:) Tj ET
+BT /F1 8.5 Tf 164.96 189.00 Td (Chaos Drill: Exec into a running pod and attempt metadata exfiltration or internal nmap;) Tj ET
+BT /F1 8.5 Tf 62.00 177.50 Td (verify Tetragon SIGKILL & audit alert.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 163.50 Td (Lab 6: Distributed Consensus, Durable Workflows & Legacy Migration) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 149.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 147.00 Td (Core Stack:) Tj ET
+BT /F1 8.5 Tf 117.36 147.00 Td (Temporal, Debezium CDC, Redpanda, Patroni HA Postgres, Envoy Proxy \(shadow mirroring\), Infracost.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 134.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 132.50 Td (Objective:) Tj ET
+BT /F1 8.5 Tf 112.60 132.50 Td (Migrate a 10M-row legacy monolith under 3k RPS live traffic via Strangler Fig, Debezium WAL CDC, and) Tj ET
+BT /F1 8.5 Tf 62.00 121.00 Td (Expand-and-Contract.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 108.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 106.50 Td (Verification / Drill:) Tj ET
+BT /F1 8.5 Tf 164.96 106.50 Td (Chaos Drill: Kill the new microservice during 50% canary cutover; verify Envoy outlier) Tj ET
+BT /F1 8.5 Tf 62.00 95.00 Td (detection falls back to legacy in <2s with 0 5xx.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SPARTAN SYSTEMS LAB -- PRINCIPAL ARCHITECTURE & SRE MANUAL) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 3 of 5) Tj ET
+Q
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 10706 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (HOMELAB & ENTERPRISE SYSTEMS ARCHITECTURE BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (5. MICRO-LABS) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 722.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 724.00 Td (5. THE 2 WEEKEND MICRO-LABS \(DEEP SYSTEMS INTERNALS\)) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 716.00 m 564.00 716.00 l S
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 698.00 Td (Micro-Lab A: LSM-Tree Storage Engine & 3-Node Raft Consensus from Scratch) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 683.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 681.50 Td (Part 1 - 300-Line LSM-Tree \(Python/Go\):) Tj ET
+BT /F1 8.5 Tf 250.64 681.50 Td (Implement \(1\) append-only binary WAL for crash durability, \(2\) in-memory) Tj ET
+BT /F1 8.5 Tf 62.00 670.00 Td (sorted MemTable, \(3\) 4MB flush to immutable SSTables with sparse index + Bloom filter, and \(4\) background two-way) Tj ET
+BT /F1 8.5 Tf 62.00 658.50 Td (merge compaction removing tombstones/duplicates.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 646.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 644.00 Td (Part 2 - 3-Node Raft over Raw TCP:) Tj ET
+BT /F1 8.5 Tf 226.84 644.00 Td (Implement randomized election timers \(150-300ms\), Term counters, RequestVote) Tj ET
+BT /F1 8.5 Tf 62.00 632.50 Td (RPCs, AppendEntries majority quorum commits \(floor\(N/2\)+1 = 2\), and a split-brain leader partition + step-down) Tj ET
+BT /F1 8.5 Tf 62.00 621.00 Td (reconciliation drill.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 607.00 Td (Micro-Lab B: Zero-Copy Kernel I/O & GPU Triton Roofline Profiling) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 592.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 590.50 Td (Part 1 - Zero-Copy Sockets \(sendfile\):) Tj ET
+BT /F1 8.5 Tf 245.88 590.50 Td (Benchmark naive user-space f.read\(4096\) + sock.send\(\) against) Tj ET
+BT /F1 8.5 Tf 62.00 579.00 Td (os.sendfile\(\) / splice with perf stat and strace -c; observe ~90% fewer context switches as Page Cache transfers) Tj ET
+BT /F1 8.5 Tf 62.00 567.50 Td (directly to NIC DMA.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 555.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 553.00 Td (Part 2 - GPU Roofline & Triton \(3-Hr Cloud GPU Sprint\):) Tj ET
+BT /F1 8.5 Tf 326.80 553.00 Td (Attainable TFLOPs = min\(Peak Compute FLOPs, Memory) Tj ET
+BT /F1 8.5 Tf 62.00 541.50 Td (Bandwidth GB/s * Operational Intensity\). Profile PyTorch/vLLM with nsys/nvidia-smi and write a fused Triton) Tj ET
+BT /F1 8.5 Tf 62.00 530.00 Td (Softmax kernel to observe SRAM vs HBM bandwidth savings.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 512.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 514.00 Td (6. THE 12 SEVERE ENTERPRISE OUTAGES & CHAOS WAR-ROOM DRILLS) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 506.00 m 564.00 506.00 l S
+Q
+q
+0.09 0.13 0.24 rg
+48.00 478.00 516.00 18.00 re f
+1.0 1.0 1.0 rg
+BT /F2 7.5 Tf 52.00 483.00 Td (#) Tj ET
+BT /F2 7.5 Tf 72.00 483.00 Td (Outage Scenario) Tj ET
+BT /F2 7.5 Tf 168.00 483.00 Td (Root Cause / Mechanism) Tj ET
+BT /F2 7.5 Tf 306.00 483.00 Td (Triage Commands) Tj ET
+BT /F2 7.5 Tf 432.00 483.00 Td (Permanent Fix) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 453.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 453.00 m 564.00 453.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 468.00 Td (01) Tj ET
+BT /F1 7.2 Tf 72.00 468.00 Td (Cascading Retry Storm) Tj ET
+BT /F1 7.2 Tf 168.00 468.00 Td (Un-jittered retries multiply load) Tj ET
+BT /F1 7.2 Tf 168.00 459.00 Td (20x during slowdown.) Tj ET
+BT /F1 7.2 Tf 306.00 468.00 Td (ss -s; tcpdump -nn; RPS graph) Tj ET
+BT /F1 7.2 Tf 432.00 468.00 Td (Exp. backoff + full jitter; load) Tj ET
+BT /F1 7.2 Tf 432.00 459.00 Td (shedding.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 428.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 428.00 m 564.00 428.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 443.00 Td (02) Tj ET
+BT /F1 7.2 Tf 72.00 443.00 Td (Silent MTU Blackhole) Tj ET
+BT /F1 7.2 Tf 168.00 443.00 Td (Small pings pass; >1400B packets) Tj ET
+BT /F1 7.2 Tf 168.00 434.00 Td (drop in overlay.) Tj ET
+BT /F1 7.2 Tf 306.00 443.00 Td (ping -M do -s 1472; tcpdump) Tj ET
+BT /F1 7.2 Tf 432.00 443.00 Td (PMTUD or clamp TCP MSS via) Tj ET
+BT /F1 7.2 Tf 432.00 434.00 Td (iptables.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 403.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 403.00 m 564.00 403.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 418.00 Td (03) Tj ET
+BT /F1 7.2 Tf 72.00 418.00 Td (DNS ndots:5 Meltdown) Tj ET
+BT /F1 7.2 Tf 168.00 418.00 Td (K8s ndots:5 fires 5 search) Tj ET
+BT /F1 7.2 Tf 168.00 409.00 Td (queries per external lookup.) Tj ET
+BT /F1 7.2 Tf 306.00 418.00 Td (tcpdump port 53; hubble dns) Tj ET
+BT /F1 7.2 Tf 432.00 418.00 Td (Set ndots:2; deploy NodeLocal) Tj ET
+BT /F1 7.2 Tf 432.00 409.00 Td (DNSCache.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 378.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 378.00 m 564.00 378.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 393.00 Td (04) Tj ET
+BT /F1 7.2 Tf 72.00 393.00 Td (DB Lock Stampede) Tj ET
+BT /F1 7.2 Tf 168.00 393.00 Td (ALTER TABLE / unindexed FK blocks) Tj ET
+BT /F1 7.2 Tf 168.00 384.00 Td (write threads.) Tj ET
+BT /F1 7.2 Tf 306.00 393.00 Td (pg_stat_activity \(wait=Lock\)) Tj ET
+BT /F1 7.2 Tf 432.00 393.00 Td (lock_timeout='2s';) Tj ET
+BT /F1 7.2 Tf 432.00 384.00 Td (Expand-and-Contract.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 353.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 353.00 m 564.00 353.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 368.00 Td (05) Tj ET
+BT /F1 7.2 Tf 72.00 368.00 Td (conntrack Overflow) Tj ET
+BT /F1 7.2 Tf 168.00 368.00 Td (Short-lived conn surge fills) Tj ET
+BT /F1 7.2 Tf 168.00 359.00 Td (netfilter table; SYN drop.) Tj ET
+BT /F1 7.2 Tf 306.00 368.00 Td (dmesg | grep nf_conntrack) Tj ET
+BT /F1 7.2 Tf 432.00 368.00 Td (Raise nf_conntrack_max; HTTP) Tj ET
+BT /F1 7.2 Tf 432.00 359.00 Td (keepalive.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 328.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 328.00 m 564.00 328.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 343.00 Td (06) Tj ET
+BT /F1 7.2 Tf 72.00 343.00 Td (Poison Pill Queue) Tj ET
+BT /F1 7.2 Tf 168.00 343.00 Td (Corrupt msg crashes consumer in) Tj ET
+BT /F1 7.2 Tf 168.00 334.00 Td (CrashLoopBackOff.) Tj ET
+BT /F1 7.2 Tf 306.00 343.00 Td (kubectl get pods -w; lag) Tj ET
+BT /F1 7.2 Tf 432.00 343.00 Td (Dead-Letter Queue \(3 strikes ->) Tj ET
+BT /F1 7.2 Tf 432.00 334.00 Td (DLQ\).) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 303.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 303.00 m 564.00 303.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 318.00 Td (07) Tj ET
+BT /F1 7.2 Tf 72.00 318.00 Td (Inode Exhaustion) Tj ET
+BT /F1 7.2 Tf 168.00 318.00 Td (Millions of 1KB files hit 100%) Tj ET
+BT /F1 7.2 Tf 168.00 309.00 Td (inodes at 50% disk.) Tj ET
+BT /F1 7.2 Tf 306.00 318.00 Td (df -i; find count per dir) Tj ET
+BT /F1 7.2 Tf 432.00 318.00 Td (Cron cleanup; tar/archive to) Tj ET
+BT /F1 7.2 Tf 432.00 309.00 Td (S3/MinIO.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 278.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 278.00 m 564.00 278.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 293.00 Td (08) Tj ET
+BT /F1 7.2 Tf 72.00 293.00 Td (D-State I/O Freeze) Tj ET
+BT /F1 7.2 Tf 168.00 293.00 Td (Hung disk/NFS traps PID in) Tj ET
+BT /F1 7.2 Tf 168.00 284.00 Td (uninterruptible sleep.) Tj ET
+BT /F1 7.2 Tf 306.00 293.00 Td (ps aux \(D\); /proc/PID/stack) Tj ET
+BT /F1 7.2 Tf 432.00 293.00 Td (Fix storage path; hardware I/O) Tj ET
+BT /F1 7.2 Tf 432.00 284.00 Td (watchdog.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 253.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 253.00 m 564.00 253.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 268.00 Td (09) Tj ET
+BT /F1 7.2 Tf 72.00 268.00 Td (Cache Thundering Herd) Tj ET
+BT /F1 7.2 Tf 168.00 268.00 Td (Hot key expires; 20k reqs slam) Tj ET
+BT /F1 7.2 Tf 168.00 259.00 Td (Postgres at once.) Tj ET
+BT /F1 7.2 Tf 306.00 268.00 Td (redis-cli --latency; pg_top) Tj ET
+BT /F1 7.2 Tf 432.00 268.00 Td (SingleFlight mutex; XFetch / TTL) Tj ET
+BT /F1 7.2 Tf 432.00 259.00 Td (jitter.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 228.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 228.00 m 564.00 228.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 243.00 Td (10) Tj ET
+BT /F1 7.2 Tf 72.00 243.00 Td (Terraform State Lock) Tj ET
+BT /F1 7.2 Tf 168.00 243.00 Td (Aborted CI run leaves state) Tj ET
+BT /F1 7.2 Tf 168.00 234.00 Td (locked and drifted.) Tj ET
+BT /F1 7.2 Tf 306.00 243.00 Td (tofu/terraform force-unlock) Tj ET
+BT /F1 7.2 Tf 432.00 243.00 Td (Remote S3+lock backend; smaller) Tj ET
+BT /F1 7.2 Tf 432.00 234.00 Td (stacks.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 203.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 203.00 m 564.00 203.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 218.00 Td (11) Tj ET
+BT /F1 7.2 Tf 72.00 218.00 Td (GPU KV-Cache Deadlock) Tj ET
+BT /F1 7.2 Tf 168.00 218.00 Td (Long prompts fill vLLM VRAM;) Tj ET
+BT /F1 7.2 Tf 168.00 209.00 Td (queue stalls TTFT.) Tj ET
+BT /F1 7.2 Tf 306.00 218.00 Td (nvidia-smi dmon; vllm metrics) Tj ET
+BT /F1 7.2 Tf 432.00 218.00 Td (Chunked prefill; max context) Tj ET
+BT /F1 7.2 Tf 432.00 209.00 Td (caps; HPA.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 178.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 178.00 m 564.00 178.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 193.00 Td (12) Tj ET
+BT /F1 7.2 Tf 72.00 193.00 Td (Container Breakout) Tj ET
+BT /F1 7.2 Tf 168.00 193.00 Td (Compromised pkg reads /etc/shadow) Tj ET
+BT /F1 7.2 Tf 168.00 184.00 Td (or scans LAN.) Tj ET
+BT /F1 7.2 Tf 306.00 193.00 Td (kubectl gadget exec; Tetragon) Tj ET
+BT /F1 7.2 Tf 432.00 193.00 Td (Read-only rootfs; drop ALL caps;) Tj ET
+BT /F1 7.2 Tf 432.00 184.00 Td (Tetragon.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 158.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 160.00 Td (7. 60-SECOND LINUX SRE TRIAGE & TERMINAL COCKPIT) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 152.00 m 564.00 152.00 l S
+Q
+q
+0.94 0.99 0.96 rg
+48.00 96.00 516.00 46.00 re f
+0.5 w 0.02 0.59 0.41 RG
+48.00 96.00 516.00 46.00 re s
+0.02 0.59 0.41 rg
+48.00 96.00 3.50 46.00 re f
+BT /F2 8.0 Tf 60.00 128.00 Td ([SYSTEM LAW] Brendan Gregg USE Method \(Check on CPU, RAM, Disk, Network & Pools\)) Tj ET
+Q
+q
+0.15 0.22 0.32 rg
+BT /F1 8.0 Tf 60.00 117.00 Td (1. Utilization \(% time busy: iostat %util, mpstat %usr\) | 2. Saturation \(queue waiting: vmstat r, TCP listen backlog\)) Tj ET
+BT /F1 8.0 Tf 60.00 106.00 Td (| 3. Errors \(explicit failure counts: netstat -s retransmits, dmesg OOM/disk errors\).) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SPARTAN SYSTEMS LAB -- PRINCIPAL ARCHITECTURE & SRE MANUAL) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 4 of 5) Tj ET
+Q
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 14 0 R >>
+endobj
+16 0 obj
+<< /Length 9029 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (HOMELAB & ENTERPRISE SYSTEMS ARCHITECTURE BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (7. 60-SEC TRIAGE) Tj ET
+Q
+q
+0.08 0.11 0.17 rg
+48.00 619.00 516.00 115.00 re f
+0.5 w 0.20 0.28 0.40 RG
+48.00 619.00 516.00 115.00 re s
+0.22 0.74 0.97 rg
+48.00 619.00 3.00 115.00 re f
+Q
+q
+0.60 0.70 0.85 rg
+BT /F2 7.5 Tf 60.00 722.00 Td (CODE // THE 60-SECOND LINUX TRIAGE LOOP \(FIRST 10 COMMANDS ON ANY BROKEN BOX\)) Tj ET
+Q
+q
+0.90 0.94 0.98 rg
+BT /F4 7.2 Tf 60.00 711.00 Td (1. uptime                  # Load avg vs CPU cores \(rising or falling?\)) Tj ET
+BT /F4 7.2 Tf 60.00 701.50 Td (2. dmesg -T | tail -25     # Kernel ring buffer \(OOM-killer? disk/NIC errors?\)) Tj ET
+BT /F4 7.2 Tf 60.00 692.00 Td (3. vmstat 1 5              # Run queue \(r > cores = CPU starve; wa > 0 = I/O wait\)) Tj ET
+BT /F4 7.2 Tf 60.00 682.50 Td (4. mpstat -P ALL 1 3       # Per-core balance \(single core pinned at 100%?\)) Tj ET
+BT /F4 7.2 Tf 60.00 673.00 Td (5. pidstat 1 3             # Exact PID burning CPU or disk I/O right now) Tj ET
+BT /F4 7.2 Tf 60.00 663.50 Td (6. iostat -xz 1 3          # Disk saturation \(%util > 90%? await > 20ms?\)) Tj ET
+BT /F4 7.2 Tf 60.00 654.00 Td (7. free -m                 # Available RAM vs Page Cache vs Swap) Tj ET
+BT /F4 7.2 Tf 60.00 644.50 Td (8. sar -n DEV 1 3          # NIC throughput saturation / packet drops) Tj ET
+BT /F4 7.2 Tf 60.00 635.00 Td (9. ss -s                   # Socket states \(TIME_WAIT / CLOSE_WAIT / SYN_RECV\)) Tj ET
+BT /F4 7.2 Tf 60.00 625.50 Td (10. top / htop / btop      # Holistic view of threads and RSS memory) Tj ET
+Q
+q
+0.08 0.11 0.17 rg
+48.00 524.50 516.00 86.50 re f
+0.5 w 0.20 0.28 0.40 RG
+48.00 524.50 516.00 86.50 re s
+0.22 0.74 0.97 rg
+48.00 524.50 3.00 86.50 re f
+Q
+q
+0.60 0.70 0.85 rg
+BT /F2 7.5 Tf 60.00 599.00 Td (CODE // DEEP KERNEL & WIRE FORENSICS WEAPONS) Tj ET
+Q
+q
+0.90 0.94 0.98 rg
+BT /F4 7.2 Tf 60.00 588.00 Td (# Attach syscall tracer with microsecond timestamps to a hung process:) Tj ET
+BT /F4 7.2 Tf 60.00 578.50 Td (sudo strace -T -tt -p <PID> -f -e trace=network,file,desc) Tj ET
+BT /F4 7.2 Tf 60.00 569.00 Td (# Capture live TCP/DNS wire traffic on an interface:) Tj ET
+BT /F4 7.2 Tf 60.00 559.50 Td (sudo tcpdump -nn -i any 'port 5432 or port 53') Tj ET
+BT /F4 7.2 Tf 60.00 550.00 Td (# Live eBPF syscall & packet-drop snooping \(on Linux kernel\):) Tj ET
+BT /F4 7.2 Tf 60.00 540.50 Td (sudo bpftrace -e 'tracepoint:syscalls:sys_enter_openat { printf\("%s %s\\n", comm, str) Tj ET
+BT /F4 7.2 Tf 60.00 531.00 Td (sudo bpftrace -e 'kprobe:kfree_skb { printf\("Dropped skb: %s\\n", ksym\(reg\("ip"\)\)\); }) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 508.50 Td (Terminal TUI & Multi-Cloud Emulator Toolkit) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 494.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 492.00 Td (Terminal Dashboards \(TUIs\):) Tj ET
+BT /F1 8.5 Tf 193.52 492.00 Td (tmux \(split cockpit\), k9s \(Kubernetes\), lazydocker \(Docker\), pgcli \(Postgres\),) Tj ET
+BT /F1 8.5 Tf 62.00 480.50 Td (btop/htop \(system\), lnav \(structured logs\), claws/taws \(AWS TUI\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 468.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 466.00 Td (Local Emulators & CI/CD:) Tj ET
+BT /F1 8.5 Tf 179.24 466.00 Td (aws/aws-emulator \(official Rust AWS API emulator\), kind \(multi-node K8s\), act \(local) Tj ET
+BT /F1 8.5 Tf 62.00 454.50 Td (GitHub Actions CI/CD\), Azurite/localgcp \(optional Azure/GCP\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 442.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 440.00 Td (Docs-as-Code & Discovery:) Tj ET
+BT /F1 8.5 Tf 184.00 440.00 Td (Python diagrams, D2, Mermaid, InfraMap/Rover \(Terraform graphs\), Steampipe/Powerpipe) Tj ET
+BT /F1 8.5 Tf 62.00 428.50 Td (\(SQL over cloud APIs\), and Git-tracked ADRs in docs/adr/.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 410.50 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 412.50 Td (8. 12-WEEK SPARTAN EXECUTION ROADMAP & DEFINITION OF DONE) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 404.50 m 564.00 404.50 l S
+Q
+q
+0.09 0.13 0.24 rg
+48.00 376.50 516.00 18.00 re f
+1.0 1.0 1.0 rg
+BT /F2 7.5 Tf 52.00 381.50 Td (Weeks) Tj ET
+BT /F2 7.5 Tf 120.00 381.50 Td (Active Lab & Focus) Tj ET
+BT /F2 7.5 Tf 344.00 381.50 Td (Concrete Proof Artifact \(GitHub Portfolio\)) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 351.50 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 351.50 m 564.00 351.50 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 366.50 Td (Weeks 01-02) Tj ET
+BT /F1 7.2 Tf 120.00 366.50 Td (Lab 1: Core Engine \(Python, Postgres 16, PgBouncer,) Tj ET
+BT /F1 7.2 Tf 120.00 357.50 Td (Redis, Nginx, Linux SRE Box, CI/act\)) Tj ET
+BT /F1 7.2 Tf 344.00 366.50 Td (10M-row benchmark README + EXPLAIN speedup + all 22) Tj ET
+BT /F1 7.2 Tf 344.00 357.50 Td (daily tasks + passing pytest/CI.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 326.50 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 326.50 m 564.00 326.50 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 341.50 Td (Weeks 03-04) Tj ET
+BT /F1 7.2 Tf 120.00 341.50 Td (Lab 2: Cloud Data Pipelines \(aws-emulator, Terraform,) Tj ET
+BT /F1 7.2 Tf 120.00 332.50 Td (Redpanda, ClickHouse, MinIO, Grafana\)) Tj ET
+BT /F1 7.2 Tf 344.00 341.50 Td (Zero-loss 10k RPS ingestion + ClickHouse outage drill +) Tj ET
+BT /F1 7.2 Tf 344.00 332.50 Td (real-time FinOps 429 breaker.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 301.50 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 301.50 m 564.00 301.50 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 316.50 Td (Weeks 05-07) Tj ET
+BT /F1 7.2 Tf 120.00 316.50 Td (Lab 3: AI, Vector RAG & MLOps \(Qdrant, Ollama, LiteLLM,) Tj ET
+BT /F1 7.2 Tf 120.00 307.50 Td (MLflow, Phoenix, LightGBM/PyTorch\)) Tj ET
+BT /F1 7.2 Tf 344.00 316.50 Td (Hybrid RAG <2.5s + CI hallucination eval gate + anomaly) Tj ET
+BT /F1 7.2 Tf 344.00 307.50 Td (model + 3-hr RunPod vLLM sprint.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 276.50 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 276.50 m 564.00 276.50 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 291.50 Td (Week 08) Tj ET
+BT /F1 7.2 Tf 120.00 291.50 Td (Lab 4: Under-the-Hood Primitives \(Pure Python/Go) Tj ET
+BT /F1 7.2 Tf 120.00 282.50 Td (LSM-Tree, 3-Node Raft, Zero-Copy sendfile\)) Tj ET
+BT /F1 7.2 Tf 344.00 291.50 Td (Working WAL/SSTable/Bloom engine + Raft split-brain) Tj ET
+BT /F1 7.2 Tf 344.00 282.50 Td (test + sendfile perf benchmark.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 251.50 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 251.50 m 564.00 251.50 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 266.50 Td (Weeks 09-12) Tj ET
+BT /F1 7.2 Tf 120.00 266.50 Td (Lab 5: K8s, Zero-Trust & Blind Chaos Roulette \(Kind,) Tj ET
+BT /F1 7.2 Tf 120.00 257.50 Td (Cilium, ArgoCD, Vault, Chaos Mesh\)) Tj ET
+BT /F1 7.2 Tf 344.00 266.50 Td (Full GitOps rebuild <10 min + 12 blind outage) Tj ET
+BT /F1 7.2 Tf 344.00 257.50 Td (post-mortems solved cold in <5 min each.) Tj ET
+Q
+q
+0.95 0.97 1.00 rg
+48.00 186.50 516.00 57.00 re f
+0.5 w 0.15 0.39 0.92 RG
+48.00 186.50 516.00 57.00 re s
+0.15 0.39 0.92 rg
+48.00 186.50 3.50 57.00 re f
+BT /F2 8.0 Tf 60.00 229.50 Td ([MASTER UNLOCK] The Spartan Daily Loop \(75-90 Minutes/Day\)) Tj ET
+Q
+q
+0.15 0.22 0.32 rg
+BT /F1 8.0 Tf 60.00 218.50 Td (15 min Cold Warmup \(1 timed Python/DSA + 1 SQL drill against live Postgres, zero AI autocomplete\) -> 45-60 min Lab) Tj ET
+BT /F1 8.0 Tf 60.00 207.50 Td (Combat \(build or break 1 slice, blast with k6, trace with EXPLAIN/ss/strace/tcpdump\) -> 10 min Lock It In \(clean Git) Tj ET
+BT /F1 8.0 Tf 60.00 196.50 Td (commit + 10-line ADR/post-mortem + 5-min Staff-interview oral defense\).) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 170.50 Td (The Final Definition of Done \(0.01% Mastery\)) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 156.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 154.00 Td (1. Declarative Rebuild:) Tj ET
+BT /F1 8.5 Tf 174.48 154.00 Td (Rebuild the entire multi-tenant platform from an empty machine via Git + Terraform + CI) Tj ET
+BT /F1 8.5 Tf 62.00 142.50 Td (in under 10 minutes.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 130.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 128.00 Td (2. Blind Outage Triage:) Tj ET
+BT /F1 8.5 Tf 174.48 128.00 Td (Survive a blind Chaos Roulette injection and isolate the exact root cause in under 5) Tj ET
+BT /F1 8.5 Tf 62.00 116.50 Td (minutes using only CLI/TUI tools \(ss, dmesg, strace, tcpdump, EXPLAIN, k9s, Hubble\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 104.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 102.00 Td (3. Whiteboard & Trade-Off Defense:) Tj ET
+BT /F1 8.5 Tf 226.84 102.00 Td (Sketch any of the 47 canonical architectures from memory, articulating exact) Tj ET
+BT /F1 8.5 Tf 62.00 90.50 Td (data structures, wire protocols, failure modes, p99 SLOs, and dollar unit economics.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SPARTAN SYSTEMS LAB -- PRINCIPAL ARCHITECTURE & SRE MANUAL) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 5 of 5) Tj ET
+Q
+endstream
+endobj
+17 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 16 0 R >>
+endobj
+xref
+0 18
+0000000000 65535 f 
+0000000027 00000 n 
+0000000076 00000 n 
+0000000161 00000 n 
+0000000231 00000 n 
+0000000306 00000 n 
+0000000384 00000 n 
+0000000452 00000 n 
+0000000525 00000 n 
+0000008869 00000 n 
+0000009041 00000 n 
+0000019381 00000 n 
+0000019555 00000 n 
+0000027690 00000 n 
+0000027864 00000 n 
+0000038624 00000 n 
+0000038798 00000 n 
+0000047880 00000 n 
+trailer
+<< /Size 18 /Root 1 0 R >>
+startxref
+48054
+%%EOF

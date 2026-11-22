@@ -1,0 +1,24 @@
+FROM python:3.12-slim AS builder
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+WORKDIR /src
+
+COPY pyproject.toml ./
+RUN uv venv /opt/venv && \
+    UV_PROJECT_ENVIRONMENT=/opt/venv uv sync --no-dev --no-install-project
+
+FROM python:3.12-slim AS runtime
+
+RUN useradd --create-home --uid 10001 spartan
+WORKDIR /app
+
+COPY --from=builder /opt/venv /opt/venv
+COPY lab-1-core-engine/app ./app
+
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1
+
+USER spartan
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

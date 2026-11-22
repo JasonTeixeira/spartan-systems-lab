@@ -1,0 +1,1795 @@
+%PDF-1.4
+%\xE2\xE3\xCF\xD3
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [9 0 R 11 0 R 13 0 R 15 0 R 17 0 R 19 0 R 21 0 R 23 0 R 25 0 R] /Count 9 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Bold >>
+endobj
+8 0 obj
+<< /Length 8517 >>
+stream
+q
+0.06 0.09 0.16 rg
+48.00 629.00 516.00 115.00 re f
+0.15 0.39 0.92 rg
+48.00 740.00 516.00 4.00 re f
+1.0 1.0 1.0 rg
+BT /F2 16 Tf 64.00 718.00 Td (PYTHON, SQL, LINUX & AI PRODUCTION ENCYCLOPEDIA) Tj ET
+0.75 0.82 0.92 rg
+BT /F1 9.5 Tf 64.00 702.00 Td (The Complete 126-Concept, 22-Task & Master Unlocks Architecture: From Primitives to Principal AI/Data Systems) Tj ET
+Q
+q
+0.58 0.65 0.76 rg
+BT /F2 7.0 Tf 64.00 651.00 Td ([CONCEPTS] 126 Numbered Core Concepts   |   [DAILY TASKS] 22 Repeating Industry Loops) Tj ET
+BT /F2 7.0 Tf 64.00 641.00 Td ([SCALING LAWS] 5 Physical Laws \(100 vs 10M\)   |   [AI/ML BRIDGE] pgvector, HNSW, RAG, Embeddings) Tj ET
+Q
+q
+0.15 0.20 0.28 rg
+BT /F1 8.5 Tf 48.00 600.50 Td (This master manual codifies the entire spectrum of modern engineering required for absolute mastery. It spans 126) Tj ET
+BT /F1 8.5 Tf 48.00 589.00 Td (sequentially numbered concepts, the 22 repeating operational loops, the 5 physical scaling laws, the trigger-pattern) Tj ET
+BT /F1 8.5 Tf 48.00 577.50 Td (recognition flashcards, the 4 non-syntax career habits, and the 6 foundational 100x AHAs that unify Linux, DSA,) Tj ET
+BT /F1 8.5 Tf 48.00 566.00 Td (Python, SQL, Data Engineering, and modern AI/ML systems.) Tj ET
+Q
+q
+0.09 0.13 0.24 rg
+48.00 541.00 516.00 18.00 re f
+1.0 1.0 1.0 rg
+BT /F2 7.5 Tf 52.00 546.00 Td (Curriculum Component) Tj ET
+BT /F2 7.5 Tf 192.00 546.00 Td (Scope & Units) Tj ET
+BT /F2 7.5 Tf 287.00 546.00 Td (Engineering & Architecture Outcomes) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 516.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 516.00 m 564.00 516.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 531.00 Td (Part 1: Core Foundations) Tj ET
+BT /F1 7.2 Tf 192.00 531.00 Td (Concepts 115 - 126) Tj ET
+BT /F1 7.2 Tf 287.00 531.00 Td (Clean code, SOLID, Git, OWASP, SQL execution pipeline, 3-valued NULL) Tj ET
+BT /F1 7.2 Tf 287.00 522.00 Td (logic, constraints.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 491.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 491.00 m 564.00 491.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 506.00 Td (Part 2: Production Patterns) Tj ET
+BT /F1 7.2 Tf 192.00 506.00 Td (Concepts 1 - 26) Tj ET
+BT /F1 7.2 Tf 287.00 506.00 Td (Streaming generators, concurrency, idempotency, retries, CTEs,) Tj ET
+BT /F1 7.2 Tf 287.00 497.00 Td (windowing, batching.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 466.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 466.00 m 564.00 466.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 481.00 Td (Part 3: Core & Advanced DSA) Tj ET
+BT /F1 7.2 Tf 192.00 481.00 Td (Concepts 27 - 56) Tj ET
+BT /F1 7.2 Tf 287.00 481.00 Td (8 data structures, 14 interview templates, Bloom filters, HyperLogLog,) Tj ET
+BT /F1 7.2 Tf 287.00 472.00 Td (LSM, consistent hashing.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 441.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 441.00 m 564.00 441.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 456.00 Td (Part 4: Runtime & DB Internals) Tj ET
+BT /F1 7.2 Tf 192.00 456.00 Td (Concepts 57 - 70) Tj ET
+BT /F1 7.2 Tf 287.00 456.00 Td (PyObject, descriptors, free-threaded GIL, Arrow, B+ vs LSM, MVCC, WAL,) Tj ET
+BT /F1 7.2 Tf 287.00 447.00 Td (query planner.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 416.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 416.00 m 564.00 416.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 431.00 Td (Part 5: Linux OS & Networking) Tj ET
+BT /F1 7.2 Tf 192.00 431.00 Td (Concepts 77 - 114) Tj ET
+BT /F1 7.2 Tf 287.00 431.00 Td (Processes, virtual memory, page cache, VFS, epoll, TCP/IP, TLS/mTLS,) Tj ET
+BT /F1 7.2 Tf 287.00 422.00 Td (strace, eBPF, shell.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 391.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 391.00 m 564.00 391.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 406.00 Td (Part 6: Principal Architecture) Tj ET
+BT /F1 7.2 Tf 192.00 406.00 Td (Concepts 71 - 76) Tj ET
+BT /F1 7.2 Tf 287.00 406.00 Td (Backpressure, multi-layer caching, CAP/PACELC, zero-downtime) Tj ET
+BT /F1 7.2 Tf 287.00 397.00 Td (migrations, FinOps.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 366.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 366.00 m 564.00 366.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 381.00 Td (Part 7: 22 Daily Operational) Tj ET
+BT /F1 7.2 Tf 52.00 372.00 Td (Loops) Tj ET
+BT /F1 7.2 Tf 192.00 381.00 Td (22 Repeating Tasks) Tj ET
+BT /F1 7.2 Tf 287.00 381.00 Td (The exact daily tasks covering 95-99% of real-world backend, data, and) Tj ET
+BT /F1 7.2 Tf 287.00 372.00 Td (platform jobs.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 341.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 341.00 m 564.00 341.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 356.00 Td (Part 8: 5 Scaling Laws & Triggers) Tj ET
+BT /F1 7.2 Tf 192.00 356.00 Td (5 Laws + 7 Triggers) Tj ET
+BT /F1 7.2 Tf 287.00 356.00 Td (Physical limits at 10M rows + instant problem-to-pattern mental) Tj ET
+BT /F1 7.2 Tf 287.00 347.00 Td (flashcards.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 316.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 316.00 m 564.00 316.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 331.00 Td (Part 9: The 6 100x Master AHAs) Tj ET
+BT /F1 7.2 Tf 192.00 331.00 Td (6 Stack Foundations) Tj ET
+BT /F1 7.2 Tf 287.00 331.00 Td (The unified mental model linking Linux kernel, DSA, Python, SQL, Data) Tj ET
+BT /F1 7.2 Tf 287.00 322.00 Td (Eng & AI/ML.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 291.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 291.00 m 564.00 291.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 306.00 Td (Part 10: Career Retention & AI) Tj ET
+BT /F1 7.2 Tf 192.00 306.00 Td (Habits + AI Bridge) Tj ET
+BT /F1 7.2 Tf 287.00 306.00 Td (The 4 non-syntax habits, 10M benchmark project, pgvector, HNSW, and) Tj ET
+BT /F1 7.2 Tf 287.00 297.00 Td (interview traps.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 271.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 273.00 Td (PART 1: SOFTWARE ENGINEERING & SQL FOUNDATIONS \(115-126\)) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 265.00 m 564.00 265.00 l S
+Q
+q
+0.15 0.39 0.92 rg 52.00 248.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 246.50 Td (115. Clean Code & Naming Discipline:) Tj ET
+BT /F1 8.5 Tf 236.36 246.50 Td (Self-documenting code with intention-revealing names, small) Tj ET
+BT /F1 8.5 Tf 62.00 235.00 Td (single-responsibility functions, and low cognitive complexity.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 222.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 220.50 Td (116. SOLID, DRY & KISS Principles:) Tj ET
+BT /F1 8.5 Tf 226.84 220.50 Td (Avoid premature abstractions \(KISS\); centralize single sources of truth \(DRY\);) Tj ET
+BT /F1 8.5 Tf 62.00 209.00 Td (maintain open/closed extensibility.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 196.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 194.50 Td (117. Git Mastery & Code Review Workflow:) Tj ET
+BT /F1 8.5 Tf 255.40 194.50 Td (Trunk-based development, atomic commits, interactive rebasing, bug) Tj ET
+BT /F1 8.5 Tf 62.00 183.00 Td (isolation with git bisect, and rigorous PR reviews.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 170.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 168.50 Td (118. API Contract & Backward Compatibility:) Tj ET
+BT /F1 8.5 Tf 269.68 168.50 Td (Designing REST/gRPC schemas, semantic versioning, pagination) Tj ET
+BT /F1 8.5 Tf 62.00 157.00 Td (envelopes, and non-breaking contract expansions.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 144.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 142.50 Td (119. Application Security & OWASP Essentials:) Tj ET
+BT /F1 8.5 Tf 279.20 142.50 Td (Parameterized queries to stop SQL injection, CSRF/XSS mitigation,) Tj ET
+BT /F1 8.5 Tf 62.00 131.00 Td (RBAC authorization, and Argon2/bcrypt password hashing.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 118.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 116.50 Td (120. Scientific Debugging Methodology:) Tj ET
+BT /F1 8.5 Tf 245.88 116.50 Td (Deterministic reproduction, hypothesis isolation, binary searching inputs,) Tj ET
+BT /F1 8.5 Tf 62.00 105.00 Td (and fixing root causes rather than symptoms.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 92.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 90.50 Td (121. SQL Logical Execution Order:) Tj ET
+BT /F1 8.5 Tf 222.08 90.50 Td (Internal pipeline: FROM -> JOIN -> WHERE -> GROUP BY -> HAVING -> WINDOW ->) Tj ET
+BT /F1 8.5 Tf 62.00 79.00 Td (SELECT -> DISTINCT -> ORDER BY -> LIMIT.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SAGE KERNEL ENGINEERING PLAYBOOK -- ARCHITECTURAL MASTERY) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 1 of 9) Tj ET
+Q
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 8669 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (PYTHON & SQL PRODUCTION MASTERY BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (PART 1: FOUNDATIONS) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 727.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 725.50 Td (122. NULL Three-Valued Logic \(TRUE, FALSE, UNKNOWN\):) Tj ET
+BT /F1 8.5 Tf 312.52 725.50 Td (Why x = NULL evaluates to UNKNOWN; handling COALESCE,) Tj ET
+BT /F1 8.5 Tf 62.00 714.00 Td (NULLIF, and avoiding the silent NOT IN \(NULL\) trap.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 701.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 699.50 Td (123. Join Semantics & Anti-Patterns:) Tj ET
+BT /F1 8.5 Tf 236.36 699.50 Td (Mastering INNER, LEFT, FULL OUTER, CROSS, and self-joins; preventing) Tj ET
+BT /F1 8.5 Tf 62.00 688.00 Td (Cartesian product explosions in multi-table joins.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 675.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 673.50 Td (124. Data Types, Precision & Timezones:) Tj ET
+BT /F1 8.5 Tf 250.64 673.50 Td (Using NUMERIC/DECIMAL for financial currencies, TIMESTAMPTZ \(stored) Tj ET
+BT /F1 8.5 Tf 62.00 662.00 Td (strictly in UTC\), and BIGINT vs UUIDv7 primary keys.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 649.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 647.50 Td (125. Subqueries, Correlated Subqueries & EXISTS:) Tj ET
+BT /F1 8.5 Tf 293.48 647.50 Td (Understanding subquery execution plans; leveraging WHERE EXISTS) Tj ET
+BT /F1 8.5 Tf 62.00 636.00 Td (over IN for high-performance semi-joins.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 623.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 621.50 Td (126. Views, Materialized Views & Constraints:) Tj ET
+BT /F1 8.5 Tf 279.20 621.50 Td (Enforcing business invariants in PostgreSQL via CHECK, UNIQUE, and) Tj ET
+BT /F1 8.5 Tf 62.00 610.00 Td (FOREIGN KEY constraints rather than application code alone.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 592.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 594.00 Td (PART 2: PYTHON & SQL PRODUCTION PATTERNS \(1-26\)) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 586.00 m 564.00 586.00 l S
+Q
+q
+0.15 0.39 0.92 rg 52.00 569.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 567.50 Td (1. Hash-Map Lookup & Frequency Pattern:) Tj ET
+BT /F1 8.5 Tf 250.64 567.50 Td (Converting O\(N*M\) nested loops to O\(N+M\) lookups with dict/set; tallying) Tj ET
+BT /F1 8.5 Tf 62.00 556.00 Td (distributions with collections.Counter in O\(N\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 543.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 541.50 Td (2. Lazy Streaming Pipeline Pattern:) Tj ET
+BT /F1 8.5 Tf 231.60 541.50 Td (Chaining generator expressions \('yield'\) to stream 50 million records in) Tj ET
+BT /F1 8.5 Tf 62.00 530.00 Td (constant O\(1\) RAM without OOM crashes.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 517.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 515.50 Td (3. Declarative Transformation Pattern:) Tj ET
+BT /F1 8.5 Tf 245.88 515.50 Td (Using dict/list comprehensions, zip\(\), and enumerate\(\) to transform and) Tj ET
+BT /F1 8.5 Tf 62.00 504.00 Td (shape data in optimized C bytecode.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 491.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 489.50 Td (4. Defensive Perimeter Validation:) Tj ET
+BT /F1 8.5 Tf 226.84 489.50 Td (Validating dirty external payloads strictly at system boundaries using) Tj ET
+BT /F1 8.5 Tf 62.00 478.00 Td (Pydantic v2 before domain logic executes.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 465.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 463.50 Td (5. Resource Lifecycle Management:) Tj ET
+BT /F1 8.5 Tf 222.08 463.50 Td (Guaranteeing deterministic cleanup of sockets, locks, and DB connections via) Tj ET
+BT /F1 8.5 Tf 62.00 452.00 Td (with blocks \(__enter__/__exit__\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 439.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 437.50 Td (6. Immutability vs. Controlled Mutation:) Tj ET
+BT /F1 8.5 Tf 255.40 437.50 Td (Passing @dataclass\(frozen=True\) to eliminate side-effects; mutating) Tj ET
+BT /F1 8.5 Tf 62.00 426.00 Td (in-place only in isolated, hot performance loops.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 413.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 411.50 Td (7. Retry with Exponential Backoff & Jitter:) Tj ET
+BT /F1 8.5 Tf 269.68 411.50 Td (Protecting against transient failures: delay = base * \(2**attempt\) +) Tj ET
+BT /F1 8.5 Tf 62.00 400.00 Td (random_jitter to prevent thundering herds.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 387.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 385.50 Td (8. The Idempotency Pattern:) Tj ET
+BT /F1 8.5 Tf 193.52 385.50 Td (Tagging requests with deterministic sha256 idempotency keys so reruns produce) Tj ET
+BT /F1 8.5 Tf 62.00 374.00 Td (identical state without duplicate writes.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 361.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 359.50 Td (9. Concurrency Selection Matrix:) Tj ET
+BT /F1 8.5 Tf 217.32 359.50 Td (asyncio for 10k+ I/O web connections; ThreadPool for blocking drivers;) Tj ET
+BT /F1 8.5 Tf 62.00 348.00 Td (ProcessPool for CPU-bound computations.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 335.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 333.50 Td (10. Producer-Consumer Bounded Queues:) Tj ET
+BT /F1 8.5 Tf 241.12 333.50 Td (Decoupling ingestion from persistence via asyncio.Queue\(maxsize=100\) to) Tj ET
+BT /F1 8.5 Tf 62.00 322.00 Td (buffer burst traffic safely.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 309.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 307.50 Td (11. Strategy & Dependency Injection:) Tj ET
+BT /F1 8.5 Tf 236.36 307.50 Td (Passing database sessions and API clients as constructor parameters to) Tj ET
+BT /F1 8.5 Tf 62.00 296.00 Td (enable 100% testable code with mocks.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 283.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 281.50 Td (12. Decorators & Middleware Pattern:) Tj ET
+BT /F1 8.5 Tf 236.36 281.50 Td (Wrapping functions cleanly via @functools.wraps for execution timing,) Tj ET
+BT /F1 8.5 Tf 62.00 270.00 Td (structured logging, and auth checks.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 257.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 255.50 Td (13. Structured JSON Observability:) Tj ET
+BT /F1 8.5 Tf 226.84 255.50 Td (Emitting machine-readable JSON logs with trace IDs, tenant IDs, and error) Tj ET
+BT /F1 8.5 Tf 62.00 244.00 Td (stack traces for Datadog and Grafana.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 231.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 229.50 Td (14. Relational Normalization \(3NF\):) Tj ET
+BT /F1 8.5 Tf 231.60 229.50 Td (Designing surrogate PKs, foreign keys with ON DELETE RESTRICT, and composite) Tj ET
+BT /F1 8.5 Tf 62.00 218.00 Td (junction tables for Many-to-Many models.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 205.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 203.50 Td (15. Set-Based SQL Execution:) Tj ET
+BT /F1 8.5 Tf 198.28 203.50 Td (Writing declarative joins, filters, and aggregations directly in PostgreSQL rather) Tj ET
+BT /F1 8.5 Tf 62.00 192.00 Td (than procedural row-by-row cursors.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 179.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 177.50 Td (16. The CTE Pipeline Pattern:) Tj ET
+BT /F1 8.5 Tf 203.04 177.50 Td (Structuring multi-stage transformations into modular, readable WITH pipelines that) Tj ET
+BT /F1 8.5 Tf 62.00 166.00 Td (PostgreSQL optimizes.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 153.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 151.50 Td (17. Window Analytics Pattern:) Tj ET
+BT /F1 8.5 Tf 203.04 151.50 Td (Computing rank, running sums, and period-over-period variance without collapsing) Tj ET
+BT /F1 8.5 Tf 62.00 140.00 Td (rows via OVER \(PARTITION BY ...\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 127.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 125.50 Td (18. Atomic Upserts \(INSERT ... ON CONFLICT\):) Tj ET
+BT /F1 8.5 Tf 274.44 125.50 Td (Executing atomic single-roundtrip inserts or updates preventing) Tj ET
+BT /F1 8.5 Tf 62.00 114.00 Td (concurrency race conditions.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 101.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 99.50 Td (19. High-Throughput Bulk Batching:) Tj ET
+BT /F1 8.5 Tf 226.84 99.50 Td (Batching writes with psycopg3.execute_values\(\) or streaming via COPY FROM) Tj ET
+BT /F1 8.5 Tf 62.00 88.00 Td (STDIN \(150,000+ rows/sec\).) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SAGE KERNEL ENGINEERING PLAYBOOK -- ARCHITECTURAL MASTERY) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 2 of 9) Tj ET
+Q
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 8462 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (PYTHON & SQL PRODUCTION MASTERY BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (PART 2: PROD PATTERNS) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 727.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 725.50 Td (20. Indexing & Query Plans \(EXPLAIN ANALYZE\):) Tj ET
+BT /F1 8.5 Tf 279.20 725.50 Td (Enforcing the B-Tree Leftmost Prefix Rule on composite indexes,) Tj ET
+BT /F1 8.5 Tf 62.00 714.00 Td (eliminating Sequential Scans, and tuning work_mem.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 701.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 699.50 Td (21. ACID Transactions & Row Locking:) Tj ET
+BT /F1 8.5 Tf 236.36 699.50 Td (Preventing lost updates during concurrent balance deductions using) Tj ET
+BT /F1 8.5 Tf 62.00 688.00 Td (pessimistic row locks: SELECT ... FOR UPDATE.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 675.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 673.50 Td (22. Incremental Watermark ETL:) Tj ET
+BT /F1 8.5 Tf 207.80 673.50 Td (Tracking high-watermarks \(updated_at\) in metadata tables to synchronize only) Tj ET
+BT /F1 8.5 Tf 62.00 662.00 Td (changed records incrementally.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 649.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 647.50 Td (23. Keyset \(Cursor\) Pagination:) Tj ET
+BT /F1 8.5 Tf 212.56 647.50 Td (Paginating millions of records via WHERE \(created_at, id\) > \(:time, :id\) in O\(log) Tj ET
+BT /F1 8.5 Tf 62.00 636.00 Td (N\) rather than slow OFFSET scans.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 623.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 621.50 Td (24. 12-Factor Settings Separation:) Tj ET
+BT /F1 8.5 Tf 226.84 621.50 Td (Validating environment secrets and .env files at application boot using) Tj ET
+BT /F1 8.5 Tf 62.00 610.00 Td (Pydantic BaseSettings.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 597.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 595.50 Td (25. Automated Testing Pyramid:) Tj ET
+BT /F1 8.5 Tf 207.80 595.50 Td (Pure unit tests + integration tests against real PostgreSQL Testcontainers +) Tj ET
+BT /F1 8.5 Tf 62.00 584.00 Td (external API mocks \(pytest\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 571.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 569.50 Td (26. Reproducible Packaging & CI:) Tj ET
+BT /F1 8.5 Tf 217.32 569.50 Td (Pinning dependencies via pyproject.toml \(uv\), linting with ruff, type-checking) Tj ET
+BT /F1 8.5 Tf 62.00 558.00 Td (\(mypy\), and building slim Docker images.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 540.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 542.00 Td (PART 3: CORE & ADVANCED DSA \(27-56\)) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 534.00 m 564.00 534.00 l S
+Q
+q
+0.15 0.39 0.92 rg 52.00 517.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 515.50 Td (27. Dynamic Arrays \(list\):) Tj ET
+BT /F1 8.5 Tf 188.76 515.50 Td (Contiguous pointer memory; O\(1\) index lookup and amortized append; O\(N\) insert/delete) Tj ET
+BT /F1 8.5 Tf 62.00 504.00 Td (at arbitrary positions.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 491.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 489.50 Td (28. Hash Maps & Sets \(dict, set\):) Tj ET
+BT /F1 8.5 Tf 222.08 489.50 Td (Open-addressing hash table with O\(1\) average lookup/insert; identical to SQL) Tj ET
+BT /F1 8.5 Tf 62.00 478.00 Td (Hash Joins and GROUP BY.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 465.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 463.50 Td (29. Strings & Buffers \(str, bytes\):) Tj ET
+BT /F1 8.5 Tf 231.60 463.50 Td (Immutable character arrays; avoiding O\(N^2\) '+=' loops by assembling text via) Tj ET
+BT /F1 8.5 Tf 62.00 452.00 Td (''.join\(\) in linear O\(N\) time.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 439.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 437.50 Td (30. Singly & Doubly Linked Lists:) Tj ET
+BT /F1 8.5 Tf 222.08 437.50 Td (Node-pointer structures enabling O\(1\) insertions/deletions at known positions;) Tj ET
+BT /F1 8.5 Tf 62.00 426.00 Td (builds LRU Caches.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 413.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 411.50 Td (31. Stacks & Deques \(collections.deque\):) Tj ET
+BT /F1 8.5 Tf 255.40 411.50 Td (LIFO and FIFO mechanics; O\(1\) push/pop from both ends for parsing,) Tj ET
+BT /F1 8.5 Tf 62.00 400.00 Td (backtracking, and BFS queues.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 387.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 385.50 Td (32. Heaps & Priority Queues \(heapq\):) Tj ET
+BT /F1 8.5 Tf 236.36 385.50 Td (Binary min-heaps in lists; O\(log N\) push/pop for Top-K queries, stream) Tj ET
+BT /F1 8.5 Tf 62.00 374.00 Td (medians, and task scheduling.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 361.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 359.50 Td (33. Trees & Tries \(BST, Prefix Trees\):) Tj ET
+BT /F1 8.5 Tf 245.88 359.50 Td (Hierarchical search trees with O\(log N\) lookups; prefix tries for) Tj ET
+BT /F1 8.5 Tf 62.00 348.00 Td (autocomplete; B+ Trees for database indexes.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 335.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 333.50 Td (34. Graphs & DAGs:) Tj ET
+BT /F1 8.5 Tf 150.68 333.50 Td (Adjacency lists \(dict[node, list[neighbor]]\); modeling networks, dependency graphs, and) Tj ET
+BT /F1 8.5 Tf 62.00 322.00 Td (Airflow/dbt data pipelines.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 309.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 307.50 Td (35. Two Pointers:) Tj ET
+BT /F1 8.5 Tf 145.92 307.50 Td (Moving two pointers inward or in tandem across sorted data in O\(N\) time and O\(1\) space \(2Sum,) Tj ET
+BT /F1 8.5 Tf 62.00 296.00 Td (Palindromes\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 283.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 281.50 Td (36. Sliding Window:) Tj ET
+BT /F1 8.5 Tf 155.44 281.50 Td (Maintaining a moving subsegment [L, R] to solve substring/subarray constraints or rate limits) Tj ET
+BT /F1 8.5 Tf 62.00 270.00 Td (in O\(N\) time.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 257.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 255.50 Td (37. Prefix Sums:) Tj ET
+BT /F1 8.5 Tf 141.16 255.50 Td (Precomputing cumulative totals \(prefix[i] = prefix[i-1] + nums[i]\) for O\(1\) range queries) Tj ET
+BT /F1 8.5 Tf 62.00 244.00 Td (\(identical to SQL running totals\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 231.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 229.50 Td (38. Binary Search & On Answer:) Tj ET
+BT /F1 8.5 Tf 207.80 229.50 Td (Halving search spaces in O\(log N\). Used to search monotonic answer spaces \(e.g.) Tj ET
+BT /F1 8.5 Tf 62.00 218.00 Td (minimum capacity in D days\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 205.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 203.50 Td (39. Depth-First Search \(DFS\):) Tj ET
+BT /F1 8.5 Tf 203.04 203.50 Td (Exploring branches fully using recursion or a stack; used for tree traversal, path) Tj ET
+BT /F1 8.5 Tf 62.00 192.00 Td (finding, and cycle detection.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 179.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 177.50 Td (40. Breadth-First Search \(BFS\):) Tj ET
+BT /F1 8.5 Tf 212.56 177.50 Td (Exploring level-by-level using collections.deque; finds the shortest path in) Tj ET
+BT /F1 8.5 Tf 62.00 166.00 Td (unweighted networks.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 153.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 151.50 Td (41. Topological Sort \(Kahn's\):) Tj ET
+BT /F1 8.5 Tf 207.80 151.50 Td (Ordering DAG nodes by in-degree resolution; essential for build systems, compiler) Tj ET
+BT /F1 8.5 Tf 62.00 140.00 Td (steps, and ETL pipeline execution.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 127.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 125.50 Td (42. Union-Find \(DSU\):) Tj ET
+BT /F1 8.5 Tf 164.96 125.50 Td (Tracking dynamically connected components and cycle checks in near-O\(1\) time using path) Tj ET
+BT /F1 8.5 Tf 62.00 114.00 Td (compression.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 101.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 99.50 Td (43. Top-K / K-Way Merge \(Heaps\):) Tj ET
+BT /F1 8.5 Tf 217.32 99.50 Td (Using heapq to merge K sorted streams or maintain top K items in O\(N log K\) time) Tj ET
+BT /F1 8.5 Tf 62.00 88.00 Td (without sorting all data.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SAGE KERNEL ENGINEERING PLAYBOOK -- ARCHITECTURAL MASTERY) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 3 of 9) Tj ET
+Q
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 8529 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (PYTHON & SQL PRODUCTION MASTERY BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (PART 3: CORE & ADVANCED DSA) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 727.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 725.50 Td (44. Intervals & Sweep Line:) Tj ET
+BT /F1 8.5 Tf 193.52 725.50 Td (Sorting [start, end] ranges to merge overlapping sessions, calculate room) Tj ET
+BT /F1 8.5 Tf 62.00 714.00 Td (allocations, or detect active user spikes.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 701.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 699.50 Td (45. Backtracking:) Tj ET
+BT /F1 8.5 Tf 145.92 699.50 Td (Systematically exploring state permutations with early branch pruning \(constraint satisfaction,) Tj ET
+BT /F1 8.5 Tf 62.00 688.00 Td (maze solvers\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 675.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 673.50 Td (46. Greedy Algorithms:) Tj ET
+BT /F1 8.5 Tf 169.72 673.50 Td (Making locally optimal choices at each step when the problem exhibits the greedy-choice) Tj ET
+BT /F1 8.5 Tf 62.00 662.00 Td (property \(interval scheduling\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 649.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 647.50 Td (47. Dynamic Programming \(DP\):) Tj ET
+BT /F1 8.5 Tf 203.04 647.50 Td (Breaking overlapping subproblems down with memoization \(@cache\) or bottom-up) Tj ET
+BT /F1 8.5 Tf 62.00 636.00 Td (arrays, reducing O\(2^N\) to O\(N^2\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 623.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 621.50 Td (48. Bit Manipulation:) Tj ET
+BT /F1 8.5 Tf 164.96 621.50 Td (Using XOR \(x ^ x = 0\) to find unique singletons, bitmasks for compact state flags, and fast) Tj ET
+BT /F1 8.5 Tf 62.00 610.00 Td (power checks \(n & \(n-1\) == 0\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 597.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 595.50 Td (49. Shortest Path & MST \(Dijkstra, Kruskal\):) Tj ET
+BT /F1 8.5 Tf 274.44 595.50 Td (Priority queue relaxation for shortest paths and Minimum Spanning) Tj ET
+BT /F1 8.5 Tf 62.00 584.00 Td (Trees across network graphs.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 571.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 569.50 Td (50. Segment & Fenwick Trees \(BIT\):) Tj ET
+BT /F1 8.5 Tf 226.84 569.50 Td (Binary indexed trees supporting dynamic range queries and point updates in) Tj ET
+BT /F1 8.5 Tf 62.00 558.00 Td (O\(log N\) with live writes.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 545.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 543.50 Td (51. Monotonic Stack & Queue:) Tj ET
+BT /F1 8.5 Tf 198.28 543.50 Td (Strictly ordered stacks/deques for solving Next Greater Element and sliding window) Tj ET
+BT /F1 8.5 Tf 62.00 532.00 Td (maximums in O\(N\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 519.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 517.50 Td (52. String Matching \(KMP & Rabin-Karp\):) Tj ET
+BT /F1 8.5 Tf 250.64 517.50 Td (Rolling hash polynomials and prefix tables for linear-time substring) Tj ET
+BT /F1 8.5 Tf 62.00 506.00 Td (search and corpus deduplication.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 493.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 491.50 Td (53. Bloom Filters & Count-Min Sketch:) Tj ET
+BT /F1 8.5 Tf 241.12 491.50 Td (Space-efficient probabilistic bit arrays verifying non-membership with zero) Tj ET
+BT /F1 8.5 Tf 62.00 480.00 Td (false negatives to save disk I/O.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 467.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 465.50 Td (54. HyperLogLog \(HLL\):) Tj ET
+BT /F1 8.5 Tf 169.72 465.50 Td (Estimating COUNT\(DISTINCT user_id\) across billions of events using leading zero counts in) Tj ET
+BT /F1 8.5 Tf 62.00 454.00 Td (<2KB of RAM.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 441.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 439.50 Td (55. Consistent Hashing:) Tj ET
+BT /F1 8.5 Tf 174.48 439.50 Td (Mapping nodes onto a 2^32 circular integer ring to minimize key rebalancing when scaling) Tj ET
+BT /F1 8.5 Tf 62.00 428.00 Td (cache/DB shards.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 415.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 413.50 Td (56. External Merge Sort:) Tj ET
+BT /F1 8.5 Tf 179.24 413.50 Td (Sorting datasets larger than RAM \(e.g. 500GB on 16GB RAM\) by chunking, sorting, and) Tj ET
+BT /F1 8.5 Tf 62.00 402.00 Td (k-way merging on disk.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 384.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 386.00 Td (PART 4: PYTHON RUNTIME & DB INTERNALS \(57-70\)) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 378.00 m 564.00 378.00 l S
+Q
+q
+0.15 0.39 0.92 rg 52.00 361.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 359.50 Td (57. CPython Object Model & __slots__:) Tj ET
+BT /F1 8.5 Tf 241.12 359.50 Td (PyObject headers \(refcnt, type, payload\); using __slots__ to eliminate) Tj ET
+BT /F1 8.5 Tf 62.00 348.00 Td (__dict__ and cut object RAM by 40-60%.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 335.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 333.50 Td (58. The Descriptor Protocol:) Tj ET
+BT /F1 8.5 Tf 198.28 333.50 Td (How __get__, __set__, and __delete__ intercept attribute access, powering @property,) Tj ET
+BT /F1 8.5 Tf 62.00 322.00 Td (classmethods, and ORMs.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 309.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 307.50 Td (59. Metaclasses & __init_subclass__:) Tj ET
+BT /F1 8.5 Tf 236.36 307.50 Td (Intercepting class creation dynamically to validate schemas and register) Tj ET
+BT /F1 8.5 Tf 62.00 296.00 Td (models \(SQLAlchemy / Pydantic\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 283.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 281.50 Td (60. Bytecode, AST & Profilers:) Tj ET
+BT /F1 8.5 Tf 207.80 281.50 Td (Inspecting opcodes via dis.dis\(\), parsing ASTs, and tracing CPU/memory bottlenecks) Tj ET
+BT /F1 8.5 Tf 62.00 270.00 Td (with cProfile and tracemalloc.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 257.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 255.50 Td (61. The GIL & Free-Threaded Python:) Tj ET
+BT /F1 8.5 Tf 231.60 255.50 Td (CPython's Global Interpreter Lock vs modern Python 3.13+ free-threading \(PEP) Tj ET
+BT /F1 8.5 Tf 62.00 244.00 Td (703\) using biased reference counts.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 231.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 229.50 Td (62. Zero-Copy & Apache Arrow:) Tj ET
+BT /F1 8.5 Tf 203.04 229.50 Td (Using memoryview and Arrow columnar memory buffers to pass millions of rows across) Tj ET
+BT /F1 8.5 Tf 62.00 218.00 Td (Python, Rust, and C++.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 205.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 203.50 Td (63. Storage Engines \(B+ Trees vs. LSM Trees\):) Tj ET
+BT /F1 8.5 Tf 279.20 203.50 Td (Read-optimized B+ Trees \(Postgres in-place page writes\) vs) Tj ET
+BT /F1 8.5 Tf 62.00 192.00 Td (write-optimized LSM Trees \(ClickHouse append SSTables\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 179.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 177.50 Td (64. MVCC & Transaction Isolation:) Tj ET
+BT /F1 8.5 Tf 222.08 177.50 Td (Postgres tuple versioning eliminating read/write locks, isolation levels \(READ) Tj ET
+BT /F1 8.5 Tf 62.00 166.00 Td (COMMITTED to SERIALIZABLE\), and VACUUM bloat.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 153.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 151.50 Td (65. Write-Ahead Logging \(WAL\) & CDC:) Tj ET
+BT /F1 8.5 Tf 236.36 151.50 Td (Sequential disk logging for crash recovery durability, streaming) Tj ET
+BT /F1 8.5 Tf 62.00 140.00 Td (replication, and Change Data Capture \(Debezium\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 127.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 125.50 Td (66. Row vs. Columnar Storage:) Tj ET
+BT /F1 8.5 Tf 203.04 125.50 Td (Row-oriented OLTP \(PostgreSQL\) for transactional writes vs columnar OLAP \(DuckDB,) Tj ET
+BT /F1 8.5 Tf 62.00 114.00 Td (Parquet\) for 100x analytical scans.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 101.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 99.50 Td (67. Table Partitioning & Horizontal Sharding:) Tj ET
+BT /F1 8.5 Tf 279.20 99.50 Td (Declarative range/hash partitioning on a single node vs horizontal) Tj ET
+BT /F1 8.5 Tf 62.00 88.00 Td (sharding across nodes and avoiding hot shards.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SAGE KERNEL ENGINEERING PLAYBOOK -- ARCHITECTURAL MASTERY) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 4 of 9) Tj ET
+Q
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 14 0 R >>
+endobj
+16 0 obj
+<< /Length 8890 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (PYTHON & SQL PRODUCTION MASTERY BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (PART 4: RUNTIME & DB) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 727.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 725.50 Td (68. Query Optimizer Internals:) Tj ET
+BT /F1 8.5 Tf 207.80 725.50 Td (Cardinality estimation, ANALYZE statistics, join reordering \(Nested Loop, Hash) Tj ET
+BT /F1 8.5 Tf 62.00 714.00 Td (Join, Merge Join\), and partition pruning.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 701.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 699.50 Td (69. Distributed Transactions & Sagas:) Tj ET
+BT /F1 8.5 Tf 241.12 699.50 Td (Why 2-Phase Commit \(2PC\) fails at scale; implementing the Transactional) Tj ET
+BT /F1 8.5 Tf 62.00 688.00 Td (Outbox Pattern and Saga choreography.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 675.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 673.50 Td (70. Stream Processing Semantics:) Tj ET
+BT /F1 8.5 Tf 217.32 673.50 Td (Event time vs processing time, watermarks, late data handling, and at-least-once) Tj ET
+BT /F1 8.5 Tf 62.00 662.00 Td (vs exactly-once delivery \(Kafka / Flink\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 644.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 646.00 Td (PART 5: LINUX OS, STORAGE & NETWORKING \(77-114\)) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 638.00 m 564.00 638.00 l S
+Q
+q
+0.15 0.39 0.92 rg 52.00 621.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 619.50 Td (77. Processes, Threads & Coroutines:) Tj ET
+BT /F1 8.5 Tf 236.36 619.50 Td (Kernel task structs \(clone\(\)\), context-switching costs, and why threads) Tj ET
+BT /F1 8.5 Tf 62.00 608.00 Td (share memory while processes are isolated.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 595.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 593.50 Td (78. Process Lifecycle & Signals:) Tj ET
+BT /F1 8.5 Tf 217.32 593.50 Td (fork\(\), exec\(\), wait\(\), zombie processes, and graceful termination handling) Tj ET
+BT /F1 8.5 Tf 62.00 582.00 Td (\(SIGTERM, SIGINT, SIGHUP\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 569.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 567.50 Td (79. CPU Scheduling & Load Averages:) Tj ET
+BT /F1 8.5 Tf 231.60 567.50 Td (Run queues, voluntary vs involuntary context switches, CPU pinning, and) Tj ET
+BT /F1 8.5 Tf 62.00 556.00 Td (decoding CPU vs I/O-wait load averages.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 543.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 541.50 Td (80. cgroups \(v2\) & Resource Throttling:) Tj ET
+BT /F1 8.5 Tf 250.64 541.50 Td (Enforcement of CPU shares/quotas and memory hard limits inside) Tj ET
+BT /F1 8.5 Tf 62.00 530.00 Td (containers; diagnosing tail-latency throttling.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 517.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 515.50 Td (81. Linux Namespaces \(Container Isolation\):) Tj ET
+BT /F1 8.5 Tf 269.68 515.50 Td (How pid, net, mnt, uts, ipc, and user namespaces isolate Docker and) Tj ET
+BT /F1 8.5 Tf 62.00 504.00 Td (Kubernetes processes without a hypervisor.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 491.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 489.50 Td (82. Systemd & Service Supervision:) Tj ET
+BT /F1 8.5 Tf 226.84 489.50 Td (Unit files, dependency ordering, restart backoff policies, socket activation,) Tj ET
+BT /F1 8.5 Tf 62.00 478.00 Td (and journalctl structured logs.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 465.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 463.50 Td (83. Inter-Process Communication \(IPC\):) Tj ET
+BT /F1 8.5 Tf 245.88 463.50 Td (Unix domain sockets \(faster than TCP localhost for Postgres/Redis\), named) Tj ET
+BT /F1 8.5 Tf 62.00 452.00 Td (pipes \(FIFOs\), and /dev/shm shared memory.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 439.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 437.50 Td (84. Virtual Memory & Page Tables:) Tj ET
+BT /F1 8.5 Tf 222.08 437.50 Td (Virtual-to-physical address translation, MMU, TLB misses, and configuring Huge) Tj ET
+BT /F1 8.5 Tf 62.00 426.00 Td (Pages for large database buffer pools.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 413.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 411.50 Td (85. Page Cache & Dirty Pages:) Tj ET
+BT /F1 8.5 Tf 203.04 411.50 Td (How Linux caches disk reads in free RAM, fsync\(\) durability guarantees, and tuning) Tj ET
+BT /F1 8.5 Tf 62.00 400.00 Td (vm.dirty_ratio to avoid flush stalls.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 387.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 385.50 Td (86. Swap, Page Faults & OOM Killer:) Tj ET
+BT /F1 8.5 Tf 231.60 385.50 Td (Minor vs major page faults, why swap destroys database latency, and) Tj ET
+BT /F1 8.5 Tf 62.00 374.00 Td (diagnosing oom_score_adj in dmesg.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 361.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 359.50 Td (87. File Descriptors & VFS:) Tj ET
+BT /F1 8.5 Tf 193.52 359.50 Td (Everything-is-a-file abstraction, inode tables, hard vs soft links, and fixing ulimit) Tj ET
+BT /F1 8.5 Tf 62.00 348.00 Td (-n socket/file exhaustion.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 335.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 333.50 Td (88. Storage Stack & Filesystems \(ext4, XFS, OverlayFS\):) Tj ET
+BT /F1 8.5 Tf 326.80 333.50 Td (Block devices, journaling, Docker copy-on-write layers,) Tj ET
+BT /F1 8.5 Tf 62.00 322.00 Td (and fixing inode exhaustion \(df -i\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 309.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 307.50 Td (89. Disk I/O Schedulers, IOPS & Throughput:) Tj ET
+BT /F1 8.5 Tf 269.68 307.50 Td (Sequential vs random I/O, NVMe queue depths, iowait, and why database) Tj ET
+BT /F1 8.5 Tf 62.00 296.00 Td (random writes bottleneck on disk latency.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 283.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 281.50 Td (90. Zero-Copy OS I/O \(mmap, sendfile, splice\):) Tj ET
+BT /F1 8.5 Tf 283.96 281.50 Td (Moving data between disk and network sockets in kernel space) Tj ET
+BT /F1 8.5 Tf 62.00 270.00 Td (without copying bytes into Python user-space RAM.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 257.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 255.50 Td (91. Permissions, Capabilities & Non-Root Execution:) Tj ET
+BT /F1 8.5 Tf 307.76 255.50 Td (Least-privilege execution, chmod/chown, CAP_NET_BIND_SERVICE,) Tj ET
+BT /F1 8.5 Tf 62.00 244.00 Td (and running rootless Docker containers.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 231.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 229.50 Td (92. TCP/IP Stack & Packet Encapsulation:) Tj ET
+BT /F1 8.5 Tf 255.40 229.50 Td (Frames, IP packets, TCP/UDP segments, MTU boundaries, and avoiding IP) Tj ET
+BT /F1 8.5 Tf 62.00 218.00 Td (fragmentation.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 205.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 203.50 Td (93. IP Addressing, CIDR, Subnets & Routing:) Tj ET
+BT /F1 8.5 Tf 269.68 203.50 Td (Private vs public CIDR blocks, NAT gateways, routing tables \(ip) Tj ET
+BT /F1 8.5 Tf 62.00 192.00 Td (route\), and diagnosing asymmetric VPC routing.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 179.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 177.50 Td (94. ARP & Layer 2 Switching:) Tj ET
+BT /F1 8.5 Tf 198.28 177.50 Td (MAC address resolution and local subnet packet forwarding within broadcast domains.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 165.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 163.00 Td (95. DNS Resolution Internals:) Tj ET
+BT /F1 8.5 Tf 203.04 163.00 Td (Recursive vs authoritative resolvers, record types \(A, CNAME, SRV\), TTL caching,) Tj ET
+BT /F1 8.5 Tf 62.00 151.50 Td (and Kubernetes ndots latency traps.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 139.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 137.00 Td (96. TCP State Machine & Handshakes:) Tj ET
+BT /F1 8.5 Tf 231.60 137.00 Td (3-way handshake \(SYN, SYN-ACK, ACK\), FIN teardown, RST resets, and TIME_WAIT) Tj ET
+BT /F1 8.5 Tf 62.00 125.50 Td (port exhaustion.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 113.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 111.00 Td (97. TCP Flow Control, Congestion & Keepalives:) Tj ET
+BT /F1 8.5 Tf 283.96 111.00 Td (Sliding windows, Nagle's algorithm \(TCP_NODELAY\), slow start, and) Tj ET
+BT /F1 8.5 Tf 62.00 99.50 Td (detecting dead DB connections across firewalls.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 87.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 85.00 Td (98. UDP & QUIC / HTTP/3:) Tj ET
+BT /F1 8.5 Tf 179.24 85.00 Td (Connectionless datagrams, eliminating head-of-line blocking, and 0-RTT handshakes in) Tj ET
+BT /F1 8.5 Tf 62.00 73.50 Td (modern web protocols.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SAGE KERNEL ENGINEERING PLAYBOOK -- ARCHITECTURAL MASTERY) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 5 of 9) Tj ET
+Q
+endstream
+endobj
+17 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 16 0 R >>
+endobj
+18 0 obj
+<< /Length 8773 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (PYTHON & SQL PRODUCTION MASTERY BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (PART 5: LINUX & NETWORKING) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 727.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 725.50 Td (99. Sockets & Event-Driven I/O \(epoll\):) Tj ET
+BT /F1 8.5 Tf 250.64 725.50 Td (Non-blocking sockets and how Linux epoll powers asyncio, Uvicorn, and) Tj ET
+BT /F1 8.5 Tf 62.00 714.00 Td (Nginx at 10,000+ concurrent connections.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 701.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 699.50 Td (100. HTTP/1.1, HTTP/2, gRPC & WebSockets:) Tj ET
+BT /F1 8.5 Tf 260.16 699.50 Td (Keep-Alive connection pooling, HTTP/2 multiplexing, Protobuf binary) Tj ET
+BT /F1 8.5 Tf 62.00 688.00 Td (framing, and persistent bidirectional streams.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 675.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 673.50 Td (101. TLS/SSL, Certificates & mTLS:) Tj ET
+BT /F1 8.5 Tf 226.84 673.50 Td (Asymmetric key exchange, symmetric session keys, Certificate Authorities) Tj ET
+BT /F1 8.5 Tf 62.00 662.00 Td (\(CAs\), SNI, and mutual TLS between microservices.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 649.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 647.50 Td (102. Reverse Proxies & Load Balancers \(L4 vs. L7\):) Tj ET
+BT /F1 8.5 Tf 303.00 647.50 Td (Nginx/Envoy/HAProxy, TLS termination, health checks, sticky) Tj ET
+BT /F1 8.5 Tf 62.00 636.00 Td (sessions, and graceful connection draining.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 623.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 621.50 Td (103. Firewalls & Packet Filtering \(iptables, nftables\):) Tj ET
+BT /F1 8.5 Tf 326.80 621.50 Td (Stateful vs stateless rules, AWS Security Groups, and) Tj ET
+BT /F1 8.5 Tf 62.00 610.00 Td (diagnosing dropped network packets.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 597.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 595.50 Td (104. SSH, Bastions & Port Forwarding:) Tj ET
+BT /F1 8.5 Tf 241.12 595.50 Td (Key-based authentication, bastion jump hosts, and local/remote SSH tunnels) Tj ET
+BT /F1 8.5 Tf 62.00 584.00 Td (\(-L, -R\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 571.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 569.50 Td (105. Syscall Tracing \(strace / ltrace\):) Tj ET
+BT /F1 8.5 Tf 250.64 569.50 Td (Inspecting live system calls \(futex, read, write, connect\) of hung Python) Tj ET
+BT /F1 8.5 Tf 62.00 558.00 Td (or database processes.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 545.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 543.50 Td (106. Packet Capture \(tcpdump / Wireshark\):) Tj ET
+BT /F1 8.5 Tf 264.92 543.50 Td (Capturing raw wire traffic to isolate whether failures originate in) Tj ET
+BT /F1 8.5 Tf 62.00 532.00 Td (app code, TLS certs, proxies, or the database.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 519.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 517.50 Td (107. USE Method Telemetry \(htop, vmstat, iostat\):) Tj ET
+BT /F1 8.5 Tf 298.24 517.50 Td (The Utilization, Saturation, and Errors \(USE\) framework to) Tj ET
+BT /F1 8.5 Tf 62.00 506.00 Td (pinpoint CPU, RAM, or Disk bottlenecks in 60 seconds.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 493.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 491.50 Td (108. Socket & File Descriptor Forensics \(ss, lsof\):) Tj ET
+BT /F1 8.5 Tf 307.76 491.50 Td (Tracking CLOSE_WAIT connection leaks, listening ports, and) Tj ET
+BT /F1 8.5 Tf 62.00 480.00 Td (open file descriptors per PID.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 467.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 465.50 Td (109. eBPF & Kernel-Space Profiling \(perf, bpftrace\):) Tj ET
+BT /F1 8.5 Tf 312.52 465.50 Td (Low-overhead live production profiling across both Python) Tj ET
+BT /F1 8.5 Tf 62.00 454.00 Td (frames and Linux kernel space.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 441.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 439.50 Td (110. Shell & Stream Processing \(awk, sed, jq, xargs\):) Tj ET
+BT /F1 8.5 Tf 317.28 439.50 Td (Processing multi-gigabyte server logs and automating) Tj ET
+BT /F1 8.5 Tf 62.00 428.00 Td (emergency incident fixes directly from the shell.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 415.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 413.50 Td (111. Container Build Optimization & Security:) Tj ET
+BT /F1 8.5 Tf 279.20 413.50 Td (Multi-stage Dockerfiles, layer caching, distroless/slim base) Tj ET
+BT /F1 8.5 Tf 62.00 402.00 Td (images, and image vulnerability scanning.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 389.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 387.50 Td (112. Signal-Safe Process Managers \(tini / PID 1\):) Tj ET
+BT /F1 8.5 Tf 298.24 387.50 Td (Why running Python as PID 1 breaks signal forwarding, leaves) Tj ET
+BT /F1 8.5 Tf 62.00 376.00 Td (zombie processes, and how tini solves it.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 363.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 361.50 Td (113. Clock Synchronization & Monotonic Clocks:) Tj ET
+BT /F1 8.5 Tf 283.96 361.50 Td (Why wall clocks drift \(time.time\(\)\) and why timeouts/distributed) Tj ET
+BT /F1 8.5 Tf 62.00 350.00 Td (systems rely strictly on time.monotonic\(\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 337.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 335.50 Td (114. Linux /proc & /sys Pseudo-Filesystems:) Tj ET
+BT /F1 8.5 Tf 269.68 335.50 Td (Reading live kernel states, process memory maps \(/proc/<pid>/smaps\),) Tj ET
+BT /F1 8.5 Tf 62.00 324.00 Td (and tuning kernel parameters via sysctl.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 306.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 308.00 Td (PART 6: PRINCIPAL SYSTEM ARCHITECTURE \(71-76\)) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 300.00 m 564.00 300.00 l S
+Q
+q
+0.15 0.39 0.92 rg 52.00 283.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 281.50 Td (71. Backpressure & Rate Limiting:) Tj ET
+BT /F1 8.5 Tf 222.08 281.50 Td (Protecting downstream databases from traffic spikes using Token Bucket and) Tj ET
+BT /F1 8.5 Tf 62.00 270.00 Td (Leaky Bucket algorithms, circuit breakers, and bounded queues.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 257.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 255.50 Td (72. Multi-Layer Caching & Cache Stampede Prevention:) Tj ET
+BT /F1 8.5 Tf 312.52 255.50 Td (Combining local in-process caches \(LRU\) with Redis) Tj ET
+BT /F1 8.5 Tf 62.00 244.00 Td (distributed caches; using Request Coalescing \(Singleflight\) and randomized TTL jitter.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 231.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 229.50 Td (73. CAP / PACELC & Consensus Protocols:) Tj ET
+BT /F1 8.5 Tf 250.64 229.50 Td (Trade-offs between Consistency and Availability during partitions \(CAP\),) Tj ET
+BT /F1 8.5 Tf 62.00 218.00 Td (and Latency vs Consistency during normal operations \(PACELC\).) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 205.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 203.50 Td (74. Zero-Downtime Live Migrations \(Expand/Contract\):) Tj ET
+BT /F1 8.5 Tf 312.52 203.50 Td (The 4-phase pattern for 100M+ row live tables: \(1\) Add) Tj ET
+BT /F1 8.5 Tf 62.00 192.00 Td (nullable column, \(2\) Dual-write, \(3\) Backfill historical rows, \(4\) Contract old column.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 179.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 177.50 Td (75. Deep Observability & Incident Triage:) Tj ET
+BT /F1 8.5 Tf 260.16 177.50 Td (OpenTelemetry distributed tracing across HTTP and queues; measuring) Tj ET
+BT /F1 8.5 Tf 62.00 166.00 Td (health with RED metrics \(Rate, Errors, Duration\) and SLO error budgets.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 153.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 151.50 Td (76. FinOps & Linear Cost Engineering:) Tj ET
+BT /F1 8.5 Tf 241.12 151.50 Td (Designing architectures where compute, storage, and network egress scale) Tj ET
+BT /F1 8.5 Tf 62.00 140.00 Td (linearly \(O\(N\)\) with users rather than exponentially.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 122.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 124.00 Td (PART 7: THE 22 REPEATING DAILY OPERATIONAL LOOPS) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 116.00 m 564.00 116.00 l S
+Q
+q
+0.15 0.39 0.92 rg 52.00 99.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 97.50 Td (Task 1: Ingest, Parse & Validate Messy External Data:) Tj ET
+BT /F1 8.5 Tf 317.28 97.50 Td (Pulling JSON/CSV/Parquet from APIs or S3, coercing dirty) Tj ET
+BT /F1 8.5 Tf 62.00 86.00 Td (nulls, dates, and types via Pydantic v2 schemas.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SAGE KERNEL ENGINEERING PLAYBOOK -- ARCHITECTURAL MASTERY) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 6 of 9) Tj ET
+Q
+endstream
+endobj
+19 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 18 0 R >>
+endobj
+20 0 obj
+<< /Length 8970 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (PYTHON & SQL PRODUCTION MASTERY BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (PART 7: 22 DAILY TASKS) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 727.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 725.50 Td (Task 2: Transform, Filter & Reshape Collections:) Tj ET
+BT /F1 8.5 Tf 293.48 725.50 Td (Grouping records by entity ID with defaultdict, deduplicating) Tj ET
+BT /F1 8.5 Tf 62.00 714.00 Td (with set, and flattening nested JSON payloads.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 701.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 699.50 Td (Task 3: Call External APIs Reliably at Scale:) Tj ET
+BT /F1 8.5 Tf 279.20 699.50 Td (Handling cursor pagination, 429 rate limits, retries with) Tj ET
+BT /F1 8.5 Tf 62.00 688.00 Td (exponential backoff/jitter, and asyncio + httpx concurrency.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 675.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 673.50 Td (Task 4: Build & Maintain API Endpoints:) Tj ET
+BT /F1 8.5 Tf 250.64 673.50 Td (FastAPI/Django routes validating inputs, enforcing auth/RBAC, executing) Tj ET
+BT /F1 8.5 Tf 62.00 662.00 Td (business logic, and returning clean HTTP codes.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 649.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 647.50 Td (Task 5: Read & Write Databases Safely:) Tj ET
+BT /F1 8.5 Tf 245.88 647.50 Td (Managing connection pools, executing atomic transactions \(with) Tj ET
+BT /F1 8.5 Tf 62.00 636.00 Td (session.begin\(\):\), and preventing N+1 queries.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 623.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 621.50 Td (Task 6: Stream & Batch Large Files Without Blowing RAM:) Tj ET
+BT /F1 8.5 Tf 326.80 621.50 Td (Reading multi-gigabyte files via generator streams) Tj ET
+BT /F1 8.5 Tf 62.00 610.00 Td (\('yield'\) and flushing batches of 1,000-5,000 rows to sinks.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 597.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 595.50 Td (Task 7: Instrument, Debug & Reproduce Bugs:) Tj ET
+BT /F1 8.5 Tf 269.68 595.50 Td (Reading tracebacks, injecting correlation IDs in structured logs, and) Tj ET
+BT /F1 8.5 Tf 62.00 584.00 Td (writing regression unit tests in pytest.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 571.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 569.50 Td (Task 8: Package, Lint & Ship via Git + CI:) Tj ET
+BT /F1 8.5 Tf 264.92 569.50 Td (Branching, atomic commits, automated ruff linting, static typing with) Tj ET
+BT /F1 8.5 Tf 62.00 558.00 Td (mypy, and clean pull request reviews.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 545.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 543.50 Td (Task 9: Write Multi-Table Reporting & Analytics Queries:) Tj ET
+BT /F1 8.5 Tf 331.56 543.50 Td (Joining 3-6 tables \(INNER/LEFT\), handling NULLs safely) Tj ET
+BT /F1 8.5 Tf 62.00 532.00 Td (with COALESCE, and aggregating with GROUP BY / HAVING.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 519.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 517.50 Td (Task 10: Deduplicate & Rank Records with Window Functions:) Tj ET
+BT /F1 8.5 Tf 341.08 517.50 Td (ROW_NUMBER\(\) OVER \(PARTITION BY id ORDER BY ts DESC\) =) Tj ET
+BT /F1 8.5 Tf 62.00 506.00 Td (1 to select latest states; LAG\(\)/LEAD\(\) for deltas.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 493.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 491.50 Td (Task 11: Debug & Fix Slow Production Queries:) Tj ET
+BT /F1 8.5 Tf 279.20 491.50 Td (Running EXPLAIN \(ANALYZE, BUFFERS\), identifying sequential scans,) Tj ET
+BT /F1 8.5 Tf 62.00 480.00 Td (adding composite indexes, and tuning work_mem.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 467.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 465.50 Td (Task 12: Build Idempotent Incremental Upserts:) Tj ET
+BT /F1 8.5 Tf 283.96 465.50 Td (Loading batches into staging tables and executing atomic INSERT) Tj ET
+BT /F1 8.5 Tf 62.00 454.00 Td (... ON CONFLICT DO UPDATE without duplicates.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 441.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 439.50 Td (Task 13: Audit & Reconcile Data Integrity:) Tj ET
+BT /F1 8.5 Tf 264.92 439.50 Td (Writing reconciliation queries to spot orphaned foreign keys,) Tj ET
+BT /F1 8.5 Tf 62.00 428.00 Td (duplicate IDs, unexpected NULL spikes, and row-count drift.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 415.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 413.50 Td (Task 14: Design & Evolve Schemas Safely:) Tj ET
+BT /F1 8.5 Tf 255.40 413.50 Td (Creating normalized tables with TIMESTAMPTZ/NUMERIC, and running) Tj ET
+BT /F1 8.5 Tf 62.00 402.00 Td (zero-downtime migrations with lock_timeout limits.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 389.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 387.50 Td (Task 15: Resolve Locks & Transaction Contention:) Tj ET
+BT /F1 8.5 Tf 293.48 387.50 Td (Inspecting pg_stat_activity, killing blocked queries, shortening) Tj ET
+BT /F1 8.5 Tf 62.00 376.00 Td (transaction scopes, and batching massive DELETEs.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 363.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 361.50 Td (Task 16: Slice & Search Logs on Live Servers:) Tj ET
+BT /F1 8.5 Tf 279.20 361.50 Td (Using grep/rg, awk, sed, jq, and tail -f to isolate user IDs, trace) Tj ET
+BT /F1 8.5 Tf 62.00 350.00 Td (IDs, and stack traces across gigabytes of logs.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 337.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 335.50 Td (Task 17: Build, Run & Debug Docker Containers:) Tj ET
+BT /F1 8.5 Tf 283.96 335.50 Td (Writing multi-stage Dockerfiles, orchestrating with docker) Tj ET
+BT /F1 8.5 Tf 62.00 324.00 Td (compose, inspecting docker logs, and running docker exec -it.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 311.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 309.50 Td (Task 18: Triage Dead or Slow Servers / Containers:) Tj ET
+BT /F1 8.5 Tf 303.00 309.50 Td (Using htop, free -h, df -h, vmstat 1, and iostat -xz 1 to) Tj ET
+BT /F1 8.5 Tf 62.00 298.00 Td (isolate CPU, RAM \(OOMKilled\), or Disk I/O bottlenecks.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 285.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 283.50 Td (Task 19: Debug Network & Connectivity Outages:) Tj ET
+BT /F1 8.5 Tf 283.96 283.50 Td (Testing DNS \(dig\), port reachability \(nc -zv\), headers \(curl -v\),) Tj ET
+BT /F1 8.5 Tf 62.00 272.00 Td (and active sockets \(ss -tulpn\) during connection drops.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 259.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 257.50 Td (Task 20: Manage Services & Scheduled Jobs:) Tj ET
+BT /F1 8.5 Tf 264.92 257.50 Td (Inspecting systemctl status, journalctl -u logs, process lists \(ps) Tj ET
+BT /F1 8.5 Tf 62.00 246.00 Td (aux\), and terminating stuck jobs with kill -TERM.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 233.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 231.50 Td (Task 21: Manage SSH, Bastions & Port Forwarding:) Tj ET
+BT /F1 8.5 Tf 293.48 231.50 Td (Connecting through jump hosts, setting up local port forwarding) Tj ET
+BT /F1 8.5 Tf 62.00 220.00 Td (\(ssh -L 5433:db:5432\) to query private databases.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 207.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 205.50 Td (Task 22: Automate Ops with Defensive Bash Scripts:) Tj ET
+BT /F1 8.5 Tf 303.00 205.50 Td (Writing reliable utility scripts with set -euo pipefail, trap,) Tj ET
+BT /F1 8.5 Tf 62.00 194.00 Td (xargs, and environment flags for automated maintenance.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 176.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 178.00 Td (PART 8: THE '100 VS 10 MILLION' SCALING LAWS) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 170.00 m 564.00 170.00 l S
+Q
+q
+0.15 0.39 0.92 rg 52.00 153.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 151.50 Td (Law 1: N+1 Queries -> Batching & Joins:) Tj ET
+BT /F1 8.5 Tf 250.64 151.50 Td (1 query in a loop takes 50ms for 100 rows, and 1.5 hours for 10M rows.) Tj ET
+BT /F1 8.5 Tf 62.00 140.00 Td (Never perform DB or network I/O inside a loop.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 127.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 125.50 Td (Law 2: Unbounded Memory -> Streaming & Pagination:) Tj ET
+BT /F1 8.5 Tf 303.00 125.50 Td (Calling .fetchall\(\) on 100 rows uses 50KB; at 10M rows it) Tj ET
+BT /F1 8.5 Tf 62.00 114.00 Td (triggers an OOMKilled crash. Cap page sizes and stream with yield.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 101.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 99.50 Td (Law 3: Synchronous Blocks -> Async Queues & Workers:) Tj ET
+BT /F1 8.5 Tf 312.52 99.50 Td (Inline webhooks block requests. At scale, return 202) Tj ET
+BT /F1 8.5 Tf 62.00 88.00 Td (Accepted, push to an async queue, and drain at a steady rate.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SAGE KERNEL ENGINEERING PLAYBOOK -- ARCHITECTURAL MASTERY) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 7 of 9) Tj ET
+Q
+endstream
+endobj
+21 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 20 0 R >>
+endobj
+22 0 obj
+<< /Length 8939 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (PYTHON & SQL PRODUCTION MASTERY BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (PART 8: SCALING LAWS) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 727.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 725.50 Td (Law 4: Full Table Scans -> Composite Indexes & Partitions:) Tj ET
+BT /F1 8.5 Tf 341.08 725.50 Td (A missing index takes 2ms on 100 rows, but locks) Tj ET
+BT /F1 8.5 Tf 62.00 714.00 Td (production CPU at 10M rows. Align queries with B-Tree leftmost prefix.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 701.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 699.50 Td (Law 5: Unpooled Connections -> Connection Multiplexing:) Tj ET
+BT /F1 8.5 Tf 326.80 699.50 Td (Opening a raw DB connection per HTTP request crashes) Tj ET
+BT /F1 8.5 Tf 62.00 688.00 Td (Postgres at ~300 clients. Route traffic through PgBouncer.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 674.00 Td (Trigger-to-Pattern Recognition Mental Flashcards) Tj ET
+Q
+q
+0.09 0.13 0.24 rg
+48.00 648.00 516.00 18.00 re f
+1.0 1.0 1.0 rg
+BT /F2 7.5 Tf 52.00 653.00 Td (When You See This Problem Trigger...) Tj ET
+BT /F2 7.5 Tf 242.00 653.00 Td (Your Brain Immediately Fires This Pattern...) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 623.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 623.00 m 564.00 623.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 638.00 Td ('Find matching or duplicate items across two) Tj ET
+BT /F1 7.2 Tf 52.00 629.00 Td (lists') Tj ET
+BT /F1 7.2 Tf 242.00 638.00 Td (Hash Map / Set Lookup \(O\(1\) lookup instead of O\(N^2\) nested loops\).) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 598.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 598.00 m 564.00 598.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 613.00 Td ('Process a huge file or API without blowing) Tj ET
+BT /F1 7.2 Tf 52.00 604.00 Td (RAM') Tj ET
+BT /F1 7.2 Tf 242.00 613.00 Td (Generator Streaming + Chunked Batching \(yield + batches of 1,000\).) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 573.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 573.00 m 564.00 573.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 588.00 Td ('Keep only the latest record per user or) Tj ET
+BT /F1 7.2 Tf 52.00 579.00 Td (entity') Tj ET
+BT /F1 7.2 Tf 242.00 588.00 Td (SQL: ROW_NUMBER\(\) OVER \(PARTITION BY id ORDER BY ts DESC\) = 1.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 548.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 548.00 m 564.00 548.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 563.00 Td ('This ingestion job might fail halfway and be) Tj ET
+BT /F1 7.2 Tf 52.00 554.00 Td (retried') Tj ET
+BT /F1 7.2 Tf 242.00 563.00 Td (Atomic Upsert \(INSERT ... ON CONFLICT\) + Watermark Checkpointing.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 523.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 523.00 m 564.00 523.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 538.00 Td ('Fetch 50,000 URLs or records from an API) Tj ET
+BT /F1 7.2 Tf 52.00 529.00 Td (quickly') Tj ET
+BT /F1 7.2 Tf 242.00 538.00 Td (asyncio + httpx + asyncio.Semaphore\(limit\) + Exponential Backoff.) Tj ET
+Q
+q
+0.97 0.98 0.99 rg
+48.00 498.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 498.00 m 564.00 498.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 513.00 Td ('This SQL query takes 15 seconds in) Tj ET
+BT /F1 7.2 Tf 52.00 504.00 Td (production') Tj ET
+BT /F1 7.2 Tf 242.00 513.00 Td (EXPLAIN \(ANALYZE, BUFFERS\) -> spot Seq Scan / row misestimate -> Composite Index.) Tj ET
+Q
+q
+1.00 1.00 1.00 rg
+48.00 473.00 516.00 25.00 re f
+0.4 w 0.88 0.91 0.94 RG
+48.00 473.00 m 564.00 473.00 l S
+0.15 0.22 0.32 rg
+BT /F1 7.2 Tf 52.00 488.00 Td ('Linux container terminated with Exit Code) Tj ET
+BT /F1 7.2 Tf 52.00 479.00 Td (137') Tj ET
+BT /F1 7.2 Tf 242.00 488.00 Td (Linux OOM Killer \(cgroups memory limit hit\) -> profile RAM / stream generators.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 453.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 455.00 Td (PART 9: THE 6 100x MASTER AHAs \(THE UNIFIED STACK\)) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 447.00 m 564.00 447.00 l S
+Q
+q
+0.15 0.20 0.28 rg
+BT /F1 8.5 Tf 48.00 428.50 Td (True mastery happens when you stop seeing Linux, Python, SQL, DSA, and AI as separate topics and recognize them as) Tj ET
+BT /F1 8.5 Tf 48.00 417.00 Td (layers of the exact same physical machine:) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 403.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 401.50 Td (AHA 1 \(Linux Kernel\): The OS is a Traffic Cop; Everything is a File Descriptor.) Tj ET
+BT /F1 8.5 Tf 441.04 401.50 Td (Processes never touch hardware;) Tj ET
+BT /F1 8.5 Tf 62.00 390.00 Td (they execute syscalls \(read, write, epoll_wait\). Every socket, file, pipe, and device is just an integer index in) Tj ET
+BT /F1 8.5 Tf 62.00 378.50 Td (the process table. Zero-copy \(sendfile\) bypasses user RAM entirely.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 366.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 364.00 Td (AHA 2 \(DSA at Scale\): Algorithms are Just Hardware Cache Locality vs. Pointer Chasing.) Tj ET
+BT /F1 8.5 Tf 474.36 364.00 Td (Arrays win in RAM because) Tj ET
+BT /F1 8.5 Tf 62.00 352.50 Td (contiguous bytes trigger CPU L1/L2 hardware prefetching. Trees and hash tables incur random memory jumps. B-Trees) Tj ET
+BT /F1 8.5 Tf 62.00 341.00 Td (dominate on disk because they match 8KB filesystem block boundaries.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 328.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 326.50 Td (AHA 3 \(Python Execution\): Python is a C Bytecode Loop; Speed Means Minimizing PyObjects.) Tj ET
+BT /F1 8.5 Tf 483.88 326.50 Td (Python isn't slow) Tj ET
+BT /F1 8.5 Tf 62.00 315.00 Td (because of syntax; it is slow because every integer is a 28-byte PyObject struct. Vectorized tools \(NumPy,) Tj ET
+BT /F1 8.5 Tf 62.00 303.50 Td (Polars, Arrow\) are fast because they bypass PyObjects and process raw C memory buffers.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 291.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 289.00 Td (AHA 4 \(SQL Query Engine\): The Optimizer is a Probability Engine; Statistics Rule Everything.) Tj ET
+BT /F1 8.5 Tf 502.92 289.00 Td (The database never) Tj ET
+BT /F1 8.5 Tf 62.00 277.50 Td (executes your query text. It uses table histograms \(pg_statistic\) to estimate I/O + CPU cost and picks Nested) Tj ET
+BT /F1 8.5 Tf 62.00 266.00 Td (Loop, Hash Join, or Merge Join. If table statistics are stale, the planner makes catastrophic choices.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 253.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 251.50 Td (AHA 5 \(Data Engineering\): All Data Engineering is State & Watermark Management over Unreliable Pipes.) Tj ET
+BT /F1 8.5 Tf 545.76 251.50 Td (Batch is) Tj ET
+BT /F1 8.5 Tf 62.00 240.00 Td (just bounded streaming; streaming is just unbounded batching. The universal rule of data engineering: an) Tj ET
+BT /F1 8.5 Tf 62.00 228.50 Td (immutable append-only event log \(Kafka/WAL\) combined with idempotent upserts guarantees zero data corruption.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 216.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 214.00 Td (AHA 6 \(AI & ML Engineering\): AI/ML is Just High-Dimensional Geometry over Vector Buffers.) Tj ET
+BT /F1 8.5 Tf 488.64 214.00 Td (Embeddings are just) Tj ET
+BT /F1 8.5 Tf 62.00 202.50 Td (float32 arrays. RAG is not magic; it is Cosine Similarity \(<=>\) running over HNSW graphs that prune) Tj ET
+BT /F1 8.5 Tf 62.00 191.00 Td (multi-dimensional search spaces like an approximate skip-list, paired with Pydantic JSON contracts.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg
+48.00 173.00 4.00 14.00 re f
+0.06 0.09 0.16 rg
+BT /F2 13 Tf 58.00 175.00 Td (PART 10: CAREER HABITS, AI BRIDGE & INTERVIEW TRAPS) Tj ET
+0.5 w 0.88 0.91 0.94 RG
+48.00 167.00 m 564.00 167.00 l S
+Q
+q
+0.15 0.39 0.92 rg 52.00 150.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 148.50 Td (Habit 1: Business Request Translation:) Tj ET
+BT /F1 8.5 Tf 245.88 148.50 Td (Clarify data volume, latency SLA, NULL tolerances, and failure degradation) Tj ET
+BT /F1 8.5 Tf 62.00 137.00 Td (before coding.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 124.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 122.50 Td (Habit 2: Observability Over Hope:) Tj ET
+BT /F1 8.5 Tf 222.08 122.50 Td (Build row-count parity assertions, Dead-Letter Queues \(DLQ\) for corrupt) Tj ET
+BT /F1 8.5 Tf 62.00 111.00 Td (records, and alerts on silent schema drift.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 98.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 96.50 Td (Habit 3: Reversibility & Blast-Radius Control:) Tj ET
+BT /F1 8.5 Tf 283.96 96.50 Td (Always run SELECT COUNT\(*\) with the exact WHERE clause before) Tj ET
+BT /F1 8.5 Tf 62.00 85.00 Td (running UPDATE/DELETE; wrap in BEGIN ... ROLLBACK to test.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SAGE KERNEL ENGINEERING PLAYBOOK -- ARCHITECTURAL MASTERY) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 8 of 9) Tj ET
+Q
+endstream
+endobj
+23 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 22 0 R >>
+endobj
+24 0 obj
+<< /Length 5507 >>
+stream
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 760.00 m 564.00 760.00 l S
+0.40 0.45 0.52 rg
+BT /F2 7 Tf 48.00 764.00 Td (PYTHON & SQL PRODUCTION MASTERY BLUEPRINT) Tj ET
+BT /F1 7 Tf 404.00 764.00 Td (PART 10: CAREER & AI) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 727.50 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 725.50 Td (Habit 4: Trade-Off Articulation:) Tj ET
+BT /F1 8.5 Tf 217.32 725.50 Td (In meetings and interviews, never give a single dogmatic answer. State the) Tj ET
+BT /F1 8.5 Tf 62.00 714.00 Td (simple way, the scalable way, and why you chose one.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 700.00 Td (The Flagship 10,000,000-Row Benchmark Portfolio Project) Tj ET
+Q
+q
+0.15 0.20 0.28 rg
+BT /F1 8.5 Tf 48.00 683.50 Td (Build one containerized Python + PostgreSQL + Linux data system, load 1,000 rows, then scale-test it to 10,000,000) Tj ET
+BT /F1 8.5 Tf 48.00 672.00 Td (rows. Document: \(1\) how streaming generators cut RAM by 95%, \(2\) how EXPLAIN ANALYZE reduced query latency from 14s) Tj ET
+BT /F1 8.5 Tf 48.00 660.50 Td (to 6ms, and \(3\) how idempotent upserts survived simulated network kills mid-batch without duplicate writes.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 645.50 Td (The 2026 Modern Platform & AI Bridge) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 631.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 629.00 Td (pgvector & AI Data Engineering:) Tj ET
+BT /F1 8.5 Tf 212.56 629.00 Td (Store high-dimensional vector embeddings in PostgreSQL, index with HNSW, query) Tj ET
+BT /F1 8.5 Tf 62.00 617.50 Td (cosine similarity \(<=>\), and enforce Pydantic JSON mode.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 605.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 603.00 Td (Columnar Engines \(DuckDB, dbt, Polars\):) Tj ET
+BT /F1 8.5 Tf 250.64 603.00 Td (Vectorized columnar execution over local Parquet files for 100x) Tj ET
+BT /F1 8.5 Tf 62.00 591.50 Td (analytics; dbt for modular CTE pipelines.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 579.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 577.00 Td (Distributed Trace Context Propagation:) Tj ET
+BT /F1 8.5 Tf 245.88 577.00 Td (Always inject the W3C 'traceparent' header across external APIs and Kafka) Tj ET
+BT /F1 8.5 Tf 62.00 565.50 Td (messages for end-to-end OpenTelemetry tracing.) Tj ET
+Q
+q
+0.15 0.23 0.36 rg
+BT /F2 10.5 Tf 48.00 551.50 Td (Top Senior Interview Screen Traps) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 537.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 535.00 Td (1. Python: Mutable Default Arguments:) Tj ET
+BT /F1 8.5 Tf 241.12 535.00 Td (def append_to\(val, target=[]\): 'target' evaluates ONCE at definition time.) Tj ET
+BT /F1 8.5 Tf 62.00 523.50 Td (All calls share the same list instance! Always use target=None.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 511.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 509.00 Td (2. Python: Closure Late-Binding:) Tj ET
+BT /F1 8.5 Tf 217.32 509.00 Td (funcs = [lambda: i for i in range\(3\)] evaluates to [2, 2, 2] because 'i' is) Tj ET
+BT /F1 8.5 Tf 62.00 497.50 Td (looked up when invoked. Fix by binding default argument: lambda i=i: i.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 485.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 483.00 Td (3. Python: Identity \(is\) vs Equality \(==\):) Tj ET
+BT /F1 8.5 Tf 264.92 483.00 Td ('is' checks memory pointer addresses \(id\); '==' checks structural) Tj ET
+BT /F1 8.5 Tf 62.00 471.50 Td (equality. a = 1000; b = 1000; a == b is True, but a is b is False in standard CPython.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 459.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 457.00 Td (4. Python: Modifying Collections During Iteration:) Tj ET
+BT /F1 8.5 Tf 303.00 457.00 Td (Deleting items from a list while looping over it skips) Tj ET
+BT /F1 8.5 Tf 62.00 445.50 Td (elements because index counters advance while items shift left. Use list comprehensions.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 433.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 431.00 Td (5. SQL: NOT IN with NULL Values:) Tj ET
+BT /F1 8.5 Tf 217.32 431.00 Td (If the subquery returns even one NULL, NOT IN evaluates to UNKNOWN, returning) Tj ET
+BT /F1 8.5 Tf 62.00 419.50 Td (ZERO rows! Always use NOT EXISTS instead.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 407.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 405.00 Td (6. SQL: Function Calls on Indexed Columns:) Tj ET
+BT /F1 8.5 Tf 264.92 405.00 Td (Writing WHERE DATE\(created_at\) = '2026-11-22' invalidates B-Tree index) Tj ET
+BT /F1 8.5 Tf 62.00 393.50 Td (on created_at, forcing a full table scan. Use range scans instead.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 381.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 379.00 Td (7. SQL: COUNT\(*\) vs COUNT\(column\):) Tj ET
+BT /F1 8.5 Tf 226.84 379.00 Td (COUNT\(*\) counts all physical rows matching the filter. COUNT\(column\) counts) Tj ET
+BT /F1 8.5 Tf 62.00 367.50 Td (only rows where 'column' IS NOT NULL.) Tj ET
+Q
+q
+0.15 0.39 0.92 rg 52.00 355.00 3.00 3.00 re f
+0.15 0.20 0.28 rg
+BT /F2 8.5 Tf 62.00 353.00 Td (8. SQL: Cartesian Join Explosion:) Tj ET
+BT /F1 8.5 Tf 222.08 353.00 Td (Joining multiple one-to-many child tables without pre-aggregating creates) Tj ET
+BT /F1 8.5 Tf 62.00 341.50 Td (exponential row multiplication, corrupting SUM\(\) metrics. Pre-aggregate in CTEs.) Tj ET
+Q
+q
+0.75 w 0.88 0.91 0.94 RG
+48.00 34.00 m 564.00 34.00 l S
+0.40 0.45 0.52 rg
+BT /F1 7.5 Tf 48.00 22.00 Td (SAGE KERNEL ENGINEERING PLAYBOOK -- ARCHITECTURAL MASTERY) Tj ET
+BT /F2 7.5 Tf 494.00 22.00 Td (Page 9 of 9) Tj ET
+Q
+endstream
+endobj
+25 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612.00 792.00] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R /F5 7 0 R >> >> /Contents 24 0 R >>
+endobj
+xref
+0 26
+0000000000 65535 f 
+0000000027 00000 n 
+0000000076 00000 n 
+0000000189 00000 n 
+0000000259 00000 n 
+0000000334 00000 n 
+0000000412 00000 n 
+0000000480 00000 n 
+0000000553 00000 n 
+0000009122 00000 n 
+0000009294 00000 n 
+0000018016 00000 n 
+0000018190 00000 n 
+0000026705 00000 n 
+0000026879 00000 n 
+0000035461 00000 n 
+0000035635 00000 n 
+0000044578 00000 n 
+0000044752 00000 n 
+0000053578 00000 n 
+0000053752 00000 n 
+0000062775 00000 n 
+0000062949 00000 n 
+0000071941 00000 n 
+0000072115 00000 n 
+0000077675 00000 n 
+trailer
+<< /Size 26 /Root 1 0 R >>
+startxref
+77849
+%%EOF

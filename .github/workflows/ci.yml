@@ -1,0 +1,27 @@
+name: Spartan CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Sync dependencies
+        run: uv sync
+
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Type check (mypy)
+        run: uv run mypy lab-1-core-engine/app tests
+
+      - name: Unit tests (pytest)
+        run: uv run pytest tests/ -v

@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments & secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Local lab state
+.localstack/
+.lab-data/
+*.db
+*.wal
+*.sst
+
+# macOS
+.DS_Store
