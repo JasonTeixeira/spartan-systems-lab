@@ -5,20 +5,24 @@
 
 ---
 
-## 1. The 8 Universal Enterprise Automation Archetypes
+## 1. The 12 Universal Enterprise & Consulting Automation Archetypes
 
-Almost every automation problem in cloud, data, SRE, FinOps, and AI engineering maps to ONE of these 8 patterns:
+Almost every automation problem in cloud, data, SRE, FinOps, consulting, and AI engineering maps to ONE of these 12 patterns:
 
 | # | Automation Archetype | Real Business Use Cases | Core Python / Infra Stack |
 | :--- | :--- | :--- | :--- |
 | **1** | **Locked Scheduled Jobs (Safe Cron)** | Nightly billing reconciliation, DB vacuum/archive, certificate checks, stale-resource cleanup. | Python + `systemd` timer / K8s `CronJob` + `pg_try_advisory_lock` / Redis lease (prevents overlap!). |
-| **2** | **Event-Driven Queue & Webhook Workers** | Stripe/CRM webhooks, email notifications, PDF/OCR ingestion, async image/video jobs. | FastAPI (`202 Accepted`) + SQS/Kafka/RabbitMQ + `asyncio` worker pool + DLQ + `Mailpit`/SMTP. |
+| **2** | **Event-Driven Queue & Webhook Workers** | Stripe/CRM webhooks, email notifications, async image/video jobs. | FastAPI (`202 Accepted`) + SQS/Kafka/RabbitMQ + `asyncio` worker pool + DLQ + `Mailpit`/SMTP. |
 | **3** | **Data Pipeline DAG Orchestration** | Multi-step ETL/ELT, S3 -> Iceberg -> ClickHouse -> dbt -> Executive BI refresh, ML retraining. | **Apache Airflow / Dagster** + DuckDB/PySpark + dbt + watermark tables + freshness SLAs. |
 | **4** | **Durable Multi-Step Workflows (Sagas)** | Customer onboarding, order fulfillment, multi-step cloud provisioning, long-running AI jobs. | **Temporal** (durable state replay + compensating transactions on partial failure). |
 | **5** | **Declarative Control-Loop Reconciliation** | Self-healing infrastructure, GitOps app deployments, cloud drift remediation, policy enforcement. | **Terraform/OpenTofu** + **ArgoCD** + Kubernetes operators + **Ansible** (idempotent config). |
-| **6** | **Dirty-Data & External API Ingestion** | Paginated REST/GraphQL scrapers, SFTP/CSV vendor drops, messy PDF/Excel extraction. | `httpx` (`asyncio` + `Semaphore`) + Pydantic v2 perimeter validation + generator streaming (`yield`) + DLQ. |
+| **6** | **Dirty-Data & External API Ingestion** | Paginated REST/GraphQL pulls, SFTP/CSV vendor drops, flaky third-party syncs. | `httpx` (`asyncio` + `Semaphore`) + Pydantic v2 perimeter validation + generator streaming (`yield`) + DLQ. |
 | **7** | **Self-Healing Ops & FinOps Automation** | Idle cloud resource reaper, auto-remediating alerts, DB lock/bloat reporters, DR backup verifiers. | Packaged Python Ops CLI (`typer`/`click` + `boto3`/K8s SDK) + Defensive Bash (`set -euo pipefail`, `ShellCheck`, `bats`). |
 | **8** | **Guardrailed Agentic & MCP Automation** | Autonomous incident triage, ticket routing, code/PR review, multi-tool business workflows. | **MCP Server** (strict schemas + risk tiers + approval gates) + deterministic agent state machine + OTel tracing + eval gates. |
+| **9** | **Headless Browser & Legacy UI Automation** | Automated E2E QA and legitimate legacy portal / ERP automation when no API exists. | Python + **Playwright** (deterministic locators, strict timeouts, trace/screenshot artifacts on failure). |
+| **10** | **Document & Office File Pipelines** | Invoices, contracts, scanned PDFs, and messy `.xlsx`/CSV vendor sheets turned into clean DB rows. | `openpyxl` / `polars` / `pdfplumber` + OCR / Vision-LLM -> strict Pydantic schema -> HITL review queue. |
+| **11** | **Business-Ops Hybrid Bridges (Glue + Code)** | Connecting Slack, Email, Stripe, HubSpot/Salesforce, Sheets, and internal APIs quickly for ROI. | Self-hosted **`n8n`** (triggers, approvals, CRM glue) backed by custom **FastAPI / MCP** Python services for heavy logic. |
+| **12** | **Release, Security & ChatOps Automation** | PR preview envs, dependency updates, secret/cert rotation, changelogs, Slack approve/reject deploys. | GitHub Actions + `Renovate` + `Trivy` + `OpenBao/Vault` + Slack/ChatOps approval webhooks. |
 
 ---
 
@@ -45,3 +49,15 @@ Every single script, pipeline, or agent you write in production MUST obey these 
 | Data warehouse / ML DAG with backfills & lineage | **Apache Airflow / Dagster** | Built-in retries, dependency graphs, partition backfills, SLA alerts. |
 | Stateful business/AI workflow that must survive crashes mid-step | **Temporal** | Deterministic replay + compensating Saga rollbacks without manual state tables. |
 | Continuous desired-state infra/cluster convergence | **Terraform + ArgoCD + Ansible** | Declarative diff/plan/apply + GitOps self-healing drift correction. |
+| Fast business-ops SaaS/Slack/CRM glue with human approvals | **`n8n` + FastAPI / MCP** | Ships in hours instead of weeks; keep heavy data/AI logic cleanly in Python. |
+| Legacy portal / E2E UI workflow with no API | **Python + Playwright** | Deterministic browser locators, retries, and trace/screenshot failure evidence. |
+
+---
+
+## 4. Confidence-Threshold Human-in-the-Loop (HITL) Routing Pattern
+
+For AI extraction, FinOps reapers, and high-stakes agentic/MCP automation, never run blindly at 100% autonomy:
+- **`confidence >= 0.95` & read-only / low blast radius:** Auto-execute and log audit receipt.
+- **`0.70 <= confidence < 0.95` OR mutating / financial action:** Route to a **Human Approval Queue** (Slack/ChatOps/UI approve-or-reject) before committing state.
+- **`confidence < 0.70` OR schema/invariant failure:** Quarantine to **Dead-Letter Queue (DLQ)** + alert owner with raw input and trace ID.
+
