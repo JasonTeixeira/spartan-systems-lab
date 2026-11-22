@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test ci up down reset logs ps sre-shell psql seed drill-py chaos backup restore snapshot-incident pdf
+.PHONY: setup lint typecheck test ci up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py chaos backup restore snapshot-incident pdf
 
 COMPOSE := docker compose -f lab-1-core-engine/docker-compose.yml
 ROWS ?= 100000
@@ -13,7 +13,7 @@ lint:
 	uv run ruff check .
 
 typecheck:
-	uv run mypy lab-1-core-engine/app tests
+	uv run mypy lab-1-core-engine/app tools tests
 
 test:
 	uv run pytest tests/ -v
@@ -48,6 +48,12 @@ sre-shell:
 
 psql:
 	$(COMPOSE) exec postgres psql -U spartan -d spartan_lab
+
+pg-xray:
+	$(COMPOSE) exec -T postgres psql -U spartan -d spartan_lab < tools/sql-diagnostics/pg_xray.sql
+
+linux-triage:
+	$(COMPOSE) exec -T sre-toolbox bash -s < tools/linux-triage.sh
 
 # --- Data Seeding, Chaos Drills & Disaster Recovery (Backup/Restore) ---
 seed:
