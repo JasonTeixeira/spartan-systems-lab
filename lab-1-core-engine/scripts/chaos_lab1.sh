@@ -14,7 +14,7 @@ case "$SCENARIO" in
   net-latency)
     echo "[CHAOS] Injecting 250ms +/- 50ms latency & 5% packet loss on sre-toolbox eth0..."
     $COMPOSE exec -T sre-toolbox tc qdisc replace dev eth0 root netem delay 250ms 50ms loss 5%
-    echo "[HINT]  Test with: make sre-shell -> curl -w '%{time_total}\n' -o /dev/null -s http://nginx/healthz"
+    printf '%s\n' "[HINT]  Test with: make sre-shell -> curl -w '%{time_total}\n' -o /dev/null -s http://nginx/healthz"
     ;;
   clear-latency)
     echo "[CHAOS] Clearing tc netem rules on sre-toolbox eth0..."

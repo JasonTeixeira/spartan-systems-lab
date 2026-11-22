@@ -4,6 +4,9 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
 
 ---
 
+## 0. Start Here (Operator Manual)
+- **`docs/HOW_TO_USE_THIS_LAB.md`** — Day-0 operator workflow, automated `make review` code/security/CVE reviewer, 5-Axis Principal Optimizer Rubric, ranked Python library stack (~25 core libraries), `uv` patching & container upgrade workflow, and audit-trail discipline.
+
 ## 1. Field Manuals (`docs/manuals/`)
 - **Manual #1 (Primitives, 126 Concepts, 22 Daily Loops, 5 Scaling Laws, 6 Master AHAs):**
   - `docs/manuals/PYTHON_AND_SQL_PRODUCTION_MASTERY_GUIDE.pdf` (9 pages) & `.md`

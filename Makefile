@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test ci up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py chaos backup restore snapshot-incident pdf
+.PHONY: setup lint typecheck test ci review up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py chaos backup restore snapshot-incident pdf
 
 COMPOSE := docker compose -f lab-1-core-engine/docker-compose.yml
 ROWS ?= 100000
@@ -19,6 +19,16 @@ test:
 	uv run pytest tests/ -v
 
 ci: lint typecheck test
+
+# --- Automated Code Review, Security & Supply-Chain Gate ---
+review: ci
+	@echo "=== [4/6] ShellCheck on Bash scripts ==="
+	shellcheck scripts/*.sh tools/*.sh lab-1-core-engine/scripts/*.sh
+	@echo "=== [5/6] Gitleaks secret scan ==="
+	gitleaks detect --source . --no-banner --redact
+	@echo "=== [6/6] Trivy filesystem CVE & misconfig scan ==="
+	trivy fs --severity HIGH,CRITICAL --exit-code 0 --quiet .
+	@echo "=== Automated Code Review PASSED ==="
 
 # --- Lab 1 Container Stack & Clean Reset-to-Zero ---
 up:
