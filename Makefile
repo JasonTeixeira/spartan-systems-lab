@@ -24,8 +24,10 @@ ci: lint typecheck test
 up:
 	$(COMPOSE) up -d --build
 	@echo "Lab 1 booted:"
-	@echo "  Edge API (Nginx):      http://localhost:8080/healthz"
-	@echo "  Executive BI (Metabase): http://localhost:3000 (connect to host=postgres port=5432 db=spartan_lab)"
+	@echo "  Edge API (Nginx):         http://localhost:8080/healthz"
+	@echo "  Executive BI (Metabase):  http://localhost:3000  (host=postgres port=5432 db=spartan_lab)"
+	@echo "  Live SRE Ops (Grafana):   http://localhost:3001  (login: admin / spartan)"
+	@echo "  Metrics Raw (Prometheus): http://localhost:9090"
 
 down:
 	$(COMPOSE) down

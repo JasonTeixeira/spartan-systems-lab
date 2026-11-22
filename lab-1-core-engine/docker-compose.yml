@@ -132,6 +132,66 @@ services:
       - private_data_net
 
   # ------------------------------------------------------------------
+  # LIVE SRE OBSERVABILITY STACK (Prometheus + Auto-Provisioned Grafana)
+  # Grafana: http://localhost:3001 (admin / spartan)
+  # Prometheus: http://localhost:9090
+  # ------------------------------------------------------------------
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.16.0
+    container_name: spartan-postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: postgresql://spartan:spartanpass@postgres:5432/spartan_lab?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - private_data_net
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.66.0-alpine
+    container_name: spartan-redis-exporter
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - private_data_net
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: spartan-prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - api
+      - postgres-exporter
+      - redis-exporter
+    networks:
+      - app_net
+      - private_data_net
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: spartan-grafana
+    ports:
+      - "127.0.0.1:3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: spartan
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/spartan_overview.json
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - app_net
+      - private_data_net
+
+  # ------------------------------------------------------------------
   # LINUX SRE & NETWORK FORENSICS TOOLBOX
   # Attached to all subnets so you can run ss, tcpdump, strace, dig, tc, iostat, psql
   # ------------------------------------------------------------------
@@ -162,3 +222,4 @@ networks:
 volumes:
   pg_data:
   metabase_data:
+  grafana_data:

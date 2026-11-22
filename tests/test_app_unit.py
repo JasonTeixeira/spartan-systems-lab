@@ -44,3 +44,15 @@ def test_settings_defaults() -> None:
     cfg = Settings()
     assert cfg.rate_limit_per_minute > 0
     assert cfg.database_url.startswith("postgresql://")
+
+
+def test_metrics_endpoint_exposes_red_and_finops_metrics() -> None:
+    client = TestClient(app)
+    client.get("/healthz")
+    resp = client.get("/metrics")
+    assert resp.status_code == 200
+    body = resp.text
+    assert "spartan_http_requests_total" in body
+    assert "spartan_http_request_duration_seconds" in body
+    assert "spartan_events_ingested_total" in body
+    assert "spartan_event_cost_usd_total" in body

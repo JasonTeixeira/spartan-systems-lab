@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from decimal import Decimal
 
 from fastapi import FastAPI, HTTPException, Request, Response
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from psycopg_pool import ConnectionPool
 
 from app.config import settings
@@ -15,6 +16,31 @@ logger = logging.getLogger("spartan.api")
 logging.basicConfig(level=settings.log_level, format="%(message)s")
 
 pool: ConnectionPool | None = None
+
+# ------------------------------------------------------------------
+# PROMETHEUS RED + BUSINESS/FINOPS METRICS (Scraped at /metrics)
+# ------------------------------------------------------------------
+HTTP_REQUESTS_TOTAL = Counter(
+    "spartan_http_requests_total",
+    "Total HTTP requests by method, path, and status code",
+    ["method", "path", "status"],
+)
+HTTP_REQUEST_DURATION_SECONDS = Histogram(
+    "spartan_http_request_duration_seconds",
+    "HTTP request duration in seconds",
+    ["method", "path"],
+    buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0),
+)
+EVENTS_INGESTED_TOTAL = Counter(
+    "spartan_events_ingested_total",
+    "Events ingested by tenant_id, event_type, and outcome",
+    ["tenant_id", "event_type", "outcome"],
+)
+EVENT_COST_USD_TOTAL = Counter(
+    "spartan_event_cost_usd_total",
+    "Cumulative ingested event cost in USD by tenant_id and event_type",
+    ["tenant_id", "event_type"],
+)
 
 
 def log_json(event: str, **fields: object) -> None:
@@ -39,22 +65,39 @@ app = FastAPI(title="Spartan Lab 1 - Core Engine", version="0.1.0", lifespan=lif
 
 
 @app.middleware("http")
-async def structured_logging_middleware(
+async def observability_middleware(
     request: Request,
     call_next: Callable[[Request], Awaitable[Response]],
 ) -> Response:
     start = time.monotonic()
     response = await call_next(request)
-    duration_ms = round((time.monotonic() - start) * 1000.0, 2)
-    log_json(
-        "http_request",
-        method=request.method,
-        path=request.url.path,
-        status=response.status_code,
-        duration_ms=duration_ms,
-        request_id=request.headers.get("x-request-id", "local"),
-    )
+    elapsed_s = time.monotonic() - start
+    path = request.url.path
+
+    if path != "/metrics":
+        HTTP_REQUESTS_TOTAL.labels(
+            method=request.method,
+            path=path,
+            status=str(response.status_code),
+        ).inc()
+        HTTP_REQUEST_DURATION_SECONDS.labels(
+            method=request.method,
+            path=path,
+        ).observe(elapsed_s)
+        log_json(
+            "http_request",
+            method=request.method,
+            path=path,
+            status=response.status_code,
+            duration_ms=round(elapsed_s * 1000.0, 2),
+            request_id=request.headers.get("x-request-id", "local"),
+        )
     return response
+
+
+@app.get("/metrics")
+def metrics() -> Response:
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @app.get("/healthz")
@@ -111,11 +154,27 @@ def ingest_event(payload: EventIn) -> EventOut:
         conn.commit()
 
     if row is None:
+        EVENTS_INGESTED_TOTAL.labels(
+            tenant_id=str(payload.tenant_id),
+            event_type=payload.event_type,
+            outcome="duplicate_ignored",
+        ).inc()
         return EventOut(
             status="duplicate_ignored",
             event_id=None,
             idempotency_key=payload.idempotency_key,
         )
+
+    EVENTS_INGESTED_TOTAL.labels(
+        tenant_id=str(payload.tenant_id),
+        event_type=payload.event_type,
+        outcome="inserted",
+    ).inc()
+    EVENT_COST_USD_TOTAL.labels(
+        tenant_id=str(payload.tenant_id),
+        event_type=payload.event_type,
+    ).inc(float(payload.cost_usd))
+
     return EventOut(
         status="inserted",
         event_id=int(row[0]),
