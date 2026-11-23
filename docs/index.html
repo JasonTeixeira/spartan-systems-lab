@@ -252,20 +252,92 @@
     .link-card:hover { border-color: var(--cyan); background: var(--card-hover); }
     .link-card b { display: block; font-size: 14px; margin-bottom: 4px; color: var(--cyan); }
     .link-card span { font-size: 12.5px; color: var(--muted); }
+
+    /* Visual Atlas v2: Interactive Module Sprints, IaC/CICD Visuals, Tool Belt */
+    .sprint-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 16px; margin-bottom: 14px;
+    }
+    .btn-sm {
+      background: var(--card); color: var(--text); border: 1px solid var(--border);
+      padding: 7px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+    }
+    .btn-sm:hover { border-color: var(--cyan); color: var(--cyan); }
+    .mod-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 12px; }
+    .mod-item {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; border-left: 4px solid var(--c, var(--cyan));
+    }
+    .mod-summary {
+      padding: 13px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      user-select: none;
+    }
+    .mod-summary:hover { background: var(--card-hover); }
+    .mod-summary b { font-size: 14px; display: block; }
+    .mod-summary small { color: var(--muted); font-size: 12px; }
+    .mod-pct { font-size: 12px; font-weight: 800; color: var(--c, var(--cyan)); white-space: nowrap; }
+    .mod-reps { padding: 0 16px 14px; display: none; border-top: 1px solid var(--border); background: var(--bg-elev); }
+    .mod-item.open .mod-reps { display: block; }
+    .rep-row {
+      display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; font-size: 12.5px;
+      border-bottom: 1px dashed var(--border); color: var(--muted);
+    }
+    .rep-row:last-child { border-bottom: none; }
+    .rep-row input { margin-top: 2px; accent-color: var(--emerald); cursor: pointer; }
+    .rep-row.done { text-decoration: line-through; opacity: 0.65; }
+
+    /* Visual CI/CD + IaC Pipeline */
+    .pipe-flow { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; align-items: stretch; }
+    .pipe-stage {
+      min-width: 145px; flex: 1; background: var(--card); border: 1px solid var(--border);
+      border-top: 3px solid var(--c, var(--cyan)); border-radius: 10px; padding: 11px 12px;
+      font-size: 12px; position: relative;
+    }
+    .pipe-stage b { display: block; font-size: 13px; color: var(--text); margin-bottom: 3px; }
+    .pipe-stage span { color: var(--muted); font-size: 11.5px; }
+    .iac-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
+    .iac-box {
+      background: var(--card); border: 1px solid var(--border); border-radius: 11px; padding: 14px;
+      border-top: 3px solid var(--c, var(--emerald));
+    }
+    .iac-box h4 { margin: 0 0 6px; font-size: 13.5px; color: var(--c, var(--emerald)); }
+    .iac-box p { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+    /* Searchable Tool Belt */
+    .tb-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .tb-search {
+      flex: 1; min-width: 220px; padding: 9px 12px; border-radius: 9px;
+      border: 1px solid var(--border); background: var(--bg-elev); color: var(--text); font-size: 13.5px;
+    }
+    .tb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 11px; }
+    .tb-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 11px; padding: 13px 14px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .tb-card .tb-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .tb-card b { font-size: 14px; }
+    .tb-card .tb-desc { font-size: 12.5px; color: var(--muted); }
+    .tb-cmd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace; font-size: 11.5px;
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: 7px;
+      padding: 6px 8px; color: var(--cyan); overflow-x: auto; white-space: nowrap;
+    }
   </style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <div class="brand"><span class="brand-dot"></span> Spartan Systems Lab — Master Atlas</div>
+      <div class="brand"><span class="brand-dot"></span> Spartan Systems Lab — Visual Atlas v2</div>
       <nav class="nav-links">
-        <a href="#numbers">By The Numbers</a>
-        <a href="#syllabus">12-Module Syllabus</a>
+        <a href="#numbers">Numbers</a>
+        <a href="#syllabus">12-Mod Sprints</a>
+        <a href="#visuals">IaC &amp; CI/CD</a>
+        <a href="#toolbelt">Tool Belt</a>
+        <a href="#security-gpu">GPU &amp; Security</a>
         <a href="#scars">Battle Scars</a>
         <a href="#domains">8 Domains</a>
-        <a href="#roles">By Role</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#labs">6 Labs</a>
+        <a href="#roles">Roles</a>
         <a href="#library">Docs</a>
       </nav>
       <button class="theme-btn" onclick="toggleTheme()">Toggle Light / Dark</button>
@@ -306,34 +378,106 @@
       </div>
     </div>
 
-    <!-- 12-MODULE LINEAR COMPOUNDING SYLLABUS -->
+    <!-- 12-MODULE LINEAR COMPOUNDING SYLLABUS (INTERACTIVE DAILY REP BOARD) -->
     <section class="sec" id="syllabus">
       <div class="sec-head">
         <div>
-          <h2>Linear Execution Track: 12 Sequential Compounding Modules (M01 → M12)</h2>
-          <p>Work strictly in order: Learn 2–3 pages → Code &amp; Break in the Lab → Pass Boss Fight Gate → Compound into M(N+1). Loop again in Nightmare Mode.</p>
+          <h2>Linear Execution Track: 12 Compounding Modules &amp; Repeatable Daily Reps (M01 → M12)</h2>
+          <p>Click any module to expand its concrete daily reps (Code, SQL, Bash, Lab Build, Break-Fix, Boss Fight). Loop Pass 2+ in Nightmare Mode forever.</p>
         </div>
         <span class="pill" style="--c:var(--violet)">8–16 Hr/Day Spartan Mode • Repeatable Forever</span>
       </div>
-      <table>
-        <thead>
-          <tr><th>Mod</th><th>Lab / Track</th><th>Learn → Immediately Apply &amp; Break</th><th>Boss Fight Exit Gate</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><strong>M01</strong></td><td>Lab 1A: Python, Clean Arch &amp; DSA</td><td>Hash Maps, Two Pointers, Sliding Window, Prefix Sums, Lazy Generators, Pydantic v2, Hexagonal Repository/Service, `uv`/`ruff`/`mypy`/`pytest`.</td><td>Pass `make drill-py`, Hexagonal refactor, 6-gate `make review`.</td></tr>
-          <tr><td><strong>M02</strong></td><td>Lab 1B: SQL, Postgres &amp; 10M Rows</td><td>Window functions, CTEs, 3-valued NULLs, `EXPLAIN (ANALYZE, BUFFERS)`, Composite B-Tree, PgBouncer, DDIA Lost Update/Write Skew, Metabase BI.</td><td>1M–10M rows, query `&lt;10ms`, live Write Skew fix, live BI views.</td></tr>
-          <tr><td><strong>M03</strong></td><td>Lab 1C: Linux, Bash, Grafana &amp; Chaos</td><td>`awk`/`sed`/`jq`/`xargs`, Brendan Gregg USE/TSA/Off-CPU, `ss`/`strace`/`tcpdump`, Prometheus+Grafana, `lock-storm` + `net-latency` + DR restore.</td><td>Solve compound outage cold, `make snapshot-incident`, DR verify.</td></tr>
-          <tr><td><strong>M04</strong></td><td>DSA Surge + Scale APIs + 3 Katas</td><td>Monotonic Stack/Queue, Heaps, Graphs/Topo, Union-Find, Binary Search on Answer, Intervals, DP, Tries + REST/RFC 7807/ETags/Webhooks + URL Shortener, Rate Limiter, Wallet.</td><td>3 unseen Hard/Med problems cold + `k6` all 3 Katas on Grafana.</td></tr>
-          <tr><td><strong>M05</strong></td><td>Lab 2: TCP/IP, Linux VM, TLS &amp; Deploys</td><td>Lima Ubuntu+Rocky VM, CIDR math, `nftables`, DNS, TLS 1.3/CDN (Nginx/Caddy), SSH Bastion, gRPC/Protobuf, Ansible + zero-downtime deploy.</td><td>Prove private DB blocked, decode TLS in `tcpdump`, zero-downtime rollback.</td></tr>
-          <tr><td><strong>M06</strong></td><td>Lab 3A: Deep IaC &amp; Core 12 AWS</td><td>`aws/aws-emulator` + Terraform modules, remote lock, `import`/`moved`, drift detection, `Checkov`/`Infracost`, VPC/IAM eval order, `boto3` + `spartan-cli`.</td><td>Zero-touch `terraform destroy &amp;&amp; apply` + `Checkov`/`Infracost` pass.</td></tr>
-          <tr><td><strong>M07</strong></td><td>Lab 3B: Apache Data &amp; FinOps Plane</td><td>6-Stage Lifecycle, Kafka/Redpanda, ClickHouse, MinIO Iceberg/Parquet, Airflow/PySpark/DuckDB/dbt, Mailpit, Superset BI, 12 Safeguards (WAP/SCD2/`ASOF`).</td><td>Survive 3-min ClickHouse kill at 10k RPS + duplicate flood, exact `$` cap.</td></tr>
-          <tr><td><strong>M08</strong></td><td>Lab 4A: Embeddings, RAG &amp; Inference</td><td>Hugging Face (`transformers`/`sentence-transformers`), Qdrant hybrid+BM25+RBAC pre-filter, Rerankers, Ollama/`mlx-lm`+LiteLLM, Semantic Cache, 6 RAG patterns.</td><td>`&lt;2.5s` p95 RAG, 0% tenant leak, 60% token savings proven.</td></tr>
-          <tr><td><strong>M09</strong></td><td>Lab 4B: Agents, MCP, Voice, ML &amp; Evals</td><td>MCP Server (schemas+approvals), LangGraph+OWASP LLM guards, WebRTC Voice AI, 7-Step/8 ML Systems, LightGBM/PyTorch + Behavioral ML Tests + Phoenix CI + RunPod vLLM.</td><td>CI eval gate auto-blocks degraded prompt + live vLLM KV-cache tune.</td></tr>
-          <tr><td><strong>M10</strong></td><td>Lab 5: Pure-Code Internals (No Docker)</td><td>300-line LSM-Tree + 3-Node Raft over TCP + Zero-Copy `sendfile` + `micrograd` + `minbpe` + Mini-GPT Attention + LoRA from scratch (M3 Max PyTorch MPS).</td><td>Raft split-brain pass, ~90% fewer `sendfile` switches, train Mini-GPT+LoRA.</td></tr>
-          <tr><td><strong>M11</strong></td><td>Lab 6: K8s, CISSP Security &amp; Chaos</td><td>3-node `kind`, Cilium eBPF/Hubble/Tetragon, ArgoCD, Vault 15m creds, Keycloak, RLS, STRIDE, Debezium CDC + Envoy Strangler Fig, 12 Blind Outages + Real AWS.</td><td>GitOps rebuild `&lt;10m`, solve blind Chaos `&lt;5m`, 50% canary fail = 0 5xx.</td></tr>
-          <tr><td><strong>M12</strong></td><td>Principal Capstone, Certs &amp; C-Suite</td><td>Timed unseen Hard coding + 10-Archetype 45-min whiteboards + AWS SAP-C02/GenAI Pro Delta + Executive BLUF FinOps receipts + 2 OSS PRs.</td><td>3 `make bench` savings proofs, 3 mock Principal loops, 3 terminal teardowns.</td></tr>
-        </tbody>
-      </table>
+
+      <div class="sprint-bar">
+        <div>
+          <strong style="font-size:14px;">Spartan Pass #<span id="pass-num">1</span></strong>
+          <span style="color:var(--muted);font-size:13px;margin-left:10px;">Completed Reps: <strong style="color:var(--emerald)" id="reps-done">0</strong> / <span id="reps-total">0</span> (<span id="reps-pct">0%</span>)</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-sm" onclick="toggleAllMods(true)">Expand All</button>
+          <button class="btn-sm" onclick="toggleAllMods(false)">Collapse All</button>
+          <button class="btn-sm" onclick="startNextPass()">Reset &amp; Start Next Pass (Nightmare Mode)</button>
+        </div>
+      </div>
+      <div class="mod-list" id="mod-list"></div>
+    </section>
+
+    <!-- VISUAL IAC TOPOLOGY & 8-STAGE CI/CD PIPELINE -->
+    <section class="sec" id="visuals">
+      <div class="sec-head">
+        <div>
+          <h2>Visual Infrastructure-as-Code (IaC) &amp; 8-Stage CI/CD Delivery Pipeline</h2>
+          <p>How real enterprise infrastructure is layered by blast radius and how every `git push` ships safely with zero manual SSH.</p>
+        </div>
+        <span class="pill" style="--c:var(--emerald)">Zero Click-Ops • Automated Rollback</span>
+      </div>
+
+      <div class="arch-wrap">
+        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--cyan);margin-bottom:10px;">8-Stage Production CI/CD &amp; Automated Code Review Pipeline (`make review` + GitHub Actions / `act`)</div>
+        <div class="pipe-flow">
+          <div class="pipe-stage" style="--c:var(--cyan)"><b>1. Git Push / PR</b><span>Feature branch, atomic commit, `pre-commit` hooks</span></div>
+          <div class="pipe-stage" style="--c:var(--emerald)"><b>2. Lint &amp; Types</b><span>`ruff check .` + `mypy --strict` + `shellcheck`</span></div>
+          <div class="pipe-stage" style="--c:var(--violet)"><b>3. Security &amp; CVEs</b><span>`gitleaks` secrets + `trivy fs` + `Checkov` IaC</span></div>
+          <div class="pipe-stage" style="--c:var(--indigo)"><b>4. Test Pyramid</b><span>`pytest` unit + real Postgres + AI Phoenix eval gate</span></div>
+          <div class="pipe-stage" style="--c:var(--amber)"><b>5. FinOps Diff</b><span>`Infracost` exact `$/mo` delta posted on PR</span></div>
+          <div class="pipe-stage" style="--c:var(--teal)"><b>6. Immutable Build</b><span>Multi-stage non-root Docker tagged with Git SHA + Cosign</span></div>
+          <div class="pipe-stage" style="--c:var(--orange)"><b>7. Canary Rollout</b><span>ArgoCD / Envoy 5% → 50% → 100% + Expand DB migration</span></div>
+          <div class="pipe-stage" style="--c:var(--rose)"><b>8. Auto-Rollback</b><span>Prometheus error-budget burn alert reverts in &lt;5s</span></div>
+        </div>
+
+        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--emerald);margin:18px 0 6px;">Blast-Radius IaC State Layering (Terraform / OpenTofu + Ansible + Kubernetes)</div>
+        <div class="iac-grid">
+          <div class="iac-box" style="--c:var(--cyan)"><h4>Layer 01 — Network &amp; Identity (`01-network/`)</h4><p>VPC CIDR (`/16`), Public/Private Subnets (`/20`), NAT/VPC Endpoints, Security Groups, IAM OIDC Roles, Route53 DNS. Changes rarely.</p></div>
+          <div class="iac-box" style="--c:var(--teal)"><h4>Layer 02 — Stateful Data (`02-data/`)</h4><p>RDS Postgres + PgBouncer, Redis, S3/MinIO Iceberg, ClickHouse, Qdrant, KMS Keys, automated backups &amp; deletion protection.</p></div>
+          <div class="iac-box" style="--c:var(--violet)"><h4>Layer 03 — Compute &amp; K8s (`03-compute/`)</h4><p>EKS/`kind` 3-node cluster, Cilium eBPF CNI, ArgoCD, Vault/OpenBao, Packer golden AMIs, Ansible OS hardening (`nftables`).</p></div>
+          <div class="iac-box" style="--c:var(--amber)"><h4>Layer 04 — Apps, AI &amp; Dashboards (`04-app/`)</h4><p>FastAPI, MCP Server, LangGraph Agents, vLLM/Ollama, Grafana + Metabase dashboards. Ships 10x/day safely without risking DB/VPC state.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEARCHABLE MASTER TOOL BELT -->
+    <section class="sec" id="toolbelt">
+      <div class="sec-head">
+        <div>
+          <h2>Searchable Master Tool Belt (Backend, Data, AI/ML, Infra, Security &amp; React/Mobile)</h2>
+          <p>Your personal handyman toolkit — search by task or filter by layer to grab the exact tool and 1-line command immediately.</p>
+        </div>
+        <span class="pill" style="--c:var(--orange)">Full-Stack + Infra + AI Ready</span>
+      </div>
+      <div class="tb-controls">
+        <input class="tb-search" id="tb-q" type="text" placeholder="Search tools or tasks (e.g., 'postgres', 'cve', 'react native', 'vllm', 'packet', 'cost')..." oninput="renderToolbelt()" />
+      </div>
+      <div class="role-tabs" id="tb-tabs"></div>
+      <div class="tb-grid" id="tb-grid"></div>
+    </section>
+
+    <!-- GPU SILICON PHYSICS, CRYPTOGRAPHY, NIST/MITRE & SPARTAN-MCP PREVIEW -->
+    <section class="sec" id="security-gpu">
+      <div class="sec-head">
+        <div>
+          <h2>Silicon Physics, Deep Cryptography, Security Frameworks &amp; Personal `spartan-mcp`</h2>
+          <p>Vendor-neutral hardware math (NVIDIA/Apple MLX/TPU), modern cryptography, NIST CSF 2.0 / MITRE ATT&amp;CK, and your Step 2 MCP AI Assistant.</p>
+        </div>
+        <span class="pill" style="--c:var(--violet)">Hardware → Crypto → Personal AI Toolbelt</span>
+      </div>
+      <div class="iac-grid" style="margin-top:0;">
+        <div class="iac-box" style="--c:var(--violet)">
+          <h4>GPU Silicon &amp; Roofline Physics (Why NVIDIA Dominates)</h4>
+          <p><strong>Prefill = Compute-Bound</strong> (Tensor Core BF16/FP8 FLOPs). <strong>Decode = HBM Bandwidth-Bound</strong> (H100 `3.35 TB/s` vs CPU `~100 GB/s`). <strong>FlashAttention</strong> tiles inside on-chip SRAM; <strong>PagedAttention</strong> eliminates KV-cache fragmentation; <strong>NVLink/RDMA</strong> (`900 GB/s`) scales multi-GPU clusters. Same physics apply to Apple MLX &amp; TPUs.</p>
+        </div>
+        <div class="iac-box" style="--c:var(--emerald)">
+          <h4>Applied Cryptography &amp; PKI Primitives</h4>
+          <p><strong>AEAD</strong> (`AES-256-GCM`) for confidentiality + integrity; <strong>KDFs</strong> (`HKDF`, `Argon2id`); <strong>Ed25519 / Cosign</strong> image &amp; receipt signing; <strong>KMS Envelope Encryption</strong>; <strong>Merkle Trees</strong> (Git, Iceberg, Raft); <strong>TLS 1.3 ECDHE</strong> Forward Secrecy + <strong>mTLS</strong> pod identity.</p>
+        </div>
+        <div class="iac-box" style="--c:var(--rose)">
+          <h4>NIST CSF 2.0, MITRE ATT&amp;CK &amp; CISSP Risk</h4>
+          <p><strong>NIST CSF 2.0:</strong> Govern → Identify → Protect → Detect → Respond → Recover. <strong>MITRE ATT&amp;CK:</strong> Break lateral movement &amp; exfiltration with IAM Policy Eval, non-root drop-ALL caps, Cilium NetworkPolicies &amp; Tetragon SIGKILL. <strong>Risk Math:</strong> `ALE = SLE × ARO` + RPO/RTO tiers.</p>
+        </div>
+        <div class="iac-box" style="--c:var(--amber)">
+          <h4>Next Up (Step 2): Personal `spartan-mcp` Server</h4>
+          <p>Your own Python MCP server plugged into Claude / Cursor / Antigravity exposing 5 senior tools: <strong>`finops_estimate`</strong>, <strong>`qa_and_code_review`</strong>, <strong>`generate_dashboard_pack`</strong>, <strong>`toolbelt_lookup`</strong>, and <strong>`visualize_infra_and_cicd`</strong> — bringing your entire stack &amp; QA standards to any project.</p>
+        </div>
+      </div>
     </section>
 
     <!-- CONSTRAINT-FIRST CODING + 10 VETERAN BATTLE SCARS -->
@@ -710,6 +854,7 @@
         <span class="pill" style="--c:var(--cyan)">All Files Committed &amp; Verified</span>
       </div>
       <div class="links-grid">
+        <a class="link-card" href="TOOLBELT.md"><b>Master Engineer Tool Belt (Full-Stack + Infra + AI)</b><span>Every CLI, TUI, GUI, Python lib, Cloud/IaC tool, QA scanner, and React/React Native stack with 1-line commands.</span></a>
         <a class="link-card" href="LINEAR_SYLLABUS.md"><b>12-Module Linear Compounding Syllabus</b><span>Sequential M01–M12 roadmap, Boss Fight gates, Constraint-First LeetCode-100x method &amp; 10 Veteran Battle Scars.</span></a>
         <a class="link-card" href="DEEP_SPECIALTIES_IAC_API_ML_SECURITY_CERTS.md"><b>Deep Specialties (+78 Units: IaC, APIs, ML, CISSP, Certs)</b><span>Terraform state surgery, Cosmic Python &amp; APIs, 8 ML Systems, Deep TCP/IP &amp; CISSP Security, AWS SAP / GenAI Pro Delta.</span></a>
         <a class="link-card" href="mastery_tracker.html"><b>Interactive Mastery Tracker (HTML)</b><span>Check off all 6 Labs, 10 Archetypes, 12 DDIA, 12 Safeguards, 12 Automation, 22 Loops &amp; 8 Katas + CSV export.</span></a>
@@ -840,6 +985,184 @@
     }
     if (localStorage.getItem("spartan_portal_theme") === "light") document.body.classList.add("light");
     renderRoles("ai");
+
+    // --- Interactive 12-Module Daily Rep Sprint Board ---
+    const MODULES = [
+      { id:"M01", c:"var(--emerald)", title:"M01 • Lab 1A: Python Core, Clean Arch & Foundation DSA", sub:"Hash Maps, Sliding Window, Generators, Cosmic Python, make review", reps:[
+        "Solve Day-1 cold Python stubs (day01_patterns.py) with 0 AI help & pass make drill-py",
+        "Refactor Lab 1 app/ into Hexagonal Domain -> Service -> Repository adapters",
+        "Add Redis sliding-window rate limiter + batch ingestion endpoint",
+        "Run 6-gate automated make review (ruff/mypy/pytest/shellcheck/gitleaks/trivy)"
+      ]},
+      { id:"M02", c:"var(--cyan)", title:"M02 • Lab 1B: SQL Mastery, Postgres Internals & 10M Rows", sub:"Window Functions, EXPLAIN, Composite B-Tree, DDIA Write Skew, Metabase", reps:[
+        "Seed 250k -> 1M+ rows via COPY FROM STDIN (make seed) & run make pg-xray",
+        "Solve all 5 Day-1 SQL drills (ROW_NUMBER, NOT EXISTS NULL trap, LAG running spend)",
+        "Drop slow query via EXPLAIN (ANALYZE, BUFFERS) + Composite B-Tree index & write ADR",
+        "Reproduce & fix DDIA Lost Update + Write Skew live in 2 psql terminals",
+        "Connect Metabase (:3000) to v_exec_tenant_unit_economics & v_exec_cost_drivers"
+      ]},
+      { id:"M03", c:"var(--rose)", title:"M03 • Lab 1C: Linux Kernel, Bash Pipes, Grafana & Chaos #1", sub:"awk/jq, Brendan Gregg USE/TSA, ss/strace/tcpdump, DR backup/restore", reps:[
+        "Run make linux-triage & interpret every USE/TSA/cgroup/inode line cold",
+        "Capture live TCP handshake & HTTP headers with tcpdump + curl -v in sre-toolbox",
+        "Blast k6 load test while watching live 6-panel Grafana dashboard (:3001)",
+        "Inject compound lock-storm + net-latency, archive make snapshot-incident, run DR backup -> reset -> restore"
+      ]},
+      { id:"M04", c:"var(--indigo)", title:"M04 • DSA Deep Surge + Scale APIs + 3 Mini-System Katas", sub:"All 14 DSA Templates, RFC 7807/ETags/HMAC Webhooks, URL Shortener/Limiter/Wallet", reps:[
+        "Cold timed reps across Heaps, Monotonic Stack, BFS/DFS/Topo Sort, Union-Find, Binary Search on Answer",
+        "Cold timed reps across Intervals, Backtracking, DP, and Tries using Constraint-First method",
+        "Build & k6-benchmark 3 Katas on Lab 1: Base62 URL Shortener, Redis Lua Rate Limiter, ACID Wallet Ledger",
+        "Pass Boss Fight: 3 unseen Hard/Medium problems cold under clock + RFC 7807 API review"
+      ]},
+      { id:"M05", c:"var(--teal)", title:"M05 • Lab 2: Deep TCP/IP, Linux VM, TLS/CDN & Real Deploys", sub:"Lima Ubuntu+Rocky VM, CIDR math, nftables, DNS, TLS 1.3, gRPC, Ansible", reps:[
+        "Boot Lima Ubuntu + Rocky VMs; practice CIDR subnet math (/16-/28) & nftables rules",
+        "Wire local DNS + Nginx/Caddy HTTPS TLS 1.3 + CDN Cache-Control + SSH Bastion tunnel",
+        "Add gRPC/Protobuf contract + backward-compatible schema evolution test",
+        "Run Ansible --check --diff + zero-downtime Docker/systemd deploy & instant rollback"
+      ]},
+      { id:"M06", c:"var(--amber)", title:"M06 • Lab 3A: Production IaC & Core 12 AWS Services", sub:"aws-emulator, Terraform modules/state surgery/drift, Checkov, Infracost, spartan-cli", reps:[
+        "Provision VPC/Subnets/SGs/IAM/S3/SQS/DynamoDB against aws/aws-emulator via Terraform modules",
+        "Practice zero-downtime state surgery (terraform import + moved block) & drift detection",
+        "Enforce Checkov IaC security scan + Infracost monthly $/mo PR gate",
+        "Build packaged Python spartan-cli ops automation tool with --dry-run & blast-radius caps"
+      ]},
+      { id:"M07", c:"var(--orange)", title:"M07 • Lab 3B: Apache Data Platform, Lifecycle & FinOps", sub:"Kafka/Redpanda, ClickHouse, Iceberg/Parquet, Airflow, PySpark/dbt, Mailpit, Superset", reps:[
+        "Build 6-stage Data Lifecycle: Kafka -> ClickHouse -> MinIO Apache Iceberg (Medallion Bronze/Silver/Gold)",
+        "Implement all 12 Data Safeguards: Idempotent MERGE, Watermarks, Quarantine DLQ, SCD2, ASOF, WAP",
+        "Wire Airflow/dbt + Mailpit email pipeline + Apache Superset Executive FinOps dashboard",
+        "Chaos Drill: Kill ClickHouse 3 min during 10k RPS + duplicate flood -> verify exact penny billing & 429 cap"
+      ]},
+      { id:"M08", c:"var(--violet)", title:"M08 • Lab 4A: Embeddings, Scaled Vector RAG & Inference", sub:"Hugging Face, Qdrant Hybrid+BM25+RBAC, Reranking, Ollama/mlx-lm, LiteLLM, Semantic Cache", reps:[
+        "Build structure-aware + parent-child chunking & Hugging Face sentence-transformers ingestion",
+        "Wire Qdrant Hybrid Dense + BM25 + Cross-Encoder Reranker with mandatory tenant_id pre-filtering",
+        "Add LiteLLM gateway + Redis Semantic Cache (>0.92 cosine) + small-model router",
+        "Prove <2.5s p95 RAG, 0% cross-tenant leak on adversarial probe & >=60% token cost savings"
+      ]},
+      { id:"M09", c:"var(--violet)", title:"M09 • Lab 4B: Agents, MCP, Voice AI, ML Design & 5-Layer Evals", sub:"MCP Server, LangGraph, WebRTC Voice, LightGBM/PyTorch, Made-With-ML Tests, RunPod vLLM", reps:[
+        "Build Production MCP Server (strict schemas, risk tiers, approval gates) + LangGraph agent with OTel traces",
+        "Train LightGBM/PyTorch anomaly model on Lab 3 stream with MLflow + DVC + Slice/Invariance/Directional tests",
+        "Wire Arize Phoenix / Promptfoo CI eval gate blocking <0.95 faithfulness & prompt injections",
+        "Run 3-hr cloud GPU sprint: load-test vLLM KV-cache/TTFT/ITL + build WebRTC Voice AI slice"
+      ]},
+      { id:"M10", c:"var(--indigo)", title:"M10 • Lab 5: Pure-Code Internals (DB, Consensus & LLMs)", sub:"300-line LSM-Tree, 3-Node Raft, Zero-Copy sendfile, micrograd, minbpe, Mini-GPT+LoRA", reps:[
+        "Build 300-line LSM-Tree (WAL + MemTable + SSTable + Bloom Filter + Merge Compaction)",
+        "Build 3-Node Raft over raw TCP & pass split-brain leader election + log reconciliation test",
+        "Benchmark naive buffered socket I/O vs zero-copy os.sendfile (~90% fewer context switches)",
+        "Build micrograd + minbpe + Mini-GPT Multi-Head Attention + LoRA from scratch on M3 Max MPS"
+      ]},
+      { id:"M11", c:"var(--rose)", title:"M11 • Lab 6: K8s, CISSP Zero-Trust, CDC Migration & Chaos", sub:"3-node kind, Cilium eBPF/Hubble/Tetragon, ArgoCD, Vault, RLS, Debezium, 12 Outages", reps:[
+        "Deploy platform to 3-node kind + Cilium eBPF/Hubble + ArgoCD GitOps (rebuild <10 min)",
+        "Enforce Vault 15-min dynamic creds, Keycloak OIDC, Postgres RLS, Cosign/Trivy, Tetragon SIGKILL",
+        "Execute zero-downtime Debezium CDC + Envoy Strangler Fig canary (kill new svc at 50% -> 0 5xx)",
+        "Survive 12 Blind Chaos Roulette outages cold (<5 min each) + 1 ephemeral Real-AWS live-fire deploy"
+      ]},
+      { id:"M12", c:"var(--amber)", title:"M12 • Principal Capstone: Unseen Coding, Certs & C-Suite", sub:"45-Min Whiteboards, AWS SAP/GenAI Cert Delta, FinOps Proofs, Build-in-Public", reps:[
+        "Complete 3 timed 45-min mock Principal System Design loops across the 10 Archetypes",
+        "Publish 3 reproducible make bench FinOps savings receipts + 3-min terminal teardown videos",
+        "Run AWS SAP-C02 / GenAI Pro practice delta drills & land 2 upstream OSS PRs"
+      ]}
+    ];
+
+    function getPass() { return parseInt(localStorage.getItem("spartan_pass_num") || "1", 10); }
+    function repKey(mid, idx) { return `spartan_p${getPass()}_${mid}_${idx}`; }
+    function toggleRep(mid, idx) {
+      const k = repKey(mid, idx);
+      localStorage.setItem(k, localStorage.getItem(k) === "1" ? "0" : "1");
+      renderModules();
+    }
+    function toggleMod(mid) {
+      const openSet = new Set(JSON.parse(localStorage.getItem("spartan_open_mods") || '["M01"]'));
+      if (openSet.has(mid)) openSet.delete(mid); else openSet.add(mid);
+      localStorage.setItem("spartan_open_mods", JSON.stringify([...openSet]));
+      renderModules();
+    }
+    function toggleAllMods(open) {
+      localStorage.setItem("spartan_open_mods", JSON.stringify(open ? MODULES.map(m => m.id) : []));
+      renderModules();
+    }
+    function startNextPass() {
+      const next = getPass() + 1;
+      localStorage.setItem("spartan_pass_num", String(next));
+      renderModules();
+    }
+    function renderModules() {
+      const list = document.getElementById("mod-list");
+      const openSet = new Set(JSON.parse(localStorage.getItem("spartan_open_mods") || '["M01"]'));
+      list.innerHTML = "";
+      let total = 0, done = 0;
+      MODULES.forEach(m => {
+        let mDone = 0;
+        m.reps.forEach((_, idx) => { total++; if (localStorage.getItem(repKey(m.id, idx)) === "1") { done++; mDone++; } });
+        const pct = Math.round((mDone / m.reps.length) * 100);
+        const card = document.createElement("div");
+        card.className = "mod-item" + (openSet.has(m.id) ? " open" : "");
+        card.style.setProperty("--c", m.c);
+        card.innerHTML = `
+          <div class="mod-summary" onclick="toggleMod('${m.id}')">
+            <div><b>${m.title}</b><small>${m.sub}</small></div>
+            <div class="mod-pct">${mDone}/${m.reps.length} (${pct}%)</div>
+          </div>
+          <div class="mod-reps">
+            ${m.reps.map((r, idx) => {
+              const checked = localStorage.getItem(repKey(m.id, idx)) === "1";
+              return `<label class="rep-row ${checked ? "done" : ""}"><input type="checkbox" ${checked ? "checked" : ""} onchange="toggleRep('${m.id}', ${idx})" /><span>${r}</span></label>`;
+            }).join("")}
+          </div>`;
+        list.appendChild(card);
+      });
+      document.getElementById("pass-num").textContent = getPass();
+      document.getElementById("reps-done").textContent = done;
+      document.getElementById("reps-total").textContent = total;
+      document.getElementById("reps-pct").textContent = Math.round((done / total) * 100) + "%";
+    }
+
+    // --- Searchable Master Tool Belt ---
+    const TOOLBELT = [
+      { cat:"Linux & SRE", name:"tmux + btop + lnav", desc:"Split terminal cockpit, CPU/RAM TUI, SQL-queryable log forensics", cmd:"tmux new -s ops" },
+      { cat:"Linux & SRE", name:"ss / strace / tcpdump", desc:"Live sockets, hung-process syscalls, raw TCP/DNS/TLS wire capture", cmd:"sudo strace -T -tt -p <PID> -f" },
+      { cat:"Linux & SRE", name:"mitmproxy + dig + curl", desc:"Interactive HTTP/TLS payload inspector & DNS/header timing checks", cmd:"curl -v http://localhost:8080/healthz" },
+      { cat:"Linux & SRE", name:"linux-triage.sh", desc:"Your reusable 60-sec read-only Brendan Gregg USE/TSA collector", cmd:"make linux-triage" },
+      { cat:"Python & QA", name:"uv + ruff + mypy", desc:"Fast lockfiles/patching, Python linter, strict static type checking", cmd:"uv sync && make ci" },
+      { cat:"Python & QA", name:"pytest + hypothesis", desc:"Contract unit/integration tests + automated edge-case property fuzzing", cmd:"uv run pytest tests/ -v" },
+      { cat:"Python & QA", name:"FastAPI + Pydantic v2 + psycopg3", desc:"Async APIs, strict boundary validation, high-speed Postgres pooling/COPY", cmd:"uvicorn app.main:app --reload" },
+      { cat:"Python & QA", name:"k6 + make review", desc:"Load/SLO latency testing + 6-gate automated code & security reviewer", cmd:"make review" },
+      { cat:"Data & BI", name:"Polars + DuckDB + PyArrow", desc:"Zero-copy columnar DataFrames & in-process Parquet SQL at laptop speed", cmd:"duckdb -c \"SELECT COUNT(*) FROM 'data/*.parquet';\"" },
+      { cat:"Data & BI", name:"PostgreSQL 16 + PgBouncer + pg_xray", desc:"ACID OLTP, transaction pooling, live read-only locks/bloat/slow-query X-ray", cmd:"make pg-xray" },
+      { cat:"Data & BI", name:"Kafka/Redpanda + ClickHouse + Iceberg", desc:"Event streaming, real-time columnar OLAP, MinIO open lakehouse", cmd:"rpk topic list" },
+      { cat:"Data & BI", name:"Metabase + Apache Superset + Grafana", desc:"Executive 'Money People' KPI BI (:3000) + Live SRE Telemetry (:3001)", cmd:"open http://localhost:3000 http://localhost:3001" },
+      { cat:"AI & MLOps", name:"PyTorch + Hugging Face (PEFT/LoRA)", desc:"M3 Max MPS/CUDA training, transformers, datasets, safetensors, LoRA", cmd:"uv run python -c \"import torch; print(torch.backends.mps.is_available())\"" },
+      { cat:"AI & MLOps", name:"Ollama / mlx-lm / vLLM / LiteLLM", desc:"Local + production GPU PagedAttention serving, routing & token FinOps", cmd:"ollama run qwen2.5:7b" },
+      { cat:"AI & MLOps", name:"Qdrant + pgvector + Rerankers", desc:"Hybrid dense + BM25 search, HNSW tuning, mandatory tenant pre-filtering", cmd:"open http://localhost:6333/dashboard" },
+      { cat:"AI & MLOps", name:"LangGraph + MCP SDK + Phoenix/Promptfoo", desc:"Stateful agent DAGs, production MCP servers, automated CI eval gates", cmd:"npx promptfoo eval" },
+      { cat:"AI & MLOps", name:"MLflow + DVC + LightGBM + finops_calc", desc:"Classical ML tracking, data versioning & LLM/GPU $/mo calculator CLI", cmd:"uv run python tools/finops_calc.py --help" },
+      { cat:"Cloud & IaC", name:"Terraform + aws/aws-emulator + Infracost", desc:"Declarative AWS VPC/IAM/S3/SQS locally + exact PR $/mo diffs", cmd:"terraform plan -detailed-exitcode" },
+      { cat:"Cloud & IaC", name:"Docker + lazydocker + Lima VM + Ansible", desc:"Multi-stage slim builds, live container TUI, Ubuntu/Rocky VMs, OS config", cmd:"make up && lazydocker" },
+      { cat:"Cloud & IaC", name:"kind + k9s + Cilium Hubble + ArgoCD", desc:"3-node local K8s, live cluster TUI, eBPF packet map, GitOps deploys", cmd:"k9s" },
+      { cat:"Cloud & IaC", name:"act + d2 + inframap", desc:"Run GitHub Actions locally in Docker + declarative IaC/arch diagrams", cmd:"act -l" },
+      { cat:"Security", name:"Trivy + gitleaks + shellcheck + Checkov", desc:"CVE image/lockfile scanner, secret blocker, Bash & Terraform security gates", cmd:"trivy fs --severity HIGH,CRITICAL ." },
+      { cat:"Security", name:"OpenBao/Vault + Keycloak + Tetragon", desc:"15-min dynamic DB creds, OIDC/SSO, KMS envelope, eBPF syscall kill-switch", cmd:"vault status" },
+      { cat:"Frontend & Mobile", name:"React + Next.js (App Router) + TypeScript", desc:"Streaming SSE AI chat UIs, internal portals, strict API contract types", cmd:"npx create-next-app@latest" },
+      { cat:"Frontend & Mobile", name:"React Native + Expo + TanStack Query", desc:"Cross-platform iOS/Android mobile apps wired cleanly to FastAPI/AI APIs", cmd:"npx create-expo-app@latest" },
+      { cat:"Frontend & Mobile", name:"Tailwind CSS + Playwright + Sage Design OS", desc:"Accessible UI components, E2E browser QA & legacy portal automation", cmd:"npx playwright test" }
+    ];
+    let activeTbCat = "ALL";
+    function renderToolbelt() {
+      const cats = ["ALL", ...new Set(TOOLBELT.map(t => t.cat))];
+      const tabs = document.getElementById("tb-tabs");
+      tabs.innerHTML = cats.map(c => `<button class="role-btn ${c===activeTbCat?'active':''}" onclick="activeTbCat='${c}';renderToolbelt()">${c}</button>`).join("");
+      const q = (document.getElementById("tb-q").value || "").toLowerCase();
+      const grid = document.getElementById("tb-grid");
+      grid.innerHTML = TOOLBELT.filter(t =>
+        (activeTbCat === "ALL" || t.cat === activeTbCat) &&
+        (!q || t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q) || t.cmd.toLowerCase().includes(q) || t.cat.toLowerCase().includes(q))
+      ).map(t => `
+        <div class="tb-card">
+          <div class="tb-head"><b>${t.name}</b><span class="pill" style="--c:var(--cyan)">${t.cat}</span></div>
+          <div class="tb-desc">${t.desc}</div>
+          <div class="tb-cmd">${t.cmd}</div>
+        </div>`).join("");
+    }
+    renderModules();
+    renderToolbelt();
   </script>
 </body>
 </html>

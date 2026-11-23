@@ -97,6 +97,21 @@ Go far beyond basic `terraform apply`:
 17. **Incident Response Framework (NIST PICERL):** Preparation -> Identification -> Containment -> Eradication -> Recovery -> Lessons Learned (paired with `make snapshot-incident`).
 18. **Data Privacy & Compliance Engineering:** GDPR Right-to-Delete across Postgres/S3/Qdrant, PII redaction (`Presidio`), immutable audit trails, SOC2 Type II / HIPAA / PCI-DSS / ISO 27001 controls.
 19. **Shared Responsibility Model:** Exact security boundary between AWS/GCP/Azure (Security *of* the Cloud) vs. You (Security *in* the Cloud).
+20. **NIST CSF 2.0 & MITRE ATT&CK Kill-Chain Defense:** Organize enterprise defense around **NIST CSF 2.0** (*Govern -> Identify -> Protect -> Detect -> Respond -> Recover*) and map **MITRE ATT&CK** attacker stages (*Initial Access -> Execution -> Privilege Escalation -> Credential Access -> Lateral Movement -> Exfiltration*) directly to concrete controls (WAF, non-root/drop-caps, Vault 15m creds, Cilium NetworkPolicies, Tetragon SIGKILL, egress firewall).
+21. **Deep Applied Cryptography Primitives:** **AEAD** (`AES-256-GCM` / `ChaCha20-Poly1305` = confidentiality + tamper detection), **KDFs** (`HKDF` for key expansion, `Argon2id` for passwords), **Ed25519 / Cosign** digital signatures, **Merkle Trees** (Git commits, Apache Iceberg manifests, Raft logs, transparency logs), and **ECDHE Forward Secrecy** (compromised server key cannot decrypt past TLS 1.3 sessions).
+22. **CISSP Risk Governance Delta (For Exam & C-Suite Risk Math):** Quantitative risk formula `ALE = SLE * ARO` (Annualized Loss Expectancy = Single Loss Expectancy * Annual Rate of Occurrence), Business Continuity Planning (BCP) vs Disaster Recovery (DRP), Recovery Time Objective (RTO) vs Recovery Point Objective (RPO).
+
+---
+
+## 4B. GPU Silicon Physics & Roofline Model (Vendor-Neutral Hardware Mastery)
+
+Understanding **why NVIDIA H100/B200 chips dominate AI** transfers 1-to-1 to **Apple Silicon (MLX/Metal), AMD ROCm, and Google TPUs**:
+1. **Compute-Bound Prefill vs. Memory-Bandwidth-Bound Decode (Roofline Model):**
+   - `Attainable TFLOPs = min(Peak Tensor Core TFLOPs, HBM Bandwidth GB/s * Operational Intensity)`.
+   - Reading a prompt (**prefill**) multiplies large matrices -> **Compute-bound**. Generating tokens one by one (**decode**) reads all model weights from VRAM per token -> **HBM Memory-Bandwidth bound** (H100 = `3.35 TB/s` vs CPU DDR5 `~100 GB/s`).
+2. **SRAM vs. HBM & FlashAttention:** On-chip SRAM is ~10x faster than HBM VRAM but tiny (~50MB). FlashAttention tiles attention matrices inside SRAM to eliminate slow HBM round-trips.
+3. **KV-Cache Paging & Continuous Batching (vLLM):** PagedAttention treats GPU VRAM like OS virtual memory pages, eliminating fragmentation so 1 GPU serves 10x–20x more concurrent users.
+4. **NVLink & InfiniBand RDMA:** Direct GPU-to-GPU interconnect (`900 GB/s`) bypassing CPU/PCIe for Tensor & Pipeline Parallelism across multi-GPU clusters.
 
 ---
 

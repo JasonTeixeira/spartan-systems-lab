@@ -5,7 +5,9 @@
 > *Train 10x harder in the lab so interviews and 3:00 AM production war rooms feel easy.*
 
 ## Visual Atlas Portal & Reference Manuals (`docs/`)
-- **Interactive Visual Master Atlas (Open in Browser / GitHub Pages):** `docs/index.html` *(run `make portal`)*
+- **Interactive Visual Master Atlas v2.0 (Open in Browser / GitHub Pages):** `docs/index.html` *(run `make portal`)* — includes expandable 12-Module Daily Rep Sprint Board, Visual IaC & CI/CD Maps, Searchable Tool Belt, GPU/Crypto/NIST/MITRE cards, and 6-Role Switcher.
+- **Master Tool Belt (Backend, Data, AI/ML, Infra, Security & React/Mobile):** `docs/TOOLBELT.md`
+- **12-Module Linear Compounding Syllabus:** `docs/LINEAR_SYLLABUS.md`
 - **Interactive Mastery Progress Tracker:** `docs/mastery_tracker.html` *(run `make tracker`)*
 - **Day-0 Operator Manual & 6-Gate Reviewer:** `docs/HOW_TO_USE_THIS_LAB.md` *(run `make review`)*
 - **Master Doc Index:** `docs/INDEX.md`

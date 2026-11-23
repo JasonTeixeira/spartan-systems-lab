@@ -4,8 +4,9 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
 
 ---
 
-## 0. Start Here (Visual Atlas, Linear Syllabus, Operator Manual & Tracker)
-- **`docs/index.html`** (`make portal`) — **Interactive Colorful Visual Architecture Atlas** (offline browser & GitHub Pages): Complete **440-unit** numbers breakdown, interactive 6-Role selector ($200k–$600k+), end-to-end 5-lane architecture diagram, 6-Lab roadmap, and direct links to every manual & tool.
+## 0. Start Here (Visual Atlas v2, Tool Belt, Linear Syllabus, Operator Manual & Tracker)
+- **`docs/index.html`** (`make portal`) — **Interactive Visual Architecture Atlas v2.0** (offline browser & GitHub Pages): **440+ units**, expandable **12-Module Daily Rep Sprint Board** (with infinite Nightmare-Mode reset), **Visual IaC & 8-Stage CI/CD Pipeline Maps**, **Searchable Master Tool Belt** (including React/React Native/Frontend), **GPU Silicon / Crypto / NIST / MITRE Cards**, 6-Role Switcher ($200k–$600k+), and 5-lane End-to-End Platform Diagram.
+- **`docs/TOOLBELT.md`** — Complete searchable Master Tool Belt (Linux/SRE, Python/QA, Data/BI, AI/ML/LLM, Cloud/IaC/K8s, Security, and **React/Next.js/React Native/Frontend**) with 1-line commands — ready for `spartan-mcp` Step 2.
 - **`docs/LINEAR_SYLLABUS.md`** — **The 12-Module Linear Compounding Syllabus** (`M01 -> M12`, 4 parallel daily tracks, Boss Fight gates, Constraint-First LeetCode-100x method, and 10 "30-Year Veteran" Battle Scars).
 - **`docs/mastery_tracker.html`** (`make tracker`) — Interactive browser mastery checklist tracking all 6 Labs, 10 Archetypes, 12 DDIA Chapters, 12 Data Safeguards, 12 Automation Archetypes, 22 Daily Loops, Failure Drills, and 8 Mini-System Katas with CSV export.
 - **`docs/HOW_TO_USE_THIS_LAB.md`** — Day-0 operator workflow, automated `make review` code/security/CVE reviewer, 5-Axis Principal Optimizer Rubric, ranked Python library stack (~25 core libraries), `uv` patching & container upgrade workflow, and audit-trail discipline.
