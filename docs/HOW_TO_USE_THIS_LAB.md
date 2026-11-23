@@ -94,3 +94,21 @@ Every lab session leaves a clean, verifiable trail in Git:
 - **Architecture Choices:** `docs/adr/NNN-title.md` + `docs/rfc/NNN-title.md`.
 - **Real Outage Forensics:** `make snapshot-incident NAME=<slug>` archives container logs, `pg_stat_activity`, `pg_locks`, Linux `ss`/`vmstat`/`ip route`, and `git diff` into `docs/incidents/<timestamp>_<slug>/` before you run `make reset`.
 - **Cost & Performance Proof:** `docs/benchmarks/` stores reproducible Before/After `k6` p99, `EXPLAIN ANALYZE`, and `tools/finops_calc.py` `$/month` receipts.
+
+---
+
+## 7. Curated External Companion Deck (15 Approved Links — Zero Tab Overload)
+
+Your primary workspace is **ArchOS (`http://127.0.0.1:5180/`, 130 skills / 453 units / 114 canvases) + Spartan Systems Lab (6 live labs)**. Do **not** buy overlapping system-design/AI courses or juggle 100+ bookmarks. Use ONLY these 15 high-signal external companions strictly inside their assigned modules:
+
+| Module | Approved Companion(s) | Exact Purpose (When To Open) |
+| :---: | :--- | :--- |
+| **M01 / M04** | [NeetCode 150](https://neetcode.io/) · [CSES](https://cses.fi/problemset/) · [AtCoder DP](https://atcoder.jp/contests/dp/tasks) | Timed Track-A cold DSA reps (pick NeetCode 150 first; graduate to CSES + AtCoder DP for Hard boss fights). |
+| **M02** | [DataLemur SQL](https://datalemur.com/sql-tutorial) · [Select Star SQL](https://selectstarsql.com/) | Realistic Postgres/analytical window-function & CTE speed drills. |
+| **M03 / M05 / M11** | [SadServers](https://sadservers.com/) · [iximiuz Labs](https://labs.iximiuz.com/) · [Killercoda](https://killercoda.com/) | Live broken Linux VMs ("LeetCode for SRE"), Linux namespaces/cgroups/container internals, and disposable K8s CKA/CKS clusters. |
+| **M01 / M11** | [Hacksplaining](https://www.hacksplaining.com/) | Fast 2-hour interactive attacker-side walkthrough of OWASP Top 10 (SQLi, SSRF, XSS, CSRF). |
+| **M08 / M09** | [Anthropic Cookbooks](https://github.com/anthropics/claude-cookbooks) · [OpenAI Cookbook](https://developers.openai.com/cookbook) · [HF Learn](https://huggingface.co/learn) · [DeepEval](https://deepeval.com/) / [Ragas](https://docs.ragas.io/) | Primary-source tool-calling/structured-output/agent recipes + drop-in Python CI eval libraries for Lab 4B. |
+| **M09 / M10** | [Deep-ML](https://www.deep-ml.com/) · [Harvard ML Systems Book](https://mlsysbook.ai/) · [Chip Huyen ML Design](https://github.com/chiphuyen/machine-learning-systems-design) · [ApplyingML](https://applyingml.com/) | Cold NumPy/PyTorch ML coding reps ("LeetCode for ML") + hardware/quantization/serving/agentic ML systems reference. |
+| **M10** | [CMU 15-445](https://15445.courses.cs.cmu.edu/) · [MIT 6.5840](https://pdos.csail.mit.edu/6.5840/) · [bbycroft LLM 3D](https://bbycroft.net/) · [Transformer Explainer](https://poloclub.github.io/) · [Secret Lives of Data](https://thesecretlivesofdata.com/) | Gold-standard DB/Raft university references + 3D/live browser GPT forward-pass & Raft visualizers. |
+| **M12** | [interviewing.io](https://interviewing.io/) · [HelloInterview](https://www.hellointerview.com/) · [Tutorials Dojo](https://portal.tutorialsdojo.com/playcloud/) | Real anonymous Staff/FAANG mock interview pressure, delivery rubric polish, and final 2-week AWS SAP-C02 exam phrasing drills. |
+| **Reference** | [uv Docs](https://docs.astral.sh/uv/) · [AWS Docs](https://docs.aws.amazon.com/) · [Engineering Blogs](https://github.com/JasonTeixeira/engineering-blogs) | Official tool/cloud documentation + 1 Sunday engineering post per week. |

@@ -897,6 +897,7 @@
         <a class="link-card" href="JUDGMENT_AND_COMMUNICATION_FRAMEWORKS.md"><b>Judgment, Trade-Offs &amp; C-Suite BLUF</b><span>45-Min System Design Clock, 6 Decision Matrices, Peer Rigor &amp; Executive Translation Dictionary.</span></a>
         <a class="link-card" href="DATA_LIFECYCLE_AND_SERVER_FUNDAMENTALS.md"><b>Data Lifecycle, 5 Stacks &amp; Server DNA</b><span>6-Stage Data Lifecycle, 5 Locked-In Data Stacks, SCD2/WAP/ASOF, 5 Server Archetypes &amp; Self-Hosted CI.</span></a>
         <a class="link-card" href="AI_ML_AND_LLM_MASTERY.md"><b>AI, ML, Inference, RAG, Agents &amp; Evals</b><span>Hugging Face, Ollama/vLLM, Qdrant/HNSW, LangGraph/MCP, 5-Layer Evals &amp; 6-Repo Extraction Map.</span></a>
+        <a class="link-card" href="HOW_TO_USE_THIS_LAB.md"><b>Curated Companion Deck (15 Approved External Links)</b><span>SadServers + iximiuz (M03/M11), Deep-ML + mlsysbook.ai (M09/M10), interviewing.io + Tutorials Dojo (M12), NeetCode/CSES/DataLemur.</span></a>
       </div>
     </section>
   </main>
@@ -1035,7 +1036,8 @@
         "Run make linux-triage & interpret every USE/TSA/cgroup/inode line cold",
         "Capture live TCP handshake & HTTP headers with tcpdump + curl -v in sre-toolbox",
         "Blast k6 load test while watching live 6-panel Grafana dashboard (:3001)",
-        "Inject compound lock-storm + net-latency, archive make snapshot-incident, run DR backup -> reset -> restore"
+        "Inject compound lock-storm + net-latency, archive make snapshot-incident, run DR backup -> reset -> restore",
+        "Companion Reps: Solve 3 live broken Linux/container scenarios cold on sadservers.com & labs.iximiuz.com"
       ]},
       { id:"M04", c:"var(--indigo)", title:"M04 • DSA Deep Surge + Scale APIs + 3 Mini-System Katas", sub:"All 14 DSA Templates, RFC 7807/ETags/HMAC Webhooks, URL Shortener/Limiter/Wallet", archos:["dgm_url-shortener","dgm_rate-limiter","dgm_api-gateway-design","dgm_digital-wallet","dgm_banking-ledger"], reps:[
         "Cold timed reps across Heaps, Monotonic Stack, BFS/DFS/Topo Sort, Union-Find, Binary Search on Answer",
@@ -1071,24 +1073,27 @@
         "Build Production MCP Server (strict schemas, risk tiers, approval gates) + LangGraph agent with OTel traces",
         "Train LightGBM/PyTorch anomaly model on Lab 3 stream with MLflow + DVC + Slice/Invariance/Directional tests",
         "Wire Arize Phoenix / Promptfoo CI eval gate blocking <0.95 faithfulness & prompt injections",
-        "Run 3-hr cloud GPU sprint: load-test vLLM KV-cache/TTFT/ITL + build WebRTC Voice AI slice"
+        "Run 3-hr cloud GPU sprint: load-test vLLM KV-cache/TTFT/ITL + build WebRTC Voice AI slice",
+        "Companion Reps: Solve 5 cold NumPy/PyTorch ML problems on deep-ml.com & study hardware/serving in mlsysbook.ai"
       ]},
       { id:"M10", c:"var(--indigo)", title:"M10 • Lab 5: Pure-Code Internals (DB, Consensus & LLMs)", sub:"300-line LSM-Tree, 3-Node Raft, Zero-Copy sendfile, micrograd, minbpe, Mini-GPT+LoRA", archos:["dgm_kv-store-v3","dgm_consistent-hashing-ring","dgm_cap-pacelc","dgm_consistency-models","dgm_llm-attention-and-kv-cache","dgm_llm-constrained-decoding-and-structured-output"], reps:[
         "Build 300-line LSM-Tree (WAL + MemTable + SSTable + Bloom Filter + Merge Compaction)",
         "Build 3-Node Raft over raw TCP & pass split-brain leader election + log reconciliation test",
         "Benchmark naive buffered socket I/O vs zero-copy os.sendfile (~90% fewer context switches)",
-        "Build micrograd + minbpe + Mini-GPT Multi-Head Attention + LoRA from scratch on M3 Max MPS"
+        "Build micrograd + minbpe + Mini-GPT Multi-Head Attention + LoRA from scratch on M3 Max MPS",
+        "Companion Reps: Implement attention/backprop cold on deep-ml.com & cross-check systems math in mlsysbook.ai"
       ]},
       { id:"M11", c:"var(--rose)", title:"M11 • Lab 6: K8s, CISSP Zero-Trust, CDC Migration & Chaos", sub:"3-node kind, Cilium eBPF/Hubble/Tetragon, ArgoCD, Vault, RLS, Debezium, 12 Outages", archos:["dgm_k8s-cni-services-and-network-policy","dgm_k8s-autoscaling-hpa-keda-node-provisioning","dgm_k8s-scheduler-requests-limits-qos","dgm_cdc-failure-backfill","dgm_ai-threat-model","dgm_sec-owasp-llm-top10-reference-architecture"], reps:[
         "Deploy platform to 3-node kind + Cilium eBPF/Hubble + ArgoCD GitOps (rebuild <10 min)",
         "Enforce Vault 15-min dynamic creds, Keycloak OIDC, Postgres RLS, Cosign/Trivy, Tetragon SIGKILL",
         "Execute zero-downtime Debezium CDC + Envoy Strangler Fig canary (kill new svc at 50% -> 0 5xx)",
-        "Survive 12 Blind Chaos Roulette outages cold (<5 min each) + 1 ephemeral Real-AWS live-fire deploy"
+        "Survive 12 Blind Chaos Roulette outages cold (<5 min each) + 1 ephemeral Real-AWS live-fire deploy",
+        "Companion Reps: Complete 3 advanced Linux/K8s break-fix labs cold on sadservers.com & labs.iximiuz.com"
       ]},
       { id:"M12", c:"var(--amber)", title:"M12 • Principal Capstone: Unseen Coding, Certs & C-Suite", sub:"45-Min Whiteboards, AWS SAP/GenAI Cert Delta, FinOps Proofs, Build-in-Public", archos:["dgm_interview-framework-45min","dgm_chat-system","dgm_video-streaming","dgm_news-feed-v3","dgm_payment-system","dgm_hotel-reservation","dgm_distributed-task-scheduler"], reps:[
         "Complete 3 timed 45-min mock Principal System Design loops across the 10 Archetypes",
         "Publish 3 reproducible make bench FinOps savings receipts + 3-min terminal teardown videos",
-        "Run AWS SAP-C02 / GenAI Pro practice delta drills & land 2 upstream OSS PRs"
+        "Run live anonymous Staff mock interviews on interviewing.io & pass final 2-week AWS SAP-C02 Tutorials Dojo phrasing sprint + 2 OSS PRs"
       ]}
     ];
 
