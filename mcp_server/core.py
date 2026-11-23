@@ -122,6 +122,7 @@ def lookup_toolbelt_and_runbooks(
         "frameworks": [
             "PRINCIPAL_FRAMEWORKS.md",
             "JUDGMENT_AND_COMMUNICATION_FRAMEWORKS.md",
+            "LEADERSHIP_AND_EXEC_MASTERY.md",
             "DEEP_SPECIALTIES_IAC_API_ML_SECURITY_CERTS.md",
             "DATA_LIFECYCLE_AND_SERVER_FUNDAMENTALS.md",
             "LINEAR_SYLLABUS.md",
