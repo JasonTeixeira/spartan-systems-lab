@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test ci review portal tracker up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py chaos backup restore snapshot-incident pdf
+.PHONY: setup lint typecheck test ci review mcp portal tracker up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py chaos backup restore snapshot-incident pdf
 
 COMPOSE := docker compose -f lab-1-core-engine/docker-compose.yml
 ROWS ?= 100000
@@ -13,7 +13,7 @@ lint:
 	uv run ruff check .
 
 typecheck:
-	uv run mypy lab-1-core-engine/app tools tests
+	uv run mypy lab-1-core-engine/app mcp_server tools tests
 
 test:
 	uv run pytest tests/ -v
@@ -87,6 +87,10 @@ snapshot-incident:
 # --- Spartan Daily Cold Drills (intentionally red until YOU implement the stubs!) ---
 drill-py:
 	uv run pytest drills/python-dsa/ -v
+
+# --- Personal Principal Engineer MCP Server (stdio) ---
+mcp:
+	uv run python -m mcp_server.server
 
 # --- Visual Documentation Portal & Progress Tracker ---
 portal:

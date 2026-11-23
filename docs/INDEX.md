@@ -34,7 +34,8 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
 - `docs/incidents/` — Timestamped forensic bundles captured via `make snapshot-incident NAME=...`
 - `docs/postmortems/` — Blameless post-mortems (`000-template.md`)
 
-## 4. Reusable On-the-Job Tools (`tools/` & `scripts/`)
+## 4. Reusable On-the-Job Tools (`mcp_server/`, `tools/` & `scripts/`)
+- **`mcp_server/` (`make mcp` — [README](../mcp_server/README.md))** — Personal Principal Engineer MCP Server (`finops_estimate`, `toolbelt_and_runbook_lookup`, `qa_and_code_review`, approval-gated `generate_dashboard_pack`, `visualize_infra_and_cicd`) ready to plug into Claude Code, Cursor, or Antigravity.
 - **`tools/sql-diagnostics/pg_xray.sql`** — Read-only Production Postgres X-Ray (locks, `idle in transaction`, dead-tuple bloat, seq scans, buffer cache hit ratio, XID wraparound age, `pg_stat_statements`).
 - **`tools/linux-triage.sh`** — Safe 60-second read-only Linux triage collector (USE/TSA, cgroup v2 throttling, `df -i`, `ss -s`, `ip route`, D-state procs, `dmesg`).
 - **`tools/finops_calc.py`** — Tested Python CLI for Little's Law capacity, LLM semantic-cache/routing dollar savings, and GPU VRAM/KV-cache sizing.
