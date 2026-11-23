@@ -6,6 +6,7 @@ import pytest
 
 from mcp_server.core import (
     build_dashboard_pack,
+    export_infra_to_archos_canvas,
     lookup_archos_canvases,
     lookup_toolbelt_and_runbooks,
     run_finops_estimate,
@@ -14,7 +15,7 @@ from mcp_server.core import (
 from mcp_server.server import mcp
 
 
-def test_mcp_server_registers_all_6_tools() -> None:
+def test_mcp_server_registers_all_7_tools() -> None:
     tools = asyncio.run(mcp.list_tools())
     tool_names = {t.name for t in tools}
     expected = {
@@ -24,6 +25,7 @@ def test_mcp_server_registers_all_6_tools() -> None:
         "generate_dashboard_pack",
         "visualize_infra_and_cicd",
         "archos_canvas_lookup",
+        "infra_to_archos_canvas",
     }
     assert expected.issubset(tool_names)
 
@@ -138,3 +140,74 @@ def test_archos_canvas_lookup_reads_manifest_and_handles_missing(tmp_path: Path)
     assert found["match_count"] == 1
     assert found["matches"][0]["canvas_id"] == "dgm_tool-gateway-mcp"
     assert found["matches"][0]["file_exists"] is True
+
+
+def test_export_infra_to_archos_canvas_compose_terraform_and_guards(tmp_path: Path) -> None:
+    # 1. Real docker-compose.yml dry-run preview
+    preview = export_infra_to_archos_canvas(
+        source_path="lab-1-core-engine/docker-compose.yml",
+        diagram_id="dgm_lab1-auto",
+        title="Lab 1 Auto Export",
+    )
+    assert preview["dry_run"] is True
+    assert preview["source_type"] == "docker_compose"
+    assert preview["written_path"] is None
+    canvas = preview["canvas_json"]
+    assert canvas["schemaVersion"] == 3
+    assert canvas["id"] == "dgm_lab1-auto"
+    assert canvas["systemBoundaryId"] == "dgm_lab1-auto--boundary"
+    # 11 compose services + 1 boundary + 2 external actors (client + sink) = 14 nodes
+    assert preview["node_count"] == 14
+    assert preview["edge_count"] >= 10
+
+    # 2. Terraform .tf directory parsing + approval-gated write
+    tf_dir = tmp_path / "infra"
+    tf_dir.mkdir()
+    (tf_dir / "main.tf").write_text(
+        'resource "aws_vpc" "main" {\n  cidr_block = "10.0.0.0/16"\n}\n'
+        'resource "aws_db_instance" "pg" {\n  vpc_id = aws_vpc.main.id\n}\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(PermissionError):
+        export_infra_to_archos_canvas(
+            source_path="infra",
+            diagram_id="dgm_tf-preview",
+            dry_run=False,
+            confirm_write=False,
+            workspace_root=tmp_path,
+        )
+    with pytest.raises(ValueError):
+        export_infra_to_archos_canvas(
+            source_path="infra",
+            diagram_id="../bad-id",
+            workspace_root=tmp_path,
+        )
+    with pytest.raises(ValueError):
+        export_infra_to_archos_canvas(
+            source_path="infra",
+            diagram_id="dgm_tf-ok",
+            dry_run=False,
+            confirm_write=True,
+            output_path="../../escape.canvas.json",
+            workspace_root=tmp_path,
+        )
+
+    written = export_infra_to_archos_canvas(
+        source_path="infra",
+        diagram_id="dgm_tf-ok",
+        title="Terraform Export",
+        dry_run=False,
+        confirm_write=True,
+        output_path="out/dgm_tf-ok.canvas.json",
+        workspace_root=tmp_path,
+    )
+    assert written["source_type"] == "terraform"
+    assert written["risk_level"] == "local_write_confirmed"
+    out_file = tmp_path / "out" / "dgm_tf-ok.canvas.json"
+    assert out_file.exists()
+    loaded = json.loads(out_file.read_text(encoding="utf-8"))
+    assert loaded["schemaVersion"] == 3
+    assert any(
+        e["source"].endswith("aws_vpc-main") and e["target"].endswith("aws_db_instance-pg")
+        for e in loaded["edges"]
+    )

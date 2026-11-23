@@ -12,6 +12,7 @@ from mcp.server import MCPServer
 
 from mcp_server.core import (
     build_dashboard_pack,
+    export_infra_to_archos_canvas,
     lookup_archos_canvases,
     lookup_toolbelt_and_runbooks,
     run_finops_estimate,
@@ -123,11 +124,36 @@ def archos_canvas_lookup(
     max_matches: int = 25,
 ) -> dict[str, Any]:
     """
-    [READ-ONLY | scope: local:archos:read] Search your 114+ local ArchOS interactive
-    architecture canvases by keyword or folder (foundations, data-lifecycle,
+    [READ-ONLY | scope: local:archos:read] Search your 120+ local ArchOS interactive
+    architecture canvases by keyword or folder (spartan-labs, foundations, data-lifecycle,
     classic-systems, ai-agents, pilots) to pair visual whiteboards with Spartan Labs.
     """
     return lookup_archos_canvases(query=query, folder=folder, max_matches=max_matches)
+
+
+@mcp.tool()
+def infra_to_archos_canvas(
+    source_path: str = "lab-1-core-engine/docker-compose.yml",
+    diagram_id: str = "dgm_exported-infra",
+    title: str = "Exported Infrastructure Blueprint",
+    dry_run: bool = True,
+    confirm_write: bool = False,
+    output_path: str = "generated_canvases/dgm_exported-infra.canvas.json",
+) -> dict[str, Any]:
+    """
+    [APPROVAL-GATED WRITE | scope: repo:write:canvases] Parse real docker-compose.yml,
+    Terraform .tf files/directories, or GitHub Actions CI YAML and generate a schema v3
+    ArchOS .canvas.json blueprint ready to load into ArchOS. Defaults to dry_run=True
+    (safe preview). To write to disk, pass BOTH dry_run=False AND confirm_write=True.
+    """
+    return export_infra_to_archos_canvas(
+        source_path=source_path,
+        diagram_id=diagram_id,
+        title=title,
+        dry_run=dry_run,
+        confirm_write=confirm_write,
+        output_path=output_path,
+    )
 
 
 def main() -> None:

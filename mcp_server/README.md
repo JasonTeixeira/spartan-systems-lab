@@ -13,7 +13,8 @@ Your portable "handyman toolbelt" MCP server. Plug it into **Claude Code, Cursor
 | **`qa_and_code_review`** | `read_only` | `repo:read+linters` | Runs `ruff`, `mypy`, `pytest`, and `gitleaks` safely via explicit argv lists (45s timeout) + returns the 5-Axis Principal Optimizer Rubric. | `ValueError` on missing directory; gate failures returned cleanly with exit code & stderr snippet. |
 | **`generate_dashboard_pack`** | `local_write_guarded` | `repo:write:dashboards` | Generates Grafana JSON (RED + FinOps + AI TTFT/cache) + Executive SQL KPI view. **Defaults to `dry_run=True`**. | `PermissionError` if `dry_run=False` without explicit `confirm_write=True`; `ValueError` on path traversal (`..`). |
 | **`visualize_infra_and_cicd`** | `read_only` | `repo:read` | Parses `docker-compose.yml` and `.github/workflows/*.yml` into Mermaid & D2 diagrams. | `ValueError` on path traversal outside workspace. |
-| **`archos_canvas_lookup`** | `read_only` | `local:archos:read` | Searches all 114+ local ArchOS interactive canvases (`/Users/Sage/archos/knowledge/library.manifest.json`) by keyword or folder. | Returns `available: false` cleanly if ArchOS is not present on the host. |
+| **`archos_canvas_lookup`** | `read_only` | `local:archos:read` | Searches all 120+ local ArchOS interactive canvases (`/Users/Sage/archos/knowledge/library.manifest.json`, including `Spartan Labs Infra`) by keyword or folder. | Returns `available: false` cleanly if ArchOS is not present on the host. |
+| **`infra_to_archos_canvas`** | `local_write_guarded` | `repo:write:canvases` | Parses real `docker-compose.yml`, Terraform `.tf` directories, or GitHub Actions YAML into a schema v3 ArchOS `.canvas.json` blueprint. **Defaults to `dry_run=True`**. | `PermissionError` if `dry_run=False` without explicit `confirm_write=True`; `ValueError` on unsafe `diagram_id` or path traversal. |
 
 ---
 

@@ -529,3 +529,526 @@ def lookup_archos_canvases(
         "match_count": len(matches),
         "matches": matches,
     }
+
+
+_SAFE_DIAGRAM_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")
+_TF_RESOURCE_RE = re.compile(r'resource\s+"([^"]+)"\s+"([^"]+)"\s*\{')
+
+_SERVICE_ARCHOS_SPECS: list[tuple[tuple[str, ...], dict[str, Any]]] = [
+    (
+        ("nginx", "caddy", "envoy", "haproxy", "traefik", "alb", "lb"),
+        {
+            "label": "Reverse proxy",
+            "componentId": "comp.reverse-proxy",
+            "family": "fam.comp.net",
+            "role": "gateway",
+            "discipline": "cloud",
+            "stateful": False,
+            "icon": "lucide:route",
+            "tier": 0,
+        },
+    ),
+    (
+        ("pgbouncer", "pool"),
+        {
+            "label": "Connection pooler",
+            "componentId": "comp.connection-pooler",
+            "family": "fam.comp.rdb",
+            "role": "gateway",
+            "discipline": "data",
+            "stateful": False,
+            "icon": "lucide:route",
+            "tier": 2,
+        },
+    ),
+    (
+        ("postgres", "psql", "rds", "aurora"),
+        {
+            "label": "PostgreSQL",
+            "componentId": "comp.postgres",
+            "family": "fam.comp.rdb",
+            "role": "store",
+            "discipline": "data",
+            "stateful": True,
+            "icon": "logos:postgresql",
+            "tier": 3,
+        },
+    ),
+    (
+        ("redis", "valkey", "memcached", "elasticache"),
+        {
+            "label": "Distributed cache",
+            "componentId": "comp.redis",
+            "family": "fam.comp.cache",
+            "role": "cache",
+            "discipline": "core",
+            "stateful": True,
+            "icon": "logos:redis",
+            "tier": 2,
+        },
+    ),
+    (
+        ("kafka", "redpanda", "sqs", "kinesis"),
+        {
+            "label": "Event log",
+            "componentId": "comp.kafka",
+            "family": "fam.comp.messaging",
+            "role": "queue",
+            "discipline": "core",
+            "stateful": True,
+            "icon": "logos:kafka-icon",
+            "tier": 2,
+        },
+    ),
+    (
+        ("clickhouse",),
+        {
+            "label": "ClickHouse",
+            "componentId": "comp.clickhouse",
+            "family": "fam.comp.olap",
+            "role": "store",
+            "discipline": "data",
+            "stateful": True,
+            "icon": "lucide:database",
+            "tier": 3,
+        },
+    ),
+    (
+        ("qdrant", "milvus", "weaviate", "pinecone"),
+        {
+            "label": "Vector database",
+            "componentId": "comp.vector-store",
+            "family": "fam.comp.search",
+            "role": "index",
+            "discipline": "data",
+            "stateful": True,
+            "icon": "lucide:search",
+            "tier": 3,
+        },
+    ),
+    (
+        ("s3", "minio", "bucket", "iceberg"),
+        {
+            "label": "Object storage",
+            "componentId": "comp.object-store",
+            "family": "fam.comp.storage",
+            "role": "store",
+            "discipline": "data",
+            "stateful": True,
+            "icon": "lucide:hard-drive",
+            "tier": 3,
+        },
+    ),
+    (
+        ("prometheus", "otel", "exporter"),
+        {
+            "label": "OpenTelemetry Collector",
+            "componentId": "comp.otel-collector",
+            "family": "fam.comp.obs",
+            "role": "observe",
+            "discipline": "ops",
+            "stateful": False,
+            "icon": "lucide:activity",
+            "tier": 2,
+        },
+    ),
+    (
+        ("grafana", "metabase", "superset"),
+        {
+            "label": "Traces, metrics and logs",
+            "componentId": "comp.slo-dashboard",
+            "family": "fam.comp.obs",
+            "role": "observe",
+            "discipline": "ops",
+            "stateful": True,
+            "icon": "lucide:activity",
+            "tier": 3,
+        },
+    ),
+    (
+        ("vpc", "subnet", "security_group", "firewall"),
+        {
+            "label": "Network firewall",
+            "componentId": "comp.network-firewall",
+            "family": "fam.comp.net",
+            "role": "control",
+            "discipline": "cloud",
+            "stateful": False,
+            "icon": "lucide:shield",
+            "tier": 0,
+        },
+    ),
+]
+
+
+def _classify_infra_node(name: str, hint: str = "") -> dict[str, Any]:
+    haystack = f"{name} {hint}".lower()
+    for keywords, spec in _SERVICE_ARCHOS_SPECS:
+        if any(k in haystack for k in keywords):
+            return spec
+    return {
+        "label": "Container runtime",
+        "componentId": "comp.container-runtime",
+        "family": "fam.comp.compute",
+        "role": "compute",
+        "discipline": "cloud",
+        "stateful": False,
+        "icon": "lucide:container",
+        "tier": 1,
+    }
+
+
+def export_infra_to_archos_canvas(
+    *,
+    source_path: str = "lab-1-core-engine/docker-compose.yml",
+    diagram_id: str = "dgm_exported-infra",
+    title: str = "Exported Infrastructure Blueprint",
+    dry_run: bool = True,
+    confirm_write: bool = False,
+    output_path: str = "generated_canvases/dgm_exported-infra.canvas.json",
+    workspace_root: Path | None = None,
+) -> dict[str, Any]:
+    """
+    Parse real docker-compose.yml, Terraform .tf files/directories, or GitHub Actions YAML
+    and emit a schema v3 ArchOS .canvas.json blueprint laid out on an 8px DS2 grid.
+    Mutating boundary: defaults to dry_run=True; writes need dry_run=False & confirm_write=True.
+    """
+    if not _SAFE_DIAGRAM_ID_RE.match(diagram_id):
+        raise ValueError(
+            f"Invalid diagram_id {diagram_id!r}; must match ^[A-Za-z0-9][A-Za-z0-9_-]{{0,127}}$."
+        )
+
+    base = workspace_root or REPO_ROOT
+    target = _safe_resolve_under(base, source_path)
+    if not target.exists():
+        raise ValueError(f"Source path not found: {source_path}")
+
+    raw_nodes: list[dict[str, Any]] = []
+    raw_edges: list[tuple[str, str, str]] = []
+    source_type = "unknown"
+
+    if target.is_dir() or target.suffix == ".tf":
+        source_type = "terraform"
+        tf_files = sorted(target.rglob("*.tf")) if target.is_dir() else [target]
+        tf_blocks: list[tuple[str, str, str, str]] = []
+        for tf in tf_files:
+            content = tf.read_text(encoding="utf-8", errors="ignore")
+            matches = list(_TF_RESOURCE_RE.finditer(content))
+            for idx, m in enumerate(matches):
+                rtype, rname = m.group(1), m.group(2)
+                start = m.end()
+                end = matches[idx + 1].start() if idx + 1 < len(matches) else len(content)
+                body = content[start:end]
+                key = re.sub(r"[^a-zA-Z0-9_-]", "-", f"{rtype}-{rname}").lower()
+                tf_blocks.append((key, rtype, rname, body))
+                raw_nodes.append(
+                    {"key": key, "name": rname, "subtitle": f"{rtype}.{rname}", "hint": rtype}
+                )
+        ref_lookup = {f"{rtype}.{rname}": key for key, rtype, rname, _ in tf_blocks}
+        for key, _rtype, _rname, body in tf_blocks:
+            for ref_str, target_key in ref_lookup.items():
+                if target_key != key and ref_str in body:
+                    raw_edges.append((key, target_key, "Depends on"))
+    else:
+        parsed = yaml.safe_load(target.read_text(encoding="utf-8")) or {}
+        if isinstance(parsed, dict) and isinstance(parsed.get("services"), dict):
+            source_type = "docker_compose"
+            for svc_name, cfg in parsed["services"].items():
+                cfg = cfg or {}
+                ports = cfg.get("ports") or []
+                image = str(cfg.get("image") or "custom-build")
+                port_note = f" ({ports[0]})" if ports else ""
+                key = re.sub(r"[^a-zA-Z0-9_-]", "-", str(svc_name)).lower()
+                raw_nodes.append(
+                    {
+                        "key": key,
+                        "name": str(svc_name),
+                        "subtitle": f"{svc_name}{port_note}",
+                        "hint": f"{svc_name} {image}",
+                    }
+                )
+                deps = cfg.get("depends_on") or {}
+                dep_list = list(deps.keys()) if isinstance(deps, dict) else list(deps)
+                for dep in dep_list:
+                    dep_key = re.sub(r"[^a-zA-Z0-9_-]", "-", str(dep)).lower()
+                    raw_edges.append((key, dep_key, "Connects to"))
+        elif isinstance(parsed, dict) and isinstance(parsed.get("jobs"), dict):
+            source_type = "github_actions"
+            for job_name, jcfg in parsed["jobs"].items():
+                steps = (jcfg or {}).get("steps") or []
+                prev_key: str | None = None
+                for idx, step in enumerate(steps, start=1):
+                    sname = str(step.get("name") or step.get("uses") or f"step-{idx}")
+                    key = re.sub(r"[^a-zA-Z0-9_-]", "-", f"{job_name}-{idx}").lower()
+                    raw_nodes.append(
+                        {
+                            "key": key,
+                            "name": sname[:28],
+                            "subtitle": f"{job_name}: {sname[:36]}",
+                            "hint": sname,
+                        }
+                    )
+                    if prev_key:
+                        raw_edges.append((prev_key, key, "Next stage"))
+                    prev_key = key
+        else:
+            raise ValueError(
+                f"Unsupported source format in {source_path}; "
+                "expected docker-compose.yml, .tf, or GitHub Actions YAML."
+            )
+
+    if not raw_nodes:
+        raise ValueError(f"No infrastructure services, resources, or jobs found in {source_path}.")
+
+    # Group nodes into 4 LTR tier columns on an 8px grid inside a Trust boundary
+    by_tier: dict[int, list[dict[str, Any]]] = {0: [], 1: [], 2: [], 3: []}
+    classified: dict[str, dict[str, Any]] = {}
+    node_tier: dict[str, int] = {}
+    bucket_size = max(1, (len(raw_nodes) + 3) // 4)
+    for idx, item in enumerate(raw_nodes):
+        spec = _classify_infra_node(item["name"], item["hint"])
+        tier = int(spec["tier"]) if source_type != "github_actions" else min(3, idx // bucket_size)
+        by_tier[tier].append(item)
+        classified[item["key"]] = spec
+        node_tier[item["key"]] = tier
+
+    non_empty_tiers = [t for t in (0, 1, 2, 3) if by_tier[t]]
+    max_rows = max(len(by_tier[t]) for t in non_empty_tiers)
+    node_w, node_h = 192, 128
+    col_step, row_step = 352, 192
+    boundary_x = 320
+    boundary_w = 40 + (len(non_empty_tiers) - 1) * col_step + node_w + 40
+    boundary_h = max(360, 64 + (max_rows - 1) * row_step + node_h + 48)
+    boundary_id = f"{diagram_id}--boundary"
+
+    canvas_nodes: list[dict[str, Any]] = [
+        {
+            "id": boundary_id,
+            "type": "containerNode",
+            "position": {"x": boundary_x, "y": 0},
+            "style": {"width": boundary_w, "height": boundary_h},
+            "data": {
+                "label": "Trust boundary",
+                "subtitle": f"Auto-generated from {source_path}",
+                "icon": "lucide:boxes",
+                "colorTheme": "cyan",
+                "conceptId": "boundary",
+                "masteryScore": 0,
+                "targetLevel": "L5",
+                "pageCount": 0,
+                "isChaosFailed": False,
+                "isCollapsed": False,
+                "stateful": False,
+                "discipline": "security",
+                "boundaryKind": "trust",
+            },
+        },
+        {
+            "id": f"{diagram_id}--client",
+            "type": "techNode",
+            "position": {"x": 0, "y": 64},
+            "style": {"width": node_w, "height": node_h},
+            "data": {
+                "label": "Client application",
+                "subtitle": "External entry caller",
+                "icon": "lucide:user",
+                "colorTheme": "cyan",
+                "conceptId": "client",
+                "masteryScore": 0,
+                "targetLevel": "L5",
+                "pageCount": 0,
+                "isChaosFailed": False,
+                "isCollapsed": False,
+                "componentId": "comp.client-app",
+                "family": "fam.comp.compute",
+                "role": "actor",
+                "discipline": "cloud",
+                "stateful": "mixed",
+                "actorRole": "client",
+                "external": True,
+            },
+        },
+    ]
+
+    valid_keys = {n["key"] for n in raw_nodes}
+
+    for col_idx, tier_id in enumerate(non_empty_tiers):
+        for row_idx, item in enumerate(by_tier[tier_id]):
+            spec = classified[item["key"]]
+            annotations: dict[str, Any] = {"backup": True} if spec["stateful"] is True else {}
+            canvas_nodes.append(
+                {
+                    "id": f"{diagram_id}--{item['key']}",
+                    "type": "techNode",
+                    "position": {"x": 40 + col_idx * col_step, "y": 64 + row_idx * row_step},
+                    "parentId": boundary_id,
+                    "style": {"width": node_w, "height": node_h},
+                    "data": {
+                        "label": spec["label"],
+                        "subtitle": item["subtitle"][:42],
+                        "icon": spec["icon"],
+                        "colorTheme": "cyan",
+                        "conceptId": item["key"],
+                        "masteryScore": 0,
+                        "targetLevel": "L5",
+                        "pageCount": 0,
+                        "isChaosFailed": False,
+                        "isCollapsed": False,
+                        "componentId": spec["componentId"],
+                        "family": spec["family"],
+                        "role": spec["role"],
+                        "discipline": spec["discipline"],
+                        "stateful": spec["stateful"],
+                        **({"annotations": annotations} if annotations else {}),
+                    },
+                }
+            )
+
+    sink_x = boundary_x + boundary_w + 128
+    canvas_nodes.append(
+        {
+            "id": f"{diagram_id}--sink",
+            "type": "techNode",
+            "position": {"x": sink_x, "y": 64},
+            "style": {"width": node_w, "height": node_h},
+            "data": {
+                "label": "Client application",
+                "subtitle": "Operator / consumer",
+                "icon": "lucide:user",
+                "colorTheme": "cyan",
+                "conceptId": "sink",
+                "masteryScore": 0,
+                "targetLevel": "L5",
+                "pageCount": 0,
+                "isChaosFailed": False,
+                "isCollapsed": False,
+                "componentId": "comp.client-app",
+                "family": "fam.comp.compute",
+                "role": "actor",
+                "discipline": "cloud",
+                "stateful": "mixed",
+                "actorRole": "operator",
+                "external": True,
+            },
+        }
+    )
+
+    # Build a continuous LTR numbered spine across non-empty tier leaders so DS2-C02 & DS2-L05 pass
+    spine_keys = [by_tier[t][0]["key"] for t in non_empty_tiers]
+    canvas_edges: list[dict[str, Any]] = []
+    seen_pairs: set[tuple[str, str]] = set()
+    step_num = 1
+    prev_id = f"{diagram_id}--client"
+    for skey in spine_keys:
+        cur_id = f"{diagram_id}--{skey}"
+        canvas_edges.append(
+            {
+                "id": f"{diagram_id}--step-{step_num}",
+                "source": prev_id,
+                "target": cur_id,
+                "type": "animatedFlowEdge",
+                "data": {
+                    "colorTheme": "cyan",
+                    "protocol": "HTTPS" if step_num == 1 else "TCP",
+                    "latencyMs": 0,
+                    "animate": False,
+                    "kind": "sync",
+                    "label": "Sends load" if step_num == 1 else "Forwards",
+                    "step": str(step_num),
+                    "annotations": {"tls": True, "timeoutMs": max(500, 6000 - step_num * 1000)},
+                },
+            }
+        )
+        seen_pairs.add((prev_id, cur_id))
+        prev_id = cur_id
+        step_num += 1
+
+    sink_id = f"{diagram_id}--sink"
+    canvas_edges.append(
+        {
+            "id": f"{diagram_id}--step-{step_num}",
+            "source": prev_id,
+            "target": sink_id,
+            "type": "animatedFlowEdge",
+            "data": {
+                "colorTheme": "cyan",
+                "protocol": "HTTPS",
+                "latencyMs": 0,
+                "animate": False,
+                "kind": "sync",
+                "label": "Delivers",
+                "step": str(step_num),
+                "annotations": {"tls": True, "timeoutMs": 2000},
+            },
+        }
+    )
+    seen_pairs.add((prev_id, sink_id))
+
+    for e_idx, (src, dst, lbl) in enumerate(raw_edges, start=1):
+        if src not in valid_keys or dst not in valid_keys:
+            continue
+        # Preserve LTR flow direction for control/dependency edges when source sits right of target
+        edge_src, edge_dst = (
+            (src, dst) if node_tier[src] <= node_tier[dst] else (dst, src)
+        )
+        src_full = f"{diagram_id}--{edge_src}"
+        dst_full = f"{diagram_id}--{edge_dst}"
+        if (src_full, dst_full) in seen_pairs:
+            continue
+        seen_pairs.add((src_full, dst_full))
+        canvas_edges.append(
+            {
+                "id": f"{diagram_id}--e{e_idx}",
+                "source": src_full,
+                "target": dst_full,
+                "type": "animatedFlowEdge",
+                "data": {
+                    "colorTheme": "cyan",
+                    "protocol": "TCP",
+                    "latencyMs": 0,
+                    "animate": False,
+                    "kind": "control",
+                    "label": lbl,
+                    "annotations": {"tls": True},
+                },
+            }
+        )
+
+    canvas_doc: dict[str, Any] = {
+        "schemaVersion": 3,
+        "id": diagram_id,
+        "title": title,
+        "tier": "production",
+        "flow": "ltr",
+        "level": "L4",
+        "systemBoundaryId": boundary_id,
+        "numbers": "none-needed",
+        "showMasteryRing": False,
+        "nodes": canvas_nodes,
+        "edges": canvas_edges,
+        "viewport": {"x": 16, "y": 16, "zoom": 0.6},
+        "updatedAt": "2026-11-23T00:00:00.000Z",
+    }
+
+    written_path: str | None = None
+    if not dry_run:
+        if not confirm_write:
+            raise PermissionError(
+                "Write blocked by policy: set confirm_write=True explicitly when dry_run=False."
+            )
+        out_file = _safe_resolve_under(base, output_path)
+        out_file.parent.mkdir(parents=True, exist_ok=True)
+        out_file.write_text(json.dumps(canvas_doc, indent=2) + "\n", encoding="utf-8")
+        written_path = str(out_file)
+
+    return {
+        "risk_level": "read_only" if dry_run else "local_write_confirmed",
+        "dry_run": dry_run,
+        "source_type": source_type,
+        "source_path": source_path,
+        "diagram_id": diagram_id,
+        "node_count": len(canvas_nodes),
+        "edge_count": len(canvas_edges),
+        "written_path": written_path,
+        "canvas_json": canvas_doc,
+    }
