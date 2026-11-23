@@ -4,8 +4,9 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
 
 ---
 
-## 0. Start Here (Visual Atlas Portal, Operator Manual & Progress Tracker)
-- **`docs/index.html`** (`make portal`) — **Interactive Colorful Visual Architecture Atlas** (works offline in browser & ready for GitHub Pages): Complete 362-unit numbers breakdown across 8 domains, interactive Role/Specialization selector ($200k–$500k+), end-to-end 5-lane architecture diagram, 6-Lab roadmap, and direct links to every doc & PDF.
+## 0. Start Here (Visual Atlas, Linear Syllabus, Operator Manual & Tracker)
+- **`docs/index.html`** (`make portal`) — **Interactive Colorful Visual Architecture Atlas** (offline browser & GitHub Pages): Complete **440-unit** numbers breakdown, interactive 6-Role selector ($200k–$600k+), end-to-end 5-lane architecture diagram, 6-Lab roadmap, and direct links to every manual & tool.
+- **`docs/LINEAR_SYLLABUS.md`** — **The 12-Module Linear Compounding Syllabus** (`M01 -> M12`, 4 parallel daily tracks, Boss Fight gates, Constraint-First LeetCode-100x method, and 10 "30-Year Veteran" Battle Scars).
 - **`docs/mastery_tracker.html`** (`make tracker`) — Interactive browser mastery checklist tracking all 6 Labs, 10 Archetypes, 12 DDIA Chapters, 12 Data Safeguards, 12 Automation Archetypes, 22 Daily Loops, Failure Drills, and 8 Mini-System Katas with CSV export.
 - **`docs/HOW_TO_USE_THIS_LAB.md`** — Day-0 operator workflow, automated `make review` code/security/CVE reviewer, 5-Axis Principal Optimizer Rubric, ranked Python library stack (~25 core libraries), `uv` patching & container upgrade workflow, and audit-trail discipline.
 
@@ -22,6 +23,7 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
 - **`docs/FAILURE_MODES_AND_PERFORMANCE.md`** — Brendan Gregg's 5 Scientific Performance Models (USE, RED, TSA, On-CPU vs Off-CPU, Pragmatic eBPF) + **40 Mapped Production Failures across 8 Domains (~96-98% real-world incident coverage)**.
 - **`docs/PYTHON_AUTOMATION_AND_ORCHESTRATION.md`** — The 12 Universal Enterprise & Consulting Automation Archetypes, 7 Iron Laws of Unbreakable Python Automation, Confidence-Threshold HITL Routing, and the Orchestration Selection Matrix (Cron vs Queues vs Airflow/Dagster vs Temporal vs GitOps/Terraform/Ansible vs n8n/Playwright).
 - **`docs/AI_ML_AND_LLM_MASTERY.md`** — Complete AI/ML & LLM Engineering Specialty Blueprint: Hugging Face (`transformers`/`peft`/`datasets`/`sentence-transformers`), Inference (`Ollama`/`mlx-lm`/`vLLM`/`LiteLLM` + KV-cache/TTFT/ITL), Embeddings & 6 Proven Production RAG Patterns (Qdrant/`pgvector`/HNSW/Reranking), LangGraph vs. Pure Python + MCP Agents, 5-Layer AI/LLM/Behavioral ML Eval Pyramid, and the 6-Repo Surgical Extraction Map (`nn-zero-to-hero`, `LLMs-from-scratch`, `Made-With-ML`, `RAG_Techniques`, `ai-engineering-hub`, `applied-ml`).
+- **`docs/DEEP_SPECIALTIES_IAC_API_ML_SECURITY_CERTS.md`** — **+78 Deep Specialist Units** (362 -> 440 total): Production IaC Mastery (Terraform state surgery/drift/Checkov/Packer/Ansible/Helm/Crossplane), Clean Python (Cosmic Python) & Scale API Architecture, 7-Step ML System Design + 8 Canonical ML Systems, Deep TCP/IP & CISSP/Zero-Trust/OWASP/STRIDE Security Architecture, and AWS SAP-C02 / GenAI Pro / GCP Cert Delta.
 
 ## 3. Evidence, Decisions & Proof Artifacts (`docs/`)
 - `docs/rfc/` — 1-page Business-to-Architecture RFCs

@@ -1,0 +1,61 @@
+# The 12-Module Linear Compounding Spartan Syllabus
+
+> **How To Use This Linearly (8-16 Hr/Day Spartan Mode — Repeatable Forever):**  
+> Never jump randomly between 10 docs. Work strictly **M01 -> M12** in order. Every module runs **4 Parallel Daily Tracks** and ends with a **Boss Fight Gate**. On **Pass 2**, loop M01 -> M12 again in **Nightmare Mode** (new constraints, compound outages, tighter p99 SLOs, unseen Hard coding problems) until every primitive is native English.
+
+---
+
+## The 4 Parallel Daily Tracks (Run Every Single Day)
+
+1. **Track A (45-60 min) — Cold Python & Unseen-Hard Coding (Constraint-First Method):** Solve timed problems cold (zero AI autocomplete), state the **loop invariant** out loud, analyze Big-O Time/Space, and run `pytest`.
+2. **Track B (20-30 min) — Bash/Linux Pipes & SQL Speed:** Live `awk`/`sed`/`jq`/`ss`/`strace`/`tcpdump` + Postgres window functions, CTEs, `EXPLAIN (ANALYZE, BUFFERS)`.
+3. **Track C (2-6 hrs) — Learn -> Immediately Build & Break in the Active Lab:** Read ONLY the 2-3 pages for the current module -> write the code/SQL/IaC yourself -> run `make review` -> stress & break it -> `make snapshot-incident` -> `make reset`.
+4. **Track D (End of Module) — Module Boss Fight Gate:** Pass **(1) 1 unseen coding problem**, **(2) 1 live break-fix**, and **(3) 1 15-min whiteboard trade-off defense** before unlocking Module `N+1`.
+
+---
+
+## The 12 Sequential Compounding Modules
+
+| Mod | Lab / Track | Concepts Learned -> Immediately Built, Stressed & Broken | Boss Fight Gate (Exit Proof) |
+| :---: | :--- | :--- | :--- |
+| **M01** | **Lab 1A: Python Core, Clean Code & Foundation DSA** | Hash Maps, Two Pointers, Sliding Window, Prefix Sums, Lazy Generators (`yield`), Pydantic v2, Cosmic Python (**Repository + Service Layer + DI**), `uv`/`ruff`/`mypy`/`pytest`. | Pass `make drill-py`, refactor `lab-1` into clean Domain/Service/Adapter layers, pass 6-gate `make review`. |
+| **M02** | **Lab 1B: SQL Mastery, Postgres Internals & 10M Rows** | Window functions (`ROW_NUMBER`, `LAG`), CTEs, 3-valued NULLs, `EXPLAIN (ANALYZE, BUFFERS)`, Composite B-Tree, PgBouncer, **DDIA Lost Update & Write Skew**, Metabase Exec BI views. | Seed 1M-10M rows, drop query from seconds -> `<10ms`, reproduce & fix Write Skew live, verify Metabase KPIs. |
+| **M03** | **Lab 1C: Linux Kernel, Bash Mastery, Grafana & Chaos #1** | `awk`/`sed`/`jq`/`xargs` forensics, Brendan Gregg USE/TSA/Off-CPU, `ss`/`strace`/`tcpdump`, Prometheus + Grafana 6-panel dashboard, `lock-storm` + `net-latency` + DR `backup`/`restore`/`reset`. | Solve compound `lock-storm` + latency under `k6` cold, archive `make snapshot-incident`, pass DR restore checksum. |
+| **M04** | **DSA Deep Surge + API Mastery + 3 Mini-System Katas** | Monotonic Stack/Queue, Heaps/Top-K, BFS/DFS/Topo Sort, Union-Find, Binary Search on Answer, Intervals, Backtracking, DP, Tries + **Full REST/OpenAPI 3.1/RFC 7807/Keyset/ETags/HMAC Webhooks** + build **URL Shortener, Rate Limiter, ACID Wallet** on Lab 1. | Solve 3 unseen Hard/Medium DSA problems cold under clock + benchmark all 3 Katas with `k6` on Grafana. |
+| **M05** | **Lab 2: Deep TCP/IP, Linux VM, Security & Real Deploys** | Lima Ubuntu + Rocky/RHEL VM, CIDR subnetting math, `nftables` firewall, DNS, TLS 1.3/HTTPS + CDN caching (Nginx/Caddy), SSH Bastion, Protobuf/gRPC evolution, Ansible + zero-downtime Docker/`systemd` deploy. | Prove blocked private DB, capture & decode TLS/TCP handshake in `tcpdump`, execute zero-downtime deploy + rollback. |
+| **M06** | **Lab 3A: Deep IaC Engineering & Core 12 AWS Services** | `aws/aws-emulator` + Terraform modules, remote state locking, `import`/`moved` state surgery, drift detection, `Checkov`/`Infracost`, VPC/CIDRs/SGs/IAM policy evaluation, S3/SQS/DynamoDB, `boto3` + `spartan-cli`. | Run `terraform destroy && apply` with zero manual touches + pass `Checkov` & `Infracost` PR check. |
+| **M07** | **Lab 3B: Apache Data Platform, Lifecycle & FinOps** | 6-Stage Data Lifecycle, Kafka/Redpanda backpressure/DLQs, ClickHouse OLAP, MinIO + Apache Iceberg/Arrow/Parquet, Airflow + PySpark/DuckDB/dbt, Mailpit email, Apache Superset BI, all **12 Data Safeguards** (WAP, SCD2, `ASOF JOIN`). | Survive 3-min ClickHouse outage during 10k RPS + duplicate flood with penny-exact billing & FinOps `429` cap. |
+| **M08** | **Lab 4A: Embeddings, Scaled Vector RAG & Inference** | Hugging Face (`transformers`/`sentence-transformers`), Qdrant hybrid dense+BM25+mandatory `tenant_id` pre-filter, Cross-Encoder reranking, Ollama/`mlx-lm` + LiteLLM, Redis Semantic Cache, 6 proven RAG patterns. | Hit `<2.5s` p95 RAG, prove 0% cross-tenant leakage on adversarial test, prove 60% token savings via cache + router. |
+| **M09** | **Lab 4B: Agents, MCP, Voice AI, ML System Design & Evals** | Production MCP Server (schemas + approvals), LangGraph agents + OWASP LLM guardrails, WebRTC Voice AI, **7-Step ML Design + 8 ML Systems**, LightGBM/PyTorch anomaly model + `Made-With-ML` Behavioral ML Tests + `DVC`/`MLflow`/Phoenix CI + 3-hr RunPod **vLLM/GPU** sprint. | Block a deliberately degraded prompt/model automatically in CI eval gate + tune vLLM KV-cache live on cloud GPU. |
+| **M10** | **Lab 5: Pure-Code Internals (Zero Docker)** | 300-line **LSM-Tree** (WAL/MemTable/SSTable/Bloom/Compaction) + **3-Node Raft** over TCP + **Zero-Copy `sendfile`** + **`micrograd`** + **`minbpe`** + **Mini-GPT Attention + LoRA** from scratch on M3 Max PyTorch MPS. | Pass Raft split-brain leader re-election test, prove ~90% fewer context switches in `sendfile`, train Mini-GPT + LoRA. |
+| **M11** | **Lab 6: K8s, CISSP Zero-Trust, CDC Migration & Chaos** | 3-node `kind`, Cilium eBPF/Hubble/Tetragon, ArgoCD GitOps, OpenBao/Vault 15-min dynamic secrets, Keycloak OIDC, Postgres RLS, STRIDE threat model, Debezium CDC + Envoy Strangler Fig, **12 Blind Outages** + ephemeral **Real-AWS Live-Fire**. | Rebuild cluster from Git `<10 min`, solve blind Chaos Roulette outages `<5 min` cold, survive 50% canary failure with 0 5xx. |
+| **M12** | **Principal Capstone: Unseen Coding, Design, Certs & C-Suite** | Timed unseen Hard coding + 10-Archetype 45-min whiteboard drills + **AWS SAP-C02 / GenAI Pro Cert Delta** + Executive BLUF FinOps receipts + Build-in-Public teardowns + 2 upstream OSS PRs. | Deliver 3 reproducible `make bench` savings proofs, pass 3 mock 45-min Principal design loops, publish 3 terminal teardowns. |
+
+---
+
+## The Constraint-First Method (How to Crack Unseen Hard Coding Problems Cold)
+
+1. **Read Input Constraint `N` FIRST (Before Guessing Any Algorithm):**
+   - `N <= 20` -> Exponential / Backtracking / Bitmask DP ($O(2^N)$)
+   - `N <= 500` -> $O(N^3)$ (Interval DP / Floyd-Warshall)
+   - `N <= 5,000` -> $O(N^2)$ (2D DP / nested pairs)
+   - `N <= 10^5` -> **Must be $O(N)$ or $O(N \log N)$** (Hash Map, Two Pointers, Sliding Window, Monotonic Stack/Queue, Heap, Binary Search on Answer, Sort + Greedy, Union-Find)
+   - `N >= 10^9` -> **$O(\log N)$ or $O(1)$** (Binary Search / Math / Bitwise)
+2. **Name the Loop Invariant Out Loud Before Typing:** *"At every step, window `[L, R]` satisfies X"* or *"Heap holds the K largest elements seen in `nums[0..i]`."*
+3. **Trace 3 Edge Cases Before Running:** Empty/single element, all duplicates/negatives, maximum constraint / overflow.
+4. **Narrate Time, Space & Production Trade-Offs:** Explain memory locality, streaming vs in-RAM, and how you'd scale it to 100M items (external merge sort / HyperLogLog / Bloom filter).
+
+---
+
+## The 10 "30-Year Veteran Battle Scars" (Never Taught in Courses)
+
+1. **Hierarchical Timeouts (Inner < Outer):** Nginx `5s` > FastAPI `4s` > Postgres `statement_timeout 3s`. Reverse this and retries pile onto still-running dead DB queries.
+2. **Never Couple Breaking DB Migrations With App Code in One Deploy:** Rolling deploys run v1 and v2 side-by-side. Always **Expand -> Deploy v2 -> Contract**.
+3. **Throttle Mass Deletes & Backfills:** Never delete 50M rows in one tx; batch `5k-10k` rows with a `50ms` sleep to avoid lock storms & WAL replication lag.
+4. **Queues Absorb Bursts — Never Permanent Overload:** If `in_rate > drain_rate` permanently, scale consumers, batch, or **shed load at the edge (`429`)**.
+5. **Averages Always Lie — Check p99 & Skew By Tenant:** One mega-tenant with 100x rows will suffer `12s` latency while average latency looks like `40ms`.
+6. **At-Least-Once + Idempotency + Forward-Only State Machines:** Beats mythical "exactly-once" network guarantees every time.
+7. **Every Expensive Feature Ships With a Kill Switch & Fallback:** If OpenAI/Qdrant fails on Black Friday, degrade cleanly to cached/heuristic mode so checkout survives.
+8. **Read the Literal Source of Truth First:** `EXPLAIN`, `pg_stat_activity`, `ss -tnp`, `curl -v`, `git log -n 5`, exact stack line 1 — never guess from memory.
+9. **3-Second Production Safety Reflex:** Verify **context/env** -> run **dry-run / `SELECT COUNT(*)` / `plan`** -> know your **exact rollback command** before pressing Enter.
+10. **Open & Extensible Forever:** Every time a new framework or vendor drops in 2027+, run Framework 5 (5 Physical Questions) and slot it into its exact Domain + Module without restarting from scratch.
