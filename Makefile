@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test ci review up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py chaos backup restore snapshot-incident pdf
+.PHONY: setup lint typecheck test ci review portal tracker up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py chaos backup restore snapshot-incident pdf
 
 COMPOSE := docker compose -f lab-1-core-engine/docker-compose.yml
 ROWS ?= 100000
@@ -87,6 +87,13 @@ snapshot-incident:
 # --- Spartan Daily Cold Drills (intentionally red until YOU implement the stubs!) ---
 drill-py:
 	uv run pytest drills/python-dsa/ -v
+
+# --- Visual Documentation Portal & Progress Tracker ---
+portal:
+	open docs/index.html
+
+tracker:
+	open docs/mastery_tracker.html
 
 # --- Rebuild Homelab Blueprint PDF ---
 pdf:

@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spartan Systems Lab — Complete Engineering & AI Architecture Atlas</title>
+  <style>
+    :root {
+      --bg: #070b14;
+      --bg-elev: #0e1628;
+      --card: #121c33;
+      --card-hover: #172442;
+      --border: #233252;
+      --text: #edf2ff;
+      --muted: #93a4c4;
+      --cyan: #38bdf8;
+      --emerald: #34d399;
+      --violet: #a78bfa;
+      --amber: #fbbf24;
+      --rose: #fb7185;
+      --indigo: #818cf8;
+      --orange: #fb923c;
+      --teal: #2dd4bf;
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+      --radius: 14px;
+    }
+    body.light {
+      --bg: #f6f8fc;
+      --bg-elev: #ffffff;
+      --card: #ffffff;
+      --card-hover: #f0f5ff;
+      --border: #dbe3f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --cyan: #0284c7;
+      --emerald: #059669;
+      --violet: #7c3aed;
+      --amber: #d97706;
+      --rose: #e11d48;
+      --indigo: #4f46e5;
+      --orange: #ea580c;
+      --teal: #0d9488;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+      line-height: 1.55;
+    }
+
+    /* Top Nav */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(14px);
+      background: color-mix(in srgb, var(--bg-elev) 88%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      max-width: 1320px; margin: 0 auto; padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 16px; }
+    .brand-dot {
+      width: 12px; height: 12px; border-radius: 99px;
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+      box-shadow: 0 0 14px color-mix(in srgb, var(--cyan) 65%, transparent);
+    }
+    .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 600;
+      padding: 6px 11px; border-radius: 8px; transition: 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--card); }
+    .theme-btn {
+      background: var(--card); color: var(--text); border: 1px solid var(--border);
+      padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .theme-btn:hover { border-color: var(--cyan); }
+
+    /* Container */
+    .wrap { max-width: 1320px; margin: 0 auto; padding: 28px 24px 80px; }
+
+    /* Hero */
+    .hero {
+      position: relative; overflow: hidden;
+      background: radial-gradient(circle at 12% 10%, color-mix(in srgb, var(--cyan) 16%, transparent), transparent 42%),
+                  radial-gradient(circle at 88% 20%, color-mix(in srgb, var(--violet) 18%, transparent), transparent 45%),
+                  var(--bg-elev);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 36px 34px; box-shadow: var(--shadow); margin-bottom: 28px;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--cyan); background: color-mix(in srgb, var(--cyan) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--cyan) 30%, transparent);
+      padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+    }
+    .hero h1 { margin: 0 0 10px; font-size: clamp(26px, 3.6vw, 40px); line-height: 1.15; letter-spacing: -0.03em; }
+    .hero p { margin: 0 0 24px; max-width: 820px; color: var(--muted); font-size: 15.5px; }
+
+    /* KPI Strip */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+    .kpi {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+      border-top: 3px solid var(--c, var(--cyan));
+    }
+    .kpi .num { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--c, var(--cyan)); line-height: 1.1; }
+    .kpi .lbl { font-size: 12px; font-weight: 700; margin-top: 4px; }
+    .kpi .sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+    /* Section Header */
+    .sec { margin-top: 42px; }
+    .sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+    .sec-head h2 { margin: 0; font-size: 24px; letter-spacing: -0.02em; }
+    .sec-head p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .pill {
+      display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 4px 10px; border-radius: 999px;
+      color: var(--c, var(--cyan)); background: color-mix(in srgb, var(--c, var(--cyan)) 14%, transparent);
+      border: 1px solid color-mix(in srgb, var(--c, var(--cyan)) 35%, transparent);
+    }
+
+    /* Pareto Banner */
+    .pareto {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px;
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;
+      margin-bottom: 22px;
+    }
+    .pareto-step { padding: 10px 12px; border-left: 3px solid var(--c, var(--cyan)); background: var(--card); border-radius: 0 10px 10px 0; }
+    .pareto-step strong { display: block; font-size: 14px; margin-bottom: 4px; color: var(--c, var(--cyan)); }
+    .pareto-step span { font-size: 13px; color: var(--muted); }
+
+    /* Domain Cards */
+    .domain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
+    .dcard {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 14px;
+      border-top: 4px solid var(--c, var(--cyan)); transition: transform 0.15s, border-color 0.15s;
+    }
+    .dcard:hover { transform: translateY(-2px); border-color: var(--c, var(--cyan)); }
+    .dcard-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .dcard h3 { margin: 0; font-size: 17px; letter-spacing: -0.01em; }
+    .dcard .count-badge {
+      font-size: 20px; font-weight: 800; color: var(--c, var(--cyan));
+      background: color-mix(in srgb, var(--c, var(--cyan)) 12%, transparent);
+      padding: 4px 12px; border-radius: 10px; white-space: nowrap;
+    }
+    .breakdown-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+    .breakdown-list li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 8px; background: var(--bg-elev); border-radius: 7px; }
+    .breakdown-list li span:first-child { color: var(--muted); }
+    .breakdown-list li strong { color: var(--text); white-space: nowrap; }
+
+    /* Coverage Bars */
+    .bars { display: flex; flex-direction: column; gap: 8px; }
+    .bar-row { font-size: 12px; }
+    .bar-meta { display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--muted); font-weight: 600; }
+    .bar-track { height: 7px; background: var(--bg-elev); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+    .bar-fill { height: 100%; border-radius: 99px; background: var(--c, var(--cyan)); }
+
+    .doc-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+    .chip {
+      font-size: 11.5px; font-weight: 600; color: var(--text); text-decoration: none;
+      background: var(--bg-elev); border: 1px solid var(--border); padding: 4px 9px; border-radius: 7px;
+    }
+    .chip:hover { border-color: var(--c, var(--cyan)); color: var(--c, var(--cyan)); }
+
+    /* Role Filter Tabs */
+    .role-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .role-btn {
+      background: var(--card); color: var(--muted); border: 1px solid var(--border);
+      padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.15s;
+    }
+    .role-btn:hover { color: var(--text); border-color: var(--cyan); }
+    .role-btn.active {
+      background: linear-gradient(135deg, color-mix(in srgb, var(--cyan) 22%, var(--card)), color-mix(in srgb, var(--violet) 22%, var(--card)));
+      color: var(--text); border-color: var(--cyan); box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 40%, transparent);
+    }
+    .role-panel {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; box-shadow: var(--shadow);
+    }
+    .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; }
+    .rbox { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .rbox h4 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cyan); }
+    .rbox ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); display: flex; flex-direction: column; gap: 5px; }
+    .rbox ul strong { color: var(--text); }
+
+    /* Architecture Diagram */
+    .arch-wrap {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: 16px;
+      padding: 24px; box-shadow: var(--shadow); overflow-x: auto;
+    }
+    .arch-lanes { display: grid; grid-template-columns: repeat(5, minmax(210px, 1fr)); gap: 14px; align-items: stretch; }
+    .lane {
+      background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--c, var(--cyan));
+      border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .lane-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--c, var(--cyan)); }
+    .node {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px;
+      font-size: 12.5px;
+    }
+    .node b { display: block; font-size: 13px; color: var(--text); }
+    .node span { color: var(--muted); font-size: 11.5px; }
+    .arch-flow-bar {
+      margin-top: 14px; padding: 12px 16px; border-radius: 10px;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--cyan) 12%, var(--card)), color-mix(in srgb, var(--violet) 12%, var(--card)), color-mix(in srgb, var(--emerald) 12%, var(--card)));
+      border: 1px solid var(--border); font-size: 13px; text-align: center; font-weight: 600;
+    }
+
+    /* 6-Lab Timeline */
+    .lab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }
+    .lab-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; border-left: 5px solid var(--c, var(--cyan)); display: flex; flex-direction: column; gap: 10px;
+    }
+    .lab-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .lab-head h3 { margin: 0; font-size: 16.5px; }
+    .status-live { background: color-mix(in srgb, var(--emerald) 18%, transparent); color: var(--emerald); border: 1px solid color-mix(in srgb, var(--emerald) 45%, transparent); font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 99px; }
+    .status-next { background: color-mix(in srgb, var(--amber) 16%, transparent); color: var(--amber); border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent); font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 99px; }
+    .lab-meta { font-size: 13px; color: var(--muted); }
+    .lab-meta strong { color: var(--text); }
+
+    /* Daily Loop */
+    .loop-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+    .lstep {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px;
+      position: relative;
+    }
+    .lstep .idx { font-size: 11px; font-weight: 800; color: var(--c, var(--cyan)); text-transform: uppercase; letter-spacing: 0.08em; }
+    .lstep h4 { margin: 4px 0 6px; font-size: 15px; }
+    .lstep p { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); font-size: 13.5px; }
+    th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--border); }
+    th { background: var(--bg-elev); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    tr:last-child td { border-bottom: none; }
+
+    /* Quick Links Footer */
+    .links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .link-card {
+      display: block; text-decoration: none; color: var(--text);
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px;
+      transition: 0.15s;
+    }
+    .link-card:hover { border-color: var(--cyan); background: var(--card-hover); }
+    .link-card b { display: block; font-size: 14px; margin-bottom: 4px; color: var(--cyan); }
+    .link-card span { font-size: 12.5px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-dot"></span> Spartan Systems Lab — Master Atlas</div>
+      <nav class="nav-links">
+        <a href="#numbers">By The Numbers</a>
+        <a href="#domains">8 Domains</a>
+        <a href="#roles">By Role ($200k–$500k+)</a>
+        <a href="#architecture">System Architecture</a>
+        <a href="#labs">6 Stacked Labs</a>
+        <a href="#loop">Spartan Loop</a>
+        <a href="#library">Docs &amp; Tracker</a>
+      </nav>
+      <button class="theme-btn" onclick="toggleTheme()">Toggle Light / Dark</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- HERO -->
+    <section class="hero" id="numbers">
+      <div class="hero-eyebrow">Native Fluency System — Not Memorization</div>
+      <h1>The Complete Systems, Cloud, Data &amp; AI/ML Architecture Atlas</h1>
+      <p>
+        Stop learning tech in disconnected silos. Every enterprise system—from a 1,000-row API to a 1-billion-user cloud &amp; AI platform—is assembled from a finite set of physical building blocks. Master the <strong>Core 65 Primitives</strong> first (~80% instant fluency), then layer the full <strong>362 Structured Units</strong> through <strong>6 Stacked Labs</strong> until systems engineering reads like native English.
+      </p>
+      <div class="kpi-grid">
+        <div class="kpi" style="--c:var(--cyan)"><div class="num">362</div><div class="lbl">Total Structured Units</div><div class="sub">Across 8 engineering domains</div></div>
+        <div class="kpi" style="--c:var(--emerald)"><div class="num">65</div><div class="lbl">Core 80/20 Primitives</div><div class="sub">22 loops + 14 DSA + 15 OS/Net + 10 arch + 5 DB</div></div>
+        <div class="kpi" style="--c:var(--violet)"><div class="num">6 + 6</div><div class="lbl">Labs + Plug-In Packs</div><div class="sub">1 unified evolving platform</div></div>
+        <div class="kpi" style="--c:var(--rose)"><div class="num">40</div><div class="lbl">Mapped Prod Outages</div><div class="sub">~96–98% real incident coverage</div></div>
+        <div class="kpi" style="--c:var(--amber)"><div class="num">47 → 10</div><div class="lbl">Systems → Archetypes</div><div class="sub">Unlocks Netflix, Discord, Uber, AI</div></div>
+        <div class="kpi" style="--c:var(--indigo)"><div class="num">11</div><div class="lbl">Live Lab 1 Services</div><div class="sub">Grafana + Metabase + Postgres + SRE</div></div>
+      </div>
+    </section>
+
+    <!-- PARETO FLUENCY PATH -->
+    <div class="pareto">
+      <div class="pareto-step" style="--c:var(--emerald)">
+        <strong>Level 1 — Native Fluency Core (65 Units = 80% of Every Job)</strong>
+        <span>22 Daily Loops (Python/SQL/Linux) + 14 DSA Templates + 15 Physical Primitives + 5 DB Engines + 10 System Archetypes. Speak the language natively without freezing.</span>
+      </div>
+      <div class="pareto-step" style="--c:var(--cyan)">
+        <strong>Level 2 — Senior/Staff Execution (+180 Units = 95% Coverage)</strong>
+        <span>40 Production Failures + 12 Data Safeguards + 12 Automation Archetypes + 12 DDIA Chapters + Full AI/RAG/MCP/MLOps Eval Pyramid + Dual Grafana/Metabase Dashboards.</span>
+      </div>
+      <div class="pareto-step" style="--c:var(--violet)">
+        <strong>Level 3 — Principal &amp; Consulting Ceiling (All 362 Units)</strong>
+        <span>58-Component Periodic Table + 5 Brendan Gregg Models + 6 Judgment Matrices + C-Suite BLUF FinOps Proofs + Pure-Code LSM/Raft/Mini-GPT + Blind Chaos Roulette.</span>
+      </div>
+    </div>
+
+    <!-- 8 DOMAINS BY THE NUMBERS -->
+    <section class="sec" id="domains">
+      <div class="sec-head">
+        <div>
+          <h2>1. Complete Inventory By Domain (Ranked Most Used → Least Used)</h2>
+          <p>Exact unit counts, real-world usage weight, Interview/Job Docs coverage, and honest Live Code readiness today.</p>
+        </div>
+        <span class="pill" style="--c:var(--cyan)">8 Mastery Domains • 362 Units</span>
+      </div>
+
+      <div class="domain-grid">
+        <!-- D1 -->
+        <article class="dcard" style="--c:var(--cyan)">
+          <div class="dcard-top">
+            <div><span class="pill" style="--c:var(--cyan)">Weight: ~25% Daily</span><h3>1. Python, SQL, Coding &amp; DSA Primitives</h3></div>
+            <div class="count-badge">68 units</div>
+          </div>
+          <ul class="breakdown-list">
+            <li><span>SWE &amp; SQL Core Foundations</span><strong>12</strong></li>
+            <li><span>Production Python &amp; SQL Patterns</span><strong>26</strong></li>
+            <li><span>DSA (8 Structures + 14 Templates + 8 Adv.)</span><strong>30</strong></li>
+            <li><span>Daily Operational Loops (Python + SQL + Linux)</span><strong>22 loops</strong></li>
+            <li><span>Core Python Libraries (`uv`, Polars, PyTorch, MCP)</span><strong>25 libs</strong></li>
+          </ul>
+          <div class="bars">
+            <div class="bar-row"><div class="bar-meta"><span>Interview &amp; Job Scope Coverage (Docs)</span><span>96%</span></div><div class="bar-track"><div class="bar-fill" style="width:96%"></div></div></div>
+            <div class="bar-row"><div class="bar-meta"><span>Live Code &amp; Drills Built Today</span><span>55%</span></div><div class="bar-track"><div class="bar-fill" style="width:55%;opacity:.75"></div></div></div>
+          </div>
+          <div class="doc-chips">
+            <a class="chip" href="manuals/PYTHON_AND_SQL_PRODUCTION_MASTERY_GUIDE.pdf">PDF Manual #1</a>
+            <a class="chip" href="HOW_TO_USE_THIS_LAB.md">Python Libs &amp; Patching</a>
+          </div>
+        </article>
+
+        <!-- D2 -->
+        <article class="dcard" style="--c:var(--rose)">
+          <div class="dcard-top">
+            <div><span class="pill" style="--c:var(--rose)">Weight: ~18% Daily/Weekly</span><h3>2. Failure Forensics, Performance &amp; SRE</h3></div>
+            <div class="count-badge">51 units</div>
+          </div>
+          <ul class="breakdown-list">
+            <li><span>Mapped Production Failures (8 Domains)</span><strong>40</strong></li>
+            <li><span>Google SRE Frameworks (SLI/SLO, Burn-Rate, Toil, ICS)</span><strong>6</strong></li>
+            <li><span>QA &amp; Testing Pyramid Layers (Unit -> Chaos -> Evals)</span><strong>5</strong></li>
+            <li><span>Brendan Gregg Models (USE, RED, TSA, On/Off-CPU, eBPF)</span><strong>5 models</strong></li>
+          </ul>
+          <div class="bars">
+            <div class="bar-row"><div class="bar-meta"><span>Real-World Outage Scope Coverage (Docs)</span><span>96%</span></div><div class="bar-track"><div class="bar-fill" style="width:96%"></div></div></div>
+            <div class="bar-row"><div class="bar-meta"><span>Live Chaos &amp; Observability Built Today</span><span>40%</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;opacity:.75"></div></div></div>
+          </div>
+          <div class="doc-chips">
+            <a class="chip" href="FAILURE_MODES_AND_PERFORMANCE.md">40 Failures &amp; Gregg</a>
+            <a class="chip" href="PRINCIPAL_FRAMEWORKS.md">Google SRE &amp; QA</a>
+          </div>
+        </article>
+
+        <!-- D3 -->
+        <article class="dcard" style="--c:var(--emerald)">
+          <div class="dcard-top">
+            <div><span class="pill" style="--c:var(--emerald)">Weight: ~14% Daily/Weekly</span><h3>3. Linux OS, Networking, Servers &amp; Security</h3></div>
+            <div class="count-badge">48 units</div>
+          </div>
+          <ul class="breakdown-list">
+            <li><span>Linux Kernel, Memory, VFS, TCP/IP, TLS, Tracing</span><strong>38</strong></li>
+            <li><span>Hardware Server Archetypes (Compute/GPU/DB/Mem/HV)</span><strong>5</strong></li>
+            <li><span>Core Networking Primitives (CIDR/FW/DNS/TLS/Bastion)</span><strong>5</strong></li>
+            <li><span>6-Gate Automated Security &amp; Code Reviewer (`make review`)</span><strong>6 gates</strong></li>
+          </ul>
+          <div class="bars">
+            <div class="bar-row"><div class="bar-meta"><span>Cloud &amp; On-Prem Scope Coverage (Docs)</span><span>95%</span></div><div class="bar-track"><div class="bar-fill" style="width:95%"></div></div></div>
+            <div class="bar-row"><div class="bar-meta"><span>Live Linux Toolbox &amp; Segmented Nets Today</span><span>50%</span></div><div class="bar-track"><div class="bar-fill" style="width:50%;opacity:.75"></div></div></div>
+          </div>
+          <div class="doc-chips">
+            <a class="chip" href="DATA_LIFECYCLE_AND_SERVER_FUNDAMENTALS.md">Server Archetypes</a>
+            <a class="chip" href="../tools/linux-triage.sh">linux-triage.sh</a>
+          </div>
+        </article>
+
+        <!-- D4 -->
+        <article class="dcard" style="--c:var(--teal)">
+          <div class="dcard-top">
+            <div><span class="pill" style="--c:var(--teal)">Weight: ~14% Daily/Weekly</span><h3>4. Databases, Data Lifecycle &amp; Exec BI</h3></div>
+            <div class="count-badge">42 units</div>
+          </div>
+          <ul class="breakdown-list">
+            <li><span>Python Runtime &amp; Database Engine Internals</span><strong>14</strong></li>
+            <li><span>Data Engineering Production Safeguards (Local -> Cloud)</span><strong>12</strong></li>
+            <li><span>Data Lifecycle Stages (Generation -> Archival/GDPR)</span><strong>6</strong></li>
+            <li><span>Locked-In Data Stacks (3NF / Medallion / Star / OBT / KV)</span><strong>5</strong></li>
+            <li><span>Schema Modeling Rules (Grain, Fact/Dim, SCD2, ASOF, WAP)</span><strong>5</strong></li>
+          </ul>
+          <div class="bars">
+            <div class="bar-row"><div class="bar-meta"><span>Data Eng &amp; BI Scope Coverage (Docs)</span><span>95%</span></div><div class="bar-track"><div class="bar-fill" style="width:95%"></div></div></div>
+            <div class="bar-row"><div class="bar-meta"><span>Live Postgres + 3 Exec BI Views + Metabase Today</span><span>45%</span></div><div class="bar-track"><div class="bar-fill" style="width:45%;opacity:.75"></div></div></div>
+          </div>
+          <div class="doc-chips">
+            <a class="chip" href="DATA_LIFECYCLE_AND_SERVER_FUNDAMENTALS.md">Data Lifecycle &amp; Stacks</a>
+            <a class="chip" href="../tools/sql-diagnostics/pg_xray.sql">pg_xray.sql</a>
+          </div>
+        </article>
+
+        <!-- D5 -->
+        <article class="dcard" style="--c:var(--violet)">
+          <div class="dcard-top">
+            <div><span class="pill" style="--c:var(--violet)">Weight: Core Specialty Spike</span><h3>5. AI, ML, LLM Inference, RAG, Agents &amp; MCP</h3></div>
+            <div class="count-badge">27 units</div>
+          </div>
+          <ul class="breakdown-list">
+            <li><span>Open-Source AI Stack Layers (HF, vLLM, Qdrant, LangGraph, MCP)</span><strong>6</strong></li>
+            <li><span>Proven Production RAG Patterns (Hybrid, Rerank, RLS, CRAG)</span><strong>6</strong></li>
+            <li><span>AI, LLM &amp; Behavioral ML Eval Pyramid Layers</span><strong>5</strong></li>
+            <li><span>Pure-Code LLM Internals (Autograd, BPE, GPT Attention, LoRA)</span><strong>4</strong></li>
+            <li><span>Curated Gold Open-Source Repo Extraction Tracks</span><strong>6 repos</strong></li>
+          </ul>
+          <div class="bars">
+            <div class="bar-row"><div class="bar-meta"><span>AI/MLOps Interview &amp; Job Coverage (Docs)</span><span>95%</span></div><div class="bar-track"><div class="bar-fill" style="width:95%"></div></div></div>
+            <div class="bar-row"><div class="bar-meta"><span>Live Code Built Today (Queued in Lab 4 &amp; 5)</span><span>15%</span></div><div class="bar-track"><div class="bar-fill" style="width:15%;opacity:.75"></div></div></div>
+          </div>
+          <div class="doc-chips">
+            <a class="chip" href="AI_ML_AND_LLM_MASTERY.md">AI/ML/LLM Blueprint</a>
+            <a class="chip" href="../tools/finops_calc.py">LLM/GPU FinOps CLI</a>
+          </div>
+        </article>
+
+        <!-- D6 -->
+        <article class="dcard" style="--c:var(--indigo)">
+          <div class="dcard-top">
+            <div><span class="pill" style="--c:var(--indigo)">Weight: Staff/Principal Core</span><h3>6. System Design &amp; Distributed Architecture</h3></div>
+            <div class="count-badge">80 units</div>
+          </div>
+          <ul class="breakdown-list">
+            <li><span>Periodic Table of System Design (16 Categories)</span><strong>58</strong></li>
+            <li><span>Universal Archetypes (Unlocks all 47 Canonical Systems)</span><strong>10</strong></li>
+            <li><span>DDIA Chapters Audited End-to-End</span><strong>12</strong></li>
+            <li><span>Enterprise Arch Frameworks (C4, 6 Pillars, 20+ Patterns, Fitness)</span><strong>4 sets</strong></li>
+          </ul>
+          <div class="bars">
+            <div class="bar-row"><div class="bar-meta"><span>System Design Interview Scope Coverage (Docs)</span><span>96%</span></div><div class="bar-track"><div class="bar-fill" style="width:96%"></div></div></div>
+            <div class="bar-row"><div class="bar-meta"><span>Live Multi-Service Architecture Built Today</span><span>25%</span></div><div class="bar-track"><div class="bar-fill" style="width:25%;opacity:.75"></div></div></div>
+          </div>
+          <div class="doc-chips">
+            <a class="chip" href="PRINCIPAL_FRAMEWORKS.md">10 Archetypes &amp; DDIA</a>
+            <a class="chip" href="manuals/HOME_LAB_SYSTEM_ARCHITECTURE_BLUEPRINT.pdf">PDF Manual #2</a>
+          </div>
+        </article>
+
+        <!-- D7 -->
+        <article class="dcard" style="--c:var(--orange)">
+          <div class="dcard-top">
+            <div><span class="pill" style="--c:var(--orange)">Weight: ~14% Daily Ops</span><h3>7. Python Automation, Orchestration &amp; CI/CD</h3></div>
+            <div class="count-badge">28 units</div>
+          </div>
+          <ul class="breakdown-list">
+            <li><span>Universal Enterprise &amp; Consulting Automation Archetypes</span><strong>12</strong></li>
+            <li><span>Iron Laws of Unbreakable Python Automation</span><strong>7</strong></li>
+            <li><span>CI/CD Core Primitives (+ Self-Hosted ARC &amp; Forgejo)</span><strong>5</strong></li>
+            <li><span>Reusable On-the-Job Tools Built in `tools/` &amp; `scripts/`</span><strong>4</strong></li>
+          </ul>
+          <div class="bars">
+            <div class="bar-row"><div class="bar-meta"><span>Automation &amp; Ops Scope Coverage (Docs)</span><span>94%</span></div><div class="bar-track"><div class="bar-fill" style="width:94%"></div></div></div>
+            <div class="bar-row"><div class="bar-meta"><span>Live CI, Tools &amp; Archiver Built Today</span><span>45%</span></div><div class="bar-track"><div class="bar-fill" style="width:45%;opacity:.75"></div></div></div>
+          </div>
+          <div class="doc-chips">
+            <a class="chip" href="PYTHON_AUTOMATION_AND_ORCHESTRATION.md">12 Automation Patterns</a>
+            <a class="chip" href="../scripts/snapshot_incident.sh">Incident Archiver</a>
+          </div>
+        </article>
+
+        <!-- D8 -->
+        <article class="dcard" style="--c:var(--amber)">
+          <div class="dcard-top">
+            <div><span class="pill" style="--c:var(--amber)">Weight: $250k–$500k+ Multiplier</span><h3>8. Judgment, FinOps &amp; C-Suite Communication</h3></div>
+            <div class="count-badge">18 units</div>
+          </div>
+          <ul class="breakdown-list">
+            <li><span>Principal Judgment &amp; Trade-Off Decision Matrices</span><strong>6</strong></li>
+            <li><span>Principal Thinking Frameworks (Design/Debug/Migrate/48-Hr)</span><strong>5</strong></li>
+            <li><span>Executive Proof Artifacts (RFC, ADR, Runbook, $/Perf Receipt)</span><strong>4</strong></li>
+            <li><span>Communication Systems (Peer Technical + C-Suite BLUF)</span><strong>2</strong></li>
+            <li><span>45-Minute System Design Execution Clock (6 Qs + 7 Constants)</span><strong>1</strong></li>
+          </ul>
+          <div class="bars">
+            <div class="bar-row"><div class="bar-meta"><span>Principal Interview &amp; Consulting Coverage (Docs)</span><span>95%</span></div><div class="bar-track"><div class="bar-fill" style="width:95%"></div></div></div>
+            <div class="bar-row"><div class="bar-meta"><span>Live FinOps CLI + ADR/PM Templates Today</span><span>35%</span></div><div class="bar-track"><div class="bar-fill" style="width:35%;opacity:.75"></div></div></div>
+          </div>
+          <div class="doc-chips">
+            <a class="chip" href="JUDGMENT_AND_COMMUNICATION_FRAMEWORKS.md">Judgment &amp; C-Suite</a>
+            <a class="chip" href="../docs/adr/001-spartan-lab-architecture.md">ADR-001</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- BY ROLE / SPECIALIZATION -->
+    <section class="sec" id="roles">
+      <div class="sec-head">
+        <div>
+          <h2>2. Specialization &amp; Role Matrix ($200k–$500k+ Career Paths)</h2>
+          <p>Click any role to see the exact Labs, Domains, Daily Tasks, and Portfolio Proofs that dominate that interview loop.</p>
+        </div>
+        <span class="pill" style="--c:var(--violet)">6 Target Specializations</span>
+      </div>
+
+      <div class="role-tabs" id="role-tabs"></div>
+      <div class="role-panel" id="role-panel"></div>
+    </section>
+
+    <!-- END-TO-END PLATFORM ARCHITECTURE -->
+    <section class="sec" id="architecture">
+      <div class="sec-head">
+        <div>
+          <h2>3. End-to-End Platform Architecture &amp; Data/Signal Flow</h2>
+          <p>How ONE evolving platform connects Edge, Compute, Data/AI Engines, Dual Engineering + Executive Dashboards, and Chaos/CI/CD.</p>
+        </div>
+        <span class="pill" style="--c:var(--emerald)">1k Rows → 10M Rows → 1B-User Patterns</span>
+      </div>
+
+      <div class="arch-wrap">
+        <div class="arch-lanes">
+          <div class="lane" style="--c:var(--cyan)">
+            <div class="lane-title">1. Edge &amp; Perimeter (Lab 1 &amp; 2)</div>
+            <div class="node"><b>DNS + TLS/HTTPS</b><span>Local DNS, Let's Encrypt/ACM, SNI, mTLS</span></div>
+            <div class="node"><b>Nginx / Caddy / Envoy</b><span>L7 Reverse Proxy, CDN Cache-Control, Rate Limit</span></div>
+            <div class="node"><b>Linux Firewall &amp; Bastion</b><span>`nftables`, SSH ProxyJump, Public vs Private Subnets</span></div>
+            <div class="node"><b>Zero-Trust Identity</b><span>Keycloak OIDC/JWT, RBAC, Postgres RLS</span></div>
+          </div>
+
+          <div class="lane" style="--c:var(--indigo)">
+            <div class="lane-title">2. App, API &amp; Agents (Lab 1 &amp; 4)</div>
+            <div class="node"><b>FastAPI Hexagonal Core</b><span>REST/OpenAPI 3.1, gRPC/Protobuf, SSE/WebSockets</span></div>
+            <div class="node"><b>Production MCP Server</b><span>Strict JSON schemas, risk tiers, approval gates</span></div>
+            <div class="node"><b>LangGraph / Async Agents</b><span>Deterministic state machines, HITL, guardrails</span></div>
+            <div class="node"><b>Automation Workers</b><span>Idempotent queues, locked crons, webhooks, `n8n`</span></div>
+          </div>
+
+          <div class="lane" style="--c:var(--teal)">
+            <div class="lane-title">3. Data &amp; AI Engines (Lab 1, 3, 4)</div>
+            <div class="node"><b>Postgres 16 + PgBouncer</b><span>OLTP 3NF, ACID locks, Outbox, `pgvector`</span></div>
+            <div class="node"><b>Redis Stack</b><span>Sliding-window limits, Pub/Sub, Semantic Cache</span></div>
+            <div class="node"><b>Apache Data Platform</b><span>Kafka/Redpanda, ClickHouse, MinIO Iceberg, Airflow, Spark, DuckDB</span></div>
+            <div class="node"><b>AI / ML Stack</b><span>Qdrant (Dense+BM25), Ollama/vLLM, LiteLLM, MLflow, PyTorch/LightGBM</span></div>
+          </div>
+
+          <div class="lane" style="--c:var(--amber)">
+            <div class="lane-title">4. Dual Visual Control Plane</div>
+            <div class="node"><b>Grafana + Prometheus (:3001)</b><span>RED metrics, p99 latency, DB locks, LLM TTFT &amp; $/min</span></div>
+            <div class="node"><b>Metabase / Superset (:3000)</b><span>Executive "Money People" BI: Gross Margin, Tenant Cap Risk, ROI</span></div>
+            <div class="node"><b>Tracing &amp; Evals UI</b><span>OpenTelemetry/Loki, Arize Phoenix, Promptfoo CI gates</span></div>
+            <div class="node"><b>Terminal TUI Cockpit</b><span>`tmux`, `k9s`, `lazydocker`, `btop`, `lnav`, `pgcli`</span></div>
+          </div>
+
+          <div class="lane" style="--c:var(--rose)">
+            <div class="lane-title">5. Cloud, K8s, Chaos &amp; DR (Lab 3, 5, 6)</div>
+            <div class="node"><b>IaC &amp; Cloud Emulators</b><span>Terraform + `aws/aws-emulator` (Core 12 AWS) + Lima VM</span></div>
+            <div class="node"><b>Kubernetes &amp; GitOps</b><span>3-node `kind`, Cilium eBPF/Hubble/Tetragon, ArgoCD</span></div>
+            <div class="node"><b>CI/CD &amp; 6-Gate Reviewer</b><span>GitHub Actions (`act`), `make review` (ruff/mypy/pytest/shellcheck/gitleaks/trivy)</span></div>
+            <div class="node"><b>Chaos &amp; DR Harness</b><span>`k6`, Chaos Roulette, `make backup/restore/snapshot-incident/reset`</span></div>
+          </div>
+        </div>
+        <div class="arch-flow-bar">
+          Signal Flow: User Request → Edge TLS/Proxy → API/Agent → Storage/Vector/LLM → Prometheus/OTel + SQL KPI Views → Grafana (SRE) &amp; Metabase (CFO) → CI/CD &amp; Chaos Verification
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 STACKED LABS -->
+    <section class="sec" id="labs">
+      <div class="sec-head">
+        <div>
+          <h2>4. The 6 Stacked Labs + 6 Additive Plug-In Packs</h2>
+          <p>One progressive monorepo — every lab upgrades the exact same system through real scale inflection points.</p>
+        </div>
+        <span class="pill" style="--c:var(--amber)">Lab 1 Live Today • Labs 2–6 Progressive</span>
+      </div>
+
+      <div class="lab-grid">
+        <div class="lab-card" style="--c:var(--emerald)">
+          <div class="lab-head"><h3>Lab 1 — Core Engine, DB Internals &amp; Dual Dashboards</h3><span class="status-live">BUILT &amp; CI GREEN</span></div>
+          <div class="lab-meta"><strong>Stack:</strong> Nginx (`:8080`), FastAPI + `/metrics`, PgBouncer, Postgres 16 + 3 FinOps SQL Views, Redis, Metabase (`:3000`), Grafana (`:3001`), Prometheus (`:9090`), Exporters, Linux SRE Toolbox, `k6`.</div>
+          <div class="lab-meta"><strong>Mastery:</strong> All 22 daily loops, 10M-row `COPY` + `EXPLAIN ANALYZE` speedup, DDIA Lost Update/Write Skew, lock storms, DR backup/restore, `make review`.</div>
+        </div>
+
+        <div class="lab-card" style="--c:var(--cyan)">
+          <div class="lab-head"><h3>Lab 2 — On-Prem Networking, Linux VM, TLS/CDN &amp; Deploys</h3><span class="status-next">NEXT IN QUEUE</span></div>
+          <div class="lab-meta"><strong>Stack:</strong> Lima Ubuntu + Rocky/RHEL VM, `nftables` firewall, local DNS, Nginx/Caddy HTTPS &amp; CDN caching, SSH Bastion, gRPC/Protobuf evolution, real Docker/`systemd` zero-downtime deploy &amp; rollback.</div>
+          <div class="lab-meta"><strong>Mastery:</strong> Public/private routing, TLS cert chains, binary wire contracts, Ansible/VPS bare-metal deployment.</div>
+        </div>
+
+        <div class="lab-card" style="--c:var(--teal)">
+          <div class="lab-head"><h3>Lab 3 — Cloud IaC, Apache Data Platform &amp; FinOps Plane</h3><span class="status-next">QUEUED</span></div>
+          <div class="lab-meta"><strong>Stack:</strong> `aws/aws-emulator` + Terraform (Core 12 AWS), Apache Kafka/Redpanda, ClickHouse, MinIO + Apache Iceberg/Arrow/Parquet, Airflow/Dagster, PySpark/DuckDB/dbt, Mailpit email pipeline, Apache Superset.</div>
+          <div class="lab-meta"><strong>Mastery:</strong> 6-stage Data Lifecycle, Medallion/Star/OBT, all 12 Data Safeguards (WAP, SCD2, ASOF), backpressure/DLQs, FinOps `429` budget breakers.</div>
+        </div>
+
+        <div class="lab-card" style="--c:var(--violet)">
+          <div class="lab-head"><h3>Lab 4 — Production AI, RAG, Agents, MCP, Voice &amp; MLOps</h3><span class="status-next">PRIMARY SPIKE</span></div>
+          <div class="lab-meta"><strong>Stack:</strong> Hugging Face, Qdrant (hybrid dense+BM25+RBAC), Ollama/`mlx-lm` + LiteLLM, Redis Semantic Cache, LangGraph + Production MCP Server, LiveKit/WebRTC Voice AI, MLflow + LightGBM/PyTorch + DVC, Arize Phoenix/Promptfoo, 3-hr RunPod vLLM GPU sprint.</div>
+          <div class="lab-meta"><strong>Mastery:</strong> 6 RAG patterns, 5-layer AI/Behavioral ML eval CI gates, KV-cache/TTFT math, 60%+ token cost reduction.</div>
+        </div>
+
+        <div class="lab-card" style="--c:var(--indigo)">
+          <div class="lab-head"><h3>Lab 5 — Under-the-Hood Primitives (Pure Code, Zero Docker)</h3><span class="status-next">QUEUED</span></div>
+          <div class="lab-meta"><strong>Stack:</strong> Pure Python / PyTorch (MPS) / Go.</div>
+          <div class="lab-meta"><strong>Mastery:</strong> 300-line LSM-Tree (WAL/MemTable/SSTable/Bloom/Compaction), 3-Node Raft over TCP, Zero-Copy `sendfile`, plus `micrograd` + `minbpe` + Mini-GPT Attention + LoRA from scratch.</div>
+        </div>
+
+        <div class="lab-card" style="--c:var(--rose)">
+          <div class="lab-head"><h3>Lab 6 — Kubernetes, Zero-Trust, CDC Migration &amp; Chaos Roulette</h3><span class="status-next">CAPSTONE</span></div>
+          <div class="lab-meta"><strong>Stack:</strong> 3-node `kind`, Cilium eBPF/Hubble/Tetragon, ArgoCD GitOps, OpenBao/Vault, Keycloak OIDC, Trivy, Debezium CDC + Envoy Strangler Fig, Chaos Mesh + 12-Outage Blind Chaos Roulette + ephemeral Real-AWS live-fire deploy.</div>
+          <div class="lab-meta"><strong>Mastery:</strong> Diagnose any blind outage cold in &lt;5 min via CLI/TUI, zero-downtime brownfield migration, &lt;10-min GitOps rebuild.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- UNIVERSAL 6-STEP SPARTAN LOOP -->
+    <section class="sec" id="loop">
+      <div class="sec-head">
+        <div>
+          <h2>5. The Universal 6-Step Spartan Loop (How Everything Becomes Native English)</h2>
+          <p>Run this exact loop on every lab slice, every Mini-System Kata, and every outage drill — zero passive memorization.</p>
+        </div>
+        <span class="pill" style="--c:var(--emerald)">Infinite Reset + Permanent Proof</span>
+      </div>
+      <div class="loop-steps">
+        <div class="lstep" style="--c:var(--amber)"><div class="idx">Step 1 • 10 Min</div><h4>SPEC &amp; MATH</h4><p>Business KPI, QPS/storage/cost math, 1-way vs 2-way door, pick simplest architecture first.</p></div>
+        <div class="lstep" style="--c:var(--cyan)"><div class="idx">Step 2 • Build</div><h4>CODE &amp; INFRA</h4><p>Clean Hexagonal Python/SQL, migrations, Docker/Terraform, pass all 6 gates of `make review`.</p></div>
+        <div class="lstep" style="--c:var(--teal)"><div class="idx">Step 3 • Wire</div><h4>INSTRUMENT</h4><p>Structured JSON logs, Prometheus RED/AI metrics, Grafana panel + Metabase Executive KPI view.</p></div>
+        <div class="lstep" style="--c:var(--indigo)"><div class="idx">Step 4 • Scale</div><h4>STRESS TO BREAK</h4><p>Load 10M rows, blast `k6`, cap RAM at 256MB, or run eval suite until a real physical limit breaks.</p></div>
+        <div class="lstep" style="--c:var(--rose)"><div class="idx">Step 5 • Chaos</div><h4>BREAK, TRACE &amp; ARCHIVE</h4><p>Inject outage, diagnose cold (`ss`/`strace`/`tcpdump`/`EXPLAIN`), run `make snapshot-incident`, then `make reset`.</p></div>
+        <div class="lstep" style="--c:var(--violet)"><div class="idx">Step 6 • 10 Min</div><h4>DEFEND &amp; PUBLISH</h4><p>Write Before/After `$/mo` receipt + ADR, survive 5 hostile Staff probes, share 3-min terminal teardown.</p></div>
+      </div>
+    </section>
+
+    <!-- LIBRARY & DIRECT LINKS -->
+    <section class="sec" id="library">
+      <div class="sec-head">
+        <div>
+          <h2>6. Direct Library &amp; Interactive Tools</h2>
+          <p>Every manual, framework, reusable on-the-job tool, and interactive checklist in `/Users/Sage/code/spartan-systems-lab`.</p>
+        </div>
+        <span class="pill" style="--c:var(--cyan)">All Files Committed &amp; Verified</span>
+      </div>
+      <div class="links-grid">
+        <a class="link-card" href="mastery_tracker.html"><b>Interactive Mastery Tracker (HTML)</b><span>Check off all 6 Labs, 10 Archetypes, 12 DDIA, 12 Safeguards, 12 Automation, 22 Loops &amp; 8 Katas + CSV export.</span></a>
+        <a class="link-card" href="HOW_TO_USE_THIS_LAB.md"><b>Day-0 Operator Manual &amp; Review Gate</b><span>Daily commands, 25 core Python libraries, `uv` patching, `make review`, and 5-Axis Optimizer Rubric.</span></a>
+        <a class="link-card" href="manuals/PYTHON_AND_SQL_PRODUCTION_MASTERY_GUIDE.pdf"><b>PDF Manual #1: Python, SQL, Linux &amp; AI</b><span>9-page printable encyclopedia covering all 126 concepts, 22 daily loops, 5 scaling laws &amp; 6 Master AHAs.</span></a>
+        <a class="link-card" href="manuals/HOME_LAB_SYSTEM_ARCHITECTURE_BLUEPRINT.pdf"><b>PDF Manual #2: Homelab Blueprint</b><span>5-page printable architecture blueprint: 58-component Periodic Table, 47 systems, 60-sec Linux triage.</span></a>
+        <a class="link-card" href="PRINCIPAL_FRAMEWORKS.md"><b>Principal, Enterprise Arch &amp; SRE Frameworks</b><span>10 Archetypes, 12 DDIA Chapters, C4, Well-Architected, Google SRE, 5-Layer QA, 6 Additive Packs.</span></a>
+        <a class="link-card" href="FAILURE_MODES_AND_PERFORMANCE.md"><b>40 Failure Modes &amp; Brendan Gregg Models</b><span>USE, RED, TSA, On/Off-CPU, Pragmatic eBPF + 40 exact Symptom -> Proof Command -> Permanent Fix rows.</span></a>
+        <a class="link-card" href="PYTHON_AUTOMATION_AND_ORCHESTRATION.md"><b>Python Automation &amp; Orchestration</b><span>12 Automation Archetypes, 7 Iron Laws, Orchestration Matrix &amp; Confidence-Threshold HITL Routing.</span></a>
+        <a class="link-card" href="JUDGMENT_AND_COMMUNICATION_FRAMEWORKS.md"><b>Judgment, Trade-Offs &amp; C-Suite BLUF</b><span>45-Min System Design Clock, 6 Decision Matrices, Peer Rigor &amp; Executive Translation Dictionary.</span></a>
+        <a class="link-card" href="DATA_LIFECYCLE_AND_SERVER_FUNDAMENTALS.md"><b>Data Lifecycle, 5 Stacks &amp; Server DNA</b><span>6-Stage Data Lifecycle, 5 Locked-In Data Stacks, SCD2/WAP/ASOF, 5 Server Archetypes &amp; Self-Hosted CI.</span></a>
+        <a class="link-card" href="AI_ML_AND_LLM_MASTERY.md"><b>AI, ML, Inference, RAG, Agents &amp; Evals</b><span>Hugging Face, Ollama/vLLM, Qdrant/HNSW, LangGraph/MCP, 5-Layer Evals &amp; 6-Repo Extraction Map.</span></a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const ROLES = [
+      {
+        id: "ai",
+        name: "AI / LLM & Agentic Systems Engineer",
+        comp: "$220k–$450k+",
+        coverage: "95% Interview • 90% On-the-Job",
+        primaryLabs: ["Lab 4 (Primary Spike)", "Lab 1 (Python/Postgres/Redis)", "Lab 3 (Data & FinOps)", "Lab 5 (Mini-GPT/BPE/LoRA)"],
+        focusUnits: ["<strong>AI/RAG/MCP (27 units):</strong> Hybrid Qdrant + Reranking, LangGraph/MCP Server, 5-Layer Eval Gates, vLLM KV-Cache",
+                     "<strong>Python &amp; APIs (68 units):</strong> Asyncio, FastAPI streaming SSE, Pydantic v2, rate limiting",
+                     "<strong>FinOps &amp; Judgment (18 units):</strong> Semantic caching + small-model routing cutting token spend 60%+"],
+        proofs: ["Live Hybrid RAG + MCP Agent with >=0.95 Phoenix CI faithfulness gate",
+                 "Reproducible LLM FinOps receipt proving 60% cost reduction via cache + routing",
+                 "3-hr RunPod vLLM benchmark (TTFT, ITL, KV-cache saturation) + pure-PyTorch LoRA/Attention"]
+      },
+      {
+        id: "mlops",
+        name: "MLOps & Classical ML Engineer",
+        comp: "$210k–$420k+",
+        coverage: "95% Interview • 90% On-the-Job",
+        primaryLabs: ["Lab 4 (MLflow/LightGBM/PyTorch/DVC)", "Lab 3 (Iceberg/Airflow/PySpark)", "Lab 6 (K8s/CI/CD/Chaos)"],
+        focusUnits: ["<strong>ML Systems &amp; Testing:</strong> Made-With-ML Slice/Invariance/Directional tests, Feature Stores, Point-in-Time ASOF JOIN",
+                     "<strong>Data Lifecycle (42 units):</strong> Medallion Bronze/Silver/Gold, OBT feature matrices, drift alerts (PSI/KL)",
+                     "<strong>Infra &amp; Serving:</strong> Docker/K8s model serving, shadow deployments, GPU VRAM sizing"],
+        proofs: ["End-to-end LightGBM/PyTorch anomaly model trained on Lab 3 stream with zero target leakage",
+                 "Automated CI behavioral ML test gate + DVC data versioning + MLflow registry",
+                 "Live drift &amp; latency Grafana dashboard + Executive ROI Metabase view"]
+      },
+      {
+        id: "data",
+        name: "Data Engineer & Analytics Architect",
+        comp: "$190k–$380k+",
+        coverage: "95% Interview • 92% On-the-Job",
+        primaryLabs: ["Lab 1 (10M-Row Postgres/COPY/EXPLAIN)", "Lab 3 (Kafka/ClickHouse/Iceberg/Airflow/dbt/Superset)", "Pack: Exec BI"],
+        focusUnits: ["<strong>Data Lifecycle &amp; Modeling (42 units):</strong> 6 Stages, 5 Locked-In Stacks, Star Schema, SCD Type 2, WAP, 12 Safeguards",
+                     "<strong>SQL &amp; Python Mastery (68 units):</strong> Window functions, CTE pipelines, DuckDB/Polars/PySpark, streaming generators",
+                     "<strong>Automation (28 units):</strong> Idempotent MERGE, watermarks, Quarantine DLQs, partitioned backfills"],
+        proofs: ["10M-row Postgres EXPLAIN ANALYZE speedup (14s -> 6ms) + streaming O(1) RAM benchmark",
+                 "Zero-loss Kafka -> ClickHouse -> MinIO Iceberg pipeline surviving simulated ClickHouse outage",
+                 "Live Metabase/Superset Executive FinOps dashboard powered by tested SQL/dbt models"]
+      },
+      {
+        id: "cloud",
+        name: "Cloud, Platform & DevOps Engineer",
+        comp: "$195k–$380k+",
+        coverage: "95% Interview • 92% On-the-Job",
+        primaryLabs: ["Lab 2 (Linux VM/Firewall/DNS/TLS/Deploys)", "Lab 3 (Terraform + aws-emulator)", "Lab 6 (Kind/Cilium/ArgoCD/Vault/Real AWS)"],
+        focusUnits: ["<strong>Linux &amp; Networking (48 units):</strong> VPC/CIDRs, nftables, DNS, TLS/mTLS, SSH bastions, 5 Server Archetypes",
+                     "<strong>IaC &amp; CI/CD (28 units):</strong> Terraform destroy/apply, GitHub Actions + Self-Hosted ARC/act, Ansible, 6-gate `make review`",
+                     "<strong>Security &amp; Zero-Trust:</strong> OIDC keyless deploys, Vault 15-min dynamic secrets, Trivy CVE gates"],
+        proofs: ["Zero-touch `terraform destroy && apply` + GitOps K8s cluster self-heal in <7 minutes",
+                 "3-tier segmented network proving private DB isolation + automated HTTPS zero-downtime deploy",
+                 "Ephemeral Real-AWS live-fire deployment verified and torn down with Infracost PR breakdown"]
+      },
+      {
+        id: "sre",
+        name: "Staff SRE & Production Troubleshooter",
+        comp: "$220k–$450k+",
+        coverage: "96% Interview • 93% On-the-Job",
+        primaryLabs: ["Lab 1 (SRE Toolbox/Grafana/Chaos)", "Lab 2 (Network/TLS/Firewall)", "Lab 6 (Cilium Hubble/Tetragon/12-Outage Chaos Roulette)"],
+        focusUnits: ["<strong>Performance &amp; Failures (51 units):</strong> 5 Brendan Gregg Models (USE/RED/TSA/Off-CPU/eBPF) + all 40 Mapped Outages",
+                     "<strong>Google SRE Frameworks:</strong> SLI/SLO/Error Budgets, Burn-Rate Alerting, Toil <50%, ICS &amp; Blameless Post-Mortems",
+                     "<strong>DR &amp; Forensics:</strong> `pg_xray.sql`, `linux-triage.sh`, `snapshot_incident.sh`, RPO/RTO backup/restore"],
+        proofs: ["12 archived blind Chaos Roulette incident bundles in `docs/incidents/` solved cold in <5 min each",
+                 "3-min terminal video diagnosing live lock storm + packet loss via `ss`, `tcpdump`, `EXPLAIN`, Grafana",
+                 "Measured DR restore receipt (backup -> `make reset` -> restore -> row checksum verification)"]
+      },
+      {
+        id: "principal",
+        name: "Principal Architect & Independent Consultant (Unicorn)",
+        comp: "$300k–$600k+ / Consulting",
+        coverage: "96% Interview • 90% Real-World",
+        primaryLabs: ["ALL 6 Stacked Labs", "8 Mini-System Katas", "Pack: Exec BI + Ops Automation + Governance"],
+        focusUnits: ["<strong>System Design (80 units):</strong> 10 Universal Archetypes unlocking 47 Systems, 58 Components, 12/12 DDIA Chapters, C4 Model",
+                     "<strong>Judgment &amp; C-Suite (18 units):</strong> 45-Min Clock, 6 Decision Matrices, Executive BLUF Pitch &amp; FinOps Savings Receipts",
+                     "<strong>Cross-Stack Fluency:</strong> Connects Linux syscalls -> Postgres/Iceberg -> AI/RAG/MCP -> Executive BI Dollars"],
+        proofs: ["Complete 6-Lab public portfolio with passing 6-gate CI, ADRs, RFCs, Runbooks &amp; Post-Mortems",
+                 "Reproducible `make bench` receipts showing 60%–91% projected cloud &amp; LLM spend reductions",
+                 "Live Metabase Executive KPI dashboard + Grafana SRE dashboard + Agentic SRE Copilot demo"]
+      }
+    ];
+
+    function renderRoles(activeId) {
+      const tabs = document.getElementById("role-tabs");
+      const panel = document.getElementById("role-panel");
+      tabs.innerHTML = "";
+      ROLES.forEach(r => {
+        const b = document.createElement("button");
+        b.className = "role-btn" + (r.id === activeId ? " active" : "");
+        b.textContent = r.name;
+        b.onclick = () => renderRoles(r.id);
+        tabs.appendChild(b);
+      });
+      const cur = ROLES.find(r => r.id === activeId) || ROLES[0];
+      panel.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h3 style="margin:0;font-size:20px;">${cur.name}</h3>
+            <div style="color:var(--muted);font-size:13.5px;margin-top:3px;">Target Comp Band: <strong style="color:var(--emerald)">${cur.comp}</strong> &nbsp;•&nbsp; Scope Coverage: <strong style="color:var(--cyan)">${cur.coverage}</strong></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">${cur.primaryLabs.map(l => `<span class="pill" style="--c:var(--violet)">${l}</span>`).join("")}</div>
+        </div>
+        <div class="role-grid">
+          <div class="rbox"><h4>Highest-Weight Units To Drill</h4><ul>${cur.focusUnits.map(x => `<li>${x}</li>`).join("")}</ul></div>
+          <div class="rbox"><h4>Undeniable Portfolio Proofs</h4><ul>${cur.proofs.map(x => `<li>${x}</li>`).join("")}</ul></div>
+        </div>`;
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("light");
+      localStorage.setItem("spartan_portal_theme", document.body.classList.contains("light") ? "light" : "dark");
+    }
+    if (localStorage.getItem("spartan_portal_theme") === "light") document.body.classList.add("light");
+    renderRoles("ai");
+  </script>
+</body>
+</html>

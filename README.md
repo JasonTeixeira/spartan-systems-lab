@@ -4,8 +4,11 @@
 
 > *Train 10x harder in the lab so interviews and 3:00 AM production war rooms feel easy.*
 
-## Reference Manuals & Frameworks (`docs/`)
-- **Principal Thinking Frameworks & Visual Map:** `docs/PRINCIPAL_FRAMEWORKS.md` *(10 Archetypes -> 30+ Interview Systems, Full 12-Chapter DDIA Audit, 5 Thinking Frameworks, 4 Executive Proof Docs, Nightmare Mode)*
+## Visual Atlas Portal & Reference Manuals (`docs/`)
+- **Interactive Visual Master Atlas (Open in Browser / GitHub Pages):** `docs/index.html` *(run `make portal`)*
+- **Interactive Mastery Progress Tracker:** `docs/mastery_tracker.html` *(run `make tracker`)*
+- **Day-0 Operator Manual & 6-Gate Reviewer:** `docs/HOW_TO_USE_THIS_LAB.md` *(run `make review`)*
+- **Master Doc Index:** `docs/INDEX.md`
 - **Manual #1 (Primitives & 22 Daily Tasks):** `docs/manuals/PYTHON_AND_SQL_PRODUCTION_MASTERY_GUIDE.pdf` (`.md` included)
 - **Manual #2 (Homelab & Enterprise Systems Blueprint):** `docs/manuals/HOME_LAB_SYSTEM_ARCHITECTURE_BLUEPRINT.pdf` (`.md` included)
 

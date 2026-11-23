@@ -4,9 +4,10 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
 
 ---
 
-## 0. Start Here (Operator Manual & Visual Progress Tracker)
+## 0. Start Here (Visual Atlas Portal, Operator Manual & Progress Tracker)
+- **`docs/index.html`** (`make portal`) — **Interactive Colorful Visual Architecture Atlas** (works offline in browser & ready for GitHub Pages): Complete 362-unit numbers breakdown across 8 domains, interactive Role/Specialization selector ($200k–$500k+), end-to-end 5-lane architecture diagram, 6-Lab roadmap, and direct links to every doc & PDF.
+- **`docs/mastery_tracker.html`** (`make tracker`) — Interactive browser mastery checklist tracking all 6 Labs, 10 Archetypes, 12 DDIA Chapters, 12 Data Safeguards, 12 Automation Archetypes, 22 Daily Loops, Failure Drills, and 8 Mini-System Katas with CSV export.
 - **`docs/HOW_TO_USE_THIS_LAB.md`** — Day-0 operator workflow, automated `make review` code/security/CVE reviewer, 5-Axis Principal Optimizer Rubric, ranked Python library stack (~25 core libraries), `uv` patching & container upgrade workflow, and audit-trail discipline.
-- **`docs/mastery_tracker.html`** — Interactive browser mastery dashboard (double-click or `open docs/mastery_tracker.html`) tracking all 6 Labs, 10 Archetypes, 12 DDIA Chapters, 12 Data Safeguards, 12 Automation Archetypes, 22 Daily Loops, Failure Drills, and 8 Mini-System Katas with CSV export.
 
 ## 1. Field Manuals (`docs/manuals/`)
 - **Manual #1 (Primitives, 126 Concepts, 22 Daily Loops, 5 Scaling Laws, 6 Master AHAs):**
