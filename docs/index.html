@@ -1164,6 +1164,24 @@
     }
     renderModules();
     renderToolbelt();
+
+    // When hosted on GitHub Pages (*.github.io), route .md and repo-root ../ links
+    // to their rendered GitHub blob pages so zero links 404 or download raw text.
+    if (window.location.hostname.endsWith("github.io")) {
+      const ghBase = "https://github.com/JasonTeixeira/spartan-systems-lab/blob/main/";
+      document.querySelectorAll("a[href]").forEach(a => {
+        const href = a.getAttribute("href") || "";
+        if (href.startsWith("../")) {
+          a.setAttribute("href", ghBase + href.slice(3));
+          a.setAttribute("target", "_blank");
+          a.setAttribute("rel", "noopener");
+        } else if (href.endsWith(".md")) {
+          a.setAttribute("href", ghBase + "docs/" + href);
+          a.setAttribute("target", "_blank");
+          a.setAttribute("rel", "noopener");
+        }
+      });
+    }
   </script>
 </body>
 </html>

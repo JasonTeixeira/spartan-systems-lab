@@ -1,5 +1,8 @@
 # Spartan Systems Lab
 
+[![Spartan CI](https://github.com/JasonTeixeira/spartan-systems-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonTeixeira/spartan-systems-lab/actions/workflows/ci.yml)
+[![Visual Master Atlas](https://img.shields.io/badge/Live_Visual_Atlas-GitHub_Pages-38bdf8?style=flat)](https://jasonteixeira.github.io/spartan-systems-lab/)
+
 **Hands-on, terminal-first mastery of Linux, Python, PostgreSQL, Networking, Cloud IaC, Apache Data Platforms, Production AI/Agents/MCP/MLOps, Kubernetes, and SRE Chaos Engineering.**
 
 > *Train 10x harder in the lab so interviews and 3:00 AM production war rooms feel easy.*
