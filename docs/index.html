@@ -1026,27 +1026,27 @@
         "Add Redis sliding-window rate limiter + batch ingestion endpoint",
         "Run 6-gate automated make review (ruff/mypy/pytest/shellcheck/gitleaks/trivy)"
       ]},
-      { id:"M02", c:"var(--cyan)", title:"M02 • Lab 1B: SQL Mastery, Postgres Internals & 10M Rows", sub:"Window Functions, EXPLAIN, Composite B-Tree, DDIA Write Skew, Metabase", archos:["dgm_spartan-lab1-core-engine","dgm_transactions-and-isolation","dgm_db-scaling-ladder-v3","dgm_oltp-olap-split","dgm_serving-bi"], reps:[
+      { id:"M02", c:"var(--cyan)", title:"M02 • Lab 1B: SQL Mastery, Postgres Internals & 10M Rows", sub:"Window Functions, EXPLAIN, Composite B-Tree, DDIA Write Skew, Metabase", archos:["dgm_spartan-lab1-core-engine","dgm_spartan-lab1-chaos-lock-storm","dgm_transactions-and-isolation","dgm_db-scaling-ladder-v3","dgm_oltp-olap-split","dgm_serving-bi"], reps:[
         "Seed 250k -> 1M+ rows via COPY FROM STDIN (make seed) & run make pg-xray",
         "Solve all 5 Day-1 SQL drills (ROW_NUMBER, NOT EXISTS NULL trap, LAG running spend)",
         "Drop slow query via EXPLAIN (ANALYZE, BUFFERS) + Composite B-Tree index & write ADR",
         "Reproduce & fix DDIA Lost Update + Write Skew live in 2 psql terminals",
         "Connect Metabase (:3000) to v_exec_tenant_unit_economics & v_exec_cost_drivers"
       ]},
-      { id:"M03", c:"var(--rose)", title:"M03 • Lab 1C: Linux Kernel, Bash Pipes, Grafana & Chaos #1", sub:"awk/jq, Brendan Gregg USE/TSA, ss/strace/tcpdump, DR backup/restore", archos:["dgm_spartan-lab1-core-engine","dgm_observability-pillars","dgm_resilience-timeouts-breakers-bulkheads-shedding","dgm_capacity-estimation"], reps:[
+      { id:"M03", c:"var(--rose)", title:"M03 • Lab 1C: Linux Kernel, Bash Pipes, Grafana & Chaos #1", sub:"awk/jq, Brendan Gregg USE/TSA, ss/strace/tcpdump, DR backup/restore", archos:["dgm_spartan-lab1-core-engine","dgm_spartan-lab1-chaos-lock-storm","dgm_observability-pillars","dgm_resilience-timeouts-breakers-bulkheads-shedding","dgm_capacity-estimation"], reps:[
         "Run make linux-triage & interpret every USE/TSA/cgroup/inode line cold",
         "Capture live TCP handshake & HTTP headers with tcpdump + curl -v in sre-toolbox",
         "Blast k6 load test while watching live 6-panel Grafana dashboard (:3001)",
         "Inject compound lock-storm + net-latency, archive make snapshot-incident, run DR backup -> reset -> restore",
         "Companion Reps: Solve 3 live broken Linux/container scenarios cold on sadservers.com & labs.iximiuz.com"
       ]},
-      { id:"M04", c:"var(--indigo)", title:"M04 • DSA Deep Surge + Scale APIs + 3 Mini-System Katas", sub:"All 14 DSA Templates, RFC 7807/ETags/HMAC Webhooks, URL Shortener/Limiter/Wallet", archos:["dgm_spartan-lab1-core-engine","dgm_url-shortener","dgm_rate-limiter","dgm_api-gateway-design","dgm_digital-wallet","dgm_banking-ledger"], reps:[
+      { id:"M04", c:"var(--indigo)", title:"M04 • DSA Deep Surge + Scale APIs + 3 Mini-System Katas", sub:"All 14 DSA Templates, RFC 7807/ETags/HMAC Webhooks, URL Shortener/Limiter/Wallet", archos:["dgm_spartan-lab1-core-engine","dgm_spartan-lab1-chaos-lock-storm","dgm_url-shortener","dgm_rate-limiter","dgm_api-gateway-design","dgm_digital-wallet","dgm_banking-ledger"], reps:[
         "Cold timed reps across Heaps, Monotonic Stack, BFS/DFS/Topo Sort, Union-Find, Binary Search on Answer",
         "Cold timed reps across Intervals, Backtracking, DP, and Tries using Constraint-First method",
         "Build & k6-benchmark 3 Katas on Lab 1: Base62 URL Shortener, Redis Lua Rate Limiter, ACID Wallet Ledger",
         "Pass Boss Fight: 3 unseen Hard/Medium problems cold under clock + RFC 7807 API review"
       ]},
-      { id:"M05", c:"var(--teal)", title:"M05 • Lab 2: Deep TCP/IP, Linux VM, TLS/CDN & Real Deploys", sub:"Lima Ubuntu+Rocky VM, CIDR math, nftables, DNS, TLS 1.3, gRPC, Ansible", archos:["dgm_spartan-lab2-linux-tcp-tls-deploy","dgm_load-balancing-tiers","dgm_authn-authz-flow-v3","dgm_caching-layers","dgm_scale-from-zero"], reps:[
+      { id:"M05", c:"var(--teal)", title:"M05 • Lab 2: Deep TCP/IP, Linux VM, TLS/CDN & Real Deploys", sub:"Lima Ubuntu+Rocky VM, CIDR math, nftables, DNS, TLS 1.3, gRPC, Ansible", archos:["dgm_spartan-lab2-linux-tcp-tls-deploy","dgm_spartan-lab2-zero-downtime-rollback","dgm_load-balancing-tiers","dgm_authn-authz-flow-v3","dgm_caching-layers","dgm_scale-from-zero"], reps:[
         "Boot Lima Ubuntu + Rocky VMs; practice CIDR subnet math (/16-/28) & nftables rules",
         "Wire local DNS + Nginx/Caddy HTTPS TLS 1.3 + CDN Cache-Control + SSH Bastion tunnel",
         "Add gRPC/Protobuf contract + backward-compatible schema evolution test",
@@ -1058,40 +1058,40 @@
         "Enforce Checkov IaC security scan + Infracost monthly $/mo PR gate",
         "Build packaged Python spartan-cli ops automation tool with --dry-run & blast-radius caps"
       ]},
-      { id:"M07", c:"var(--orange)", title:"M07 • Lab 3B: Apache Data Platform, Lifecycle & FinOps", sub:"Kafka/Redpanda, ClickHouse, Iceberg/Parquet, Airflow, PySpark/dbt, Mailpit, Superset", archos:["dgm_spartan-lab3-iac-aws-apache-data","dgm_data-lifecycle-overview","dgm_cdc-to-lake","dgm_medallion-pipeline-v3","dgm_lakehouse-table-formats","dgm_dimensional-modeling","dgm_late-data-watermarks","dgm_data-quality-gates","dgm_retention-deletion-v3"], reps:[
+      { id:"M07", c:"var(--orange)", title:"M07 • Lab 3B: Apache Data Platform, Lifecycle & FinOps", sub:"Kafka/Redpanda, ClickHouse, Iceberg/Parquet, Airflow, PySpark/dbt, Mailpit, Superset", archos:["dgm_spartan-lab3-iac-aws-apache-data","dgm_spartan-lab3-wap-clickhouse-outage","dgm_data-lifecycle-overview","dgm_cdc-to-lake","dgm_medallion-pipeline-v3","dgm_lakehouse-table-formats","dgm_dimensional-modeling","dgm_late-data-watermarks","dgm_data-quality-gates","dgm_retention-deletion-v3"], reps:[
         "Build 6-stage Data Lifecycle: Kafka -> ClickHouse -> MinIO Apache Iceberg (Medallion Bronze/Silver/Gold)",
         "Implement all 12 Data Safeguards: Idempotent MERGE, Watermarks, Quarantine DLQ, SCD2, ASOF, WAP",
         "Wire Airflow/dbt + Mailpit email pipeline + Apache Superset Executive FinOps dashboard",
         "Chaos Drill: Kill ClickHouse 3 min during 10k RPS + duplicate flood -> verify exact penny billing & 429 cap"
       ]},
-      { id:"M08", c:"var(--violet)", title:"M08 • Lab 4A: Embeddings, Scaled Vector RAG & Inference", sub:"Hugging Face, Qdrant Hybrid+BM25+RBAC, Reranking, Ollama/mlx-lm, LiteLLM, Semantic Cache", archos:["dgm_spartan-lab4-ai-rag-mcp-evals","dgm_rag-basic","dgm_rag-hybrid-rerank","dgm_rag-enterprise-acl","dgm_embedding-ingest-pipeline","dgm_llm-gateway-routing","dgm_llm-prefill-decode-and-batching"], reps:[
+      { id:"M08", c:"var(--violet)", title:"M08 • Lab 4A: Embeddings, Scaled Vector RAG & Inference", sub:"Hugging Face, Qdrant Hybrid+BM25+RBAC, Reranking, Ollama/mlx-lm, LiteLLM, Semantic Cache", archos:["dgm_spartan-lab4-ai-rag-mcp-evals","dgm_spartan-lab4-rag-acl-eval-gate","dgm_rag-basic","dgm_rag-hybrid-rerank","dgm_rag-enterprise-acl","dgm_embedding-ingest-pipeline","dgm_llm-gateway-routing","dgm_llm-prefill-decode-and-batching"], reps:[
         "Build structure-aware + parent-child chunking & Hugging Face sentence-transformers ingestion",
         "Wire Qdrant Hybrid Dense + BM25 + Cross-Encoder Reranker with mandatory tenant_id pre-filtering",
         "Add LiteLLM gateway + Redis Semantic Cache (>0.92 cosine) + small-model router",
         "Prove <2.5s p95 RAG, 0% cross-tenant leak on adversarial probe & >=60% token cost savings"
       ]},
-      { id:"M09", c:"var(--violet)", title:"M09 • Lab 4B: Agents, MCP, Voice AI, ML Design & 5-Layer Evals", sub:"MCP Server, LangGraph, WebRTC Voice, LightGBM/PyTorch, Made-With-ML Tests, RunPod vLLM", archos:["dgm_spartan-lab4-ai-rag-mcp-evals","dgm_agent-platform","dgm_tool-gateway-mcp","dgm_agent-protocols-mcp-a2a-tool-registry","dgm_agent-eval-regression-gating-ci","dgm_agent-human-in-the-loop-approval","dgm_ml-training-pipeline","dgm_recommendation-system","dgm_fraud-detection-realtime"], reps:[
+      { id:"M09", c:"var(--violet)", title:"M09 • Lab 4B: Agents, MCP, Voice AI, ML Design & 5-Layer Evals", sub:"MCP Server, LangGraph, WebRTC Voice, LightGBM/PyTorch, Made-With-ML Tests, RunPod vLLM", archos:["dgm_spartan-lab4-ai-rag-mcp-evals","dgm_spartan-lab4-rag-acl-eval-gate","dgm_agent-platform","dgm_tool-gateway-mcp","dgm_agent-protocols-mcp-a2a-tool-registry","dgm_agent-eval-regression-gating-ci","dgm_agent-human-in-the-loop-approval","dgm_ml-training-pipeline","dgm_recommendation-system","dgm_fraud-detection-realtime"], reps:[
         "Build Production MCP Server (strict schemas, risk tiers, approval gates) + LangGraph agent with OTel traces",
         "Train LightGBM/PyTorch anomaly model on Lab 3 stream with MLflow + DVC + Slice/Invariance/Directional tests",
         "Wire Arize Phoenix / Promptfoo CI eval gate blocking <0.95 faithfulness & prompt injections",
         "Run 3-hr cloud GPU sprint: load-test vLLM KV-cache/TTFT/ITL + build WebRTC Voice AI slice",
         "Companion Reps: Solve 5 cold NumPy/PyTorch ML problems on deep-ml.com & study hardware/serving in mlsysbook.ai"
       ]},
-      { id:"M10", c:"var(--indigo)", title:"M10 • Lab 5: Pure-Code Internals (DB, Consensus & LLMs)", sub:"300-line LSM-Tree, 3-Node Raft, Zero-Copy sendfile, micrograd, minbpe, Mini-GPT+LoRA", archos:["dgm_spartan-lab5-internals-db-raft-llm","dgm_kv-store-v3","dgm_consistent-hashing-ring","dgm_cap-pacelc","dgm_consistency-models","dgm_llm-attention-and-kv-cache","dgm_llm-constrained-decoding-and-structured-output"], reps:[
+      { id:"M10", c:"var(--indigo)", title:"M10 • Lab 5: Pure-Code Internals (DB, Consensus & LLMs)", sub:"300-line LSM-Tree, 3-Node Raft, Zero-Copy sendfile, micrograd, minbpe, Mini-GPT+LoRA", archos:["dgm_spartan-lab5-internals-db-raft-llm","dgm_spartan-lab5-raft-splitbrain-compaction","dgm_kv-store-v3","dgm_consistent-hashing-ring","dgm_cap-pacelc","dgm_consistency-models","dgm_llm-attention-and-kv-cache","dgm_llm-constrained-decoding-and-structured-output"], reps:[
         "Build 300-line LSM-Tree (WAL + MemTable + SSTable + Bloom Filter + Merge Compaction)",
         "Build 3-Node Raft over raw TCP & pass split-brain leader election + log reconciliation test",
         "Benchmark naive buffered socket I/O vs zero-copy os.sendfile (~90% fewer context switches)",
         "Build micrograd + minbpe + Mini-GPT Multi-Head Attention + LoRA from scratch on M3 Max MPS",
         "Companion Reps: Implement attention/backprop cold on deep-ml.com & cross-check systems math in mlsysbook.ai"
       ]},
-      { id:"M11", c:"var(--rose)", title:"M11 • Lab 6: K8s, CISSP Zero-Trust, CDC Migration & Chaos", sub:"3-node kind, Cilium eBPF/Hubble/Tetragon, ArgoCD, Vault, RLS, Debezium, 12 Outages", archos:["dgm_spartan-lab6-k8s-cilium-zerotrust-cdc","dgm_k8s-cni-services-and-network-policy","dgm_k8s-autoscaling-hpa-keda-node-provisioning","dgm_k8s-scheduler-requests-limits-qos","dgm_cdc-failure-backfill","dgm_ai-threat-model","dgm_sec-owasp-llm-top10-reference-architecture"], reps:[
+      { id:"M11", c:"var(--rose)", title:"M11 • Lab 6: K8s, CISSP Zero-Trust, CDC Migration & Chaos", sub:"3-node kind, Cilium eBPF/Hubble/Tetragon, ArgoCD, Vault, RLS, Debezium, 12 Outages", archos:["dgm_spartan-lab6-k8s-cilium-zerotrust-cdc","dgm_spartan-lab6-ebpf-canary-strangler","dgm_k8s-cni-services-and-network-policy","dgm_k8s-autoscaling-hpa-keda-node-provisioning","dgm_k8s-scheduler-requests-limits-qos","dgm_cdc-failure-backfill","dgm_ai-threat-model","dgm_sec-owasp-llm-top10-reference-architecture"], reps:[
         "Deploy platform to 3-node kind + Cilium eBPF/Hubble + ArgoCD GitOps (rebuild <10 min)",
         "Enforce Vault 15-min dynamic creds, Keycloak OIDC, Postgres RLS, Cosign/Trivy, Tetragon SIGKILL",
         "Execute zero-downtime Debezium CDC + Envoy Strangler Fig canary (kill new svc at 50% -> 0 5xx)",
         "Survive 12 Blind Chaos Roulette outages cold (<5 min each) + 1 ephemeral Real-AWS live-fire deploy",
         "Companion Reps: Complete 3 advanced Linux/K8s break-fix labs cold on sadservers.com & labs.iximiuz.com"
       ]},
-      { id:"M12", c:"var(--amber)", title:"M12 • Principal Capstone: Unseen Coding, Certs & C-Suite", sub:"45-Min Whiteboards, AWS SAP/GenAI Cert Delta, FinOps Proofs, Build-in-Public", archos:["dgm_spartan-lab6-k8s-cilium-zerotrust-cdc","dgm_interview-framework-45min","dgm_chat-system","dgm_video-streaming","dgm_news-feed-v3","dgm_payment-system","dgm_hotel-reservation","dgm_distributed-task-scheduler"], reps:[
+      { id:"M12", c:"var(--amber)", title:"M12 • Principal Capstone: Unseen Coding, Certs & C-Suite", sub:"45-Min Whiteboards, AWS SAP/GenAI Cert Delta, FinOps Proofs, Build-in-Public", archos:["dgm_spartan-lab6-k8s-cilium-zerotrust-cdc","dgm_spartan-lab6-ebpf-canary-strangler","dgm_interview-framework-45min","dgm_chat-system","dgm_video-streaming","dgm_news-feed-v3","dgm_payment-system","dgm_hotel-reservation","dgm_distributed-task-scheduler"], reps:[
         "Complete 3 timed 45-min mock Principal System Design loops across the 10 Archetypes",
         "Complete all 8 STAR-L Behavioral Cards, write 3 Executive BLUF Memos + DACI/RAID org plans & record 3 vocal leadership teardowns",
         "Publish 3 reproducible make bench FinOps savings receipts + 3-min terminal teardown videos",
