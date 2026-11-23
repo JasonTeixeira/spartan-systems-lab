@@ -1,0 +1,28 @@
+{
+  "edition_id": "grounded-retrieval-v1",
+  "finding_id": "C04",
+  "source_path": "lessons/premium-rag-retrieval/20-capstone-grounded-cited-rag.md",
+  "corpus_path": "labs/grounded-retrieval/corpus.json",
+  "implementation_path": "labs/grounded-retrieval/system.py",
+  "lesson_path": "teaching/ai/grounded-retrieval/lesson.md",
+  "feedback_path": "teaching/ai/grounded-retrieval/feedback.md",
+  "scope": "Compute lexical cosine scores from raw document lines, retrieve top-k, gate, extract a matching fact quote, verify its retrieved source span, refuse unsupported/conflicting evidence, and evaluate separately annotated retrieval cases. No learned generation, embedding service, semantic entailment or production RAG claim.",
+  "question_form": "What is [the] <attribute> for <entity>? (case-insensitive; optional question mark; single identifier entity)",
+  "source_fact_form": "<entity> <attribute> is <value>. (one fact per line)",
+  "defaults": {"k": 3, "threshold": 0.25},
+  "citation_offsets": "Zero-based Python Unicode character offsets: start inclusive, end exclusive, into the unchanged document text.",
+  "metrics": {
+    "recall_at_k": "Unique labeled relevant chunk IDs found in retrieved top-k / all labeled relevant IDs; null when no relevant IDs. Assessment labels are never passed to answer().",
+    "exact_support_rate": "Candidate quotes passing retrieved-context, source-span, exact-text and question-target checks / candidate quotes; null when no candidates. Not semantic faithfulness or factual truth."
+  },
+  "exit_codes": {"answer": 0, "refuse_or_failed_self_check": 1, "input_or_pipeline_error": 2},
+  "cases": [
+    {"id": "atlas-retention", "question": "What is the retention period for Atlas?", "expected_action": "answer", "expected_reason": "verified_source_quote", "expected_claims": ["Atlas retention period is 30 days."], "relevant_chunk_ids": ["atlas-policy:L1"], "expected_recall_at_k": 1.0},
+    {"id": "beacon-retention", "question": "What is the retention period for Beacon?", "expected_action": "answer", "expected_reason": "verified_source_quote", "expected_claims": ["Beacon retention period is 7 days."], "relevant_chunk_ids": ["beacon-policy:L1"], "expected_recall_at_k": 1.0},
+    {"id": "atlas-region", "question": "What is the storage region for Atlas?", "expected_action": "answer", "expected_reason": "verified_source_quote", "expected_claims": ["Atlas storage region is north-1."], "relevant_chunk_ids": ["atlas-policy:L2"], "expected_recall_at_k": 1.0},
+    {"id": "missing-fee", "question": "What is the trading fee for Atlas?", "expected_action": "refuse", "expected_reason": "no_matching_fact", "expected_claims": [], "relevant_chunk_ids": [], "expected_recall_at_k": null},
+    {"id": "unknown-entity", "question": "What is the retention period for Nimbus?", "expected_action": "refuse", "expected_reason": "no_matching_fact", "expected_claims": [], "relevant_chunk_ids": [], "expected_recall_at_k": null},
+    {"id": "unsupported-form", "question": "Recommend the most profitable strategy.", "expected_action": "refuse", "expected_reason": "unsupported_question_form", "expected_claims": [], "relevant_chunk_ids": [], "expected_recall_at_k": null}
+  ],
+  "limitations": ["lexical retrieval can miss paraphrases", "a threshold is not an answerability proof", "only retrieved conflicts are checked", "source text can be wrong", "no authentication, access-control, provider, neural model, live trading or production deployment"]
+}

@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "fixture_id": "invalid-c03",
+  "events": "not-an-array"
+}

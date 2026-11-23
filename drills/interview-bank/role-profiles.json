@@ -1,0 +1,3035 @@
+{
+  "schema": 1,
+  "status": "generic-study-profiles; vacancy calibration pending",
+  "workbenches": [
+    {
+      "id": "python-coding",
+      "title": "Python and coding"
+    },
+    {
+      "id": "sql-data",
+      "title": "SQL and data"
+    },
+    {
+      "id": "system-design",
+      "title": "System design and engineering judgment"
+    },
+    {
+      "id": "cloud-operations",
+      "title": "Cloud and operations"
+    },
+    {
+      "id": "qa-sdet",
+      "title": "QA and SDET"
+    },
+    {
+      "id": "applied-ai",
+      "title": "Applied AI"
+    },
+    {
+      "id": "ml-mlops",
+      "title": "ML and MLOps"
+    }
+  ],
+  "families": [
+    {
+      "id": "python-data-transform",
+      "title": "Collections, parsing, validation and data transformation",
+      "workbench": "python-coding"
+    },
+    {
+      "id": "algorithm-selection",
+      "title": "Algorithm selection, invariants, traversal and complexity",
+      "workbench": "python-coding"
+    },
+    {
+      "id": "async-resource-lifetime",
+      "title": "Concurrency, async, cancellation and resource lifetime",
+      "workbench": "python-coding"
+    },
+    {
+      "id": "feature-legacy-debug",
+      "title": "Implementing, reviewing and debugging an unfamiliar codebase",
+      "workbench": "python-coding"
+    },
+    {
+      "id": "integration-automation",
+      "title": "External API/event integration, duplicates and partial failure",
+      "workbench": "python-coding"
+    },
+    {
+      "id": "sql-grain-joins",
+      "title": "Relational grain, joins, nulls and duplicate handling",
+      "workbench": "sql-data"
+    },
+    {
+      "id": "sql-analytics",
+      "title": "Windows, ranking, cohorts and time-based analytics",
+      "workbench": "sql-data"
+    },
+    {
+      "id": "data-transactions",
+      "title": "Transactions, concurrent updates and data integrity",
+      "workbench": "sql-data"
+    },
+    {
+      "id": "query-performance",
+      "title": "Indexes, query plans and database performance",
+      "workbench": "sql-data"
+    },
+    {
+      "id": "data-pipelines",
+      "title": "Ingestion, schema change, quality, lineage and replay",
+      "workbench": "sql-data"
+    },
+    {
+      "id": "deploy-migrate",
+      "title": "Website/service deployment and migration, including WordPress",
+      "workbench": "cloud-operations"
+    },
+    {
+      "id": "dns-network-tls",
+      "title": "DNS, network reachability, routing and TLS diagnosis",
+      "workbench": "cloud-operations"
+    },
+    {
+      "id": "outage-resources",
+      "title": "Unavailable/overloaded services and CPU, memory or disk pressure",
+      "workbench": "cloud-operations"
+    },
+    {
+      "id": "infrastructure-drift",
+      "title": "Containers, infrastructure configuration, drift and rollout failure",
+      "workbench": "cloud-operations"
+    },
+    {
+      "id": "backup-disaster-recovery",
+      "title": "Backup, restoration, recovery objectives and dependency loss",
+      "workbench": "cloud-operations"
+    },
+    {
+      "id": "api-service-boundaries",
+      "title": "API contracts, service boundaries and compatibility",
+      "workbench": "system-design"
+    },
+    {
+      "id": "distributed-work",
+      "title": "Queues, worker ownership, coordination and overload control",
+      "workbench": "system-design"
+    },
+    {
+      "id": "cache-consistency",
+      "title": "Caching, freshness, state ownership and consistency",
+      "workbench": "system-design"
+    },
+    {
+      "id": "identity-security",
+      "title": "Authentication, authorization, tenancy, secrets and trust boundaries",
+      "workbench": "system-design"
+    },
+    {
+      "id": "capacity-cost",
+      "title": "Capacity, scaling, latency and cost decisions",
+      "workbench": "system-design"
+    },
+    {
+      "id": "qa-risk-oracles",
+      "title": "Requirements, risk prioritization and trustworthy test oracles",
+      "workbench": "qa-sdet"
+    },
+    {
+      "id": "qa-exploration-triage",
+      "title": "Exploratory testing, reproducible defects and release decisions",
+      "workbench": "qa-sdet"
+    },
+    {
+      "id": "qa-api-data",
+      "title": "API, integration, contract and data-validation failures",
+      "workbench": "qa-sdet"
+    },
+    {
+      "id": "qa-ui-accessibility",
+      "title": "UI state, end-to-end behavior, accessibility and user journeys",
+      "workbench": "qa-sdet"
+    },
+    {
+      "id": "qa-automation-reliability",
+      "title": "Flaky tests, fixtures, CI feedback and automation maintainability",
+      "workbench": "qa-sdet"
+    },
+    {
+      "id": "ai-retrieval-grounding",
+      "title": "Retrieval, search relevance, citations and source support",
+      "workbench": "applied-ai"
+    },
+    {
+      "id": "ai-evaluation",
+      "title": "Task-specific evaluation, regression, judging and human calibration",
+      "workbench": "applied-ai"
+    },
+    {
+      "id": "ai-agent-actions",
+      "title": "Agent/workflow control, tool permissions and external effects",
+      "workbench": "applied-ai"
+    },
+    {
+      "id": "ai-adversarial-boundaries",
+      "title": "Prompt injection, sensitive data and adversarial boundaries",
+      "workbench": "applied-ai"
+    },
+    {
+      "id": "ai-provider-operations",
+      "title": "Provider/model integration, latency, cost, failures and fallback",
+      "workbench": "applied-ai"
+    },
+    {
+      "id": "ml-framing",
+      "title": "Prediction decisions, labels, metrics, baselines and error costs",
+      "workbench": "ml-mlops"
+    },
+    {
+      "id": "ml-statistics-experiments",
+      "title": "Statistical reasoning, experiments, uncertainty and causal limitations",
+      "workbench": "ml-mlops"
+    },
+    {
+      "id": "ml-data-eligibility",
+      "title": "Feature availability, splitting, leakage and preprocessing",
+      "workbench": "ml-mlops"
+    },
+    {
+      "id": "ml-error-drift",
+      "title": "Generalization, error analysis, slices, drift and feedback loops",
+      "workbench": "ml-mlops"
+    },
+    {
+      "id": "ml-serving-lifecycle",
+      "title": "Reproducibility, training/serving consistency, deployment and rollback",
+      "workbench": "ml-mlops"
+    },
+    {
+      "id": "incident-coordination",
+      "title": "Incident ownership, communication, mitigation and follow-through",
+      "workbench": "system-design"
+    },
+    {
+      "id": "architecture-evolution",
+      "title": "Architecture migration, build/buy and adoption tradeoffs",
+      "workbench": "system-design"
+    },
+    {
+      "id": "technical-debt-reliability",
+      "title": "Reliability investment, technical debt and long-term maintenance",
+      "workbench": "system-design"
+    },
+    {
+      "id": "stakeholder-decisions",
+      "title": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions",
+      "workbench": "system-design"
+    },
+    {
+      "id": "project-defense",
+      "title": "Genuine project defense, failures, learning and evidence of contribution",
+      "workbench": "system-design"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "general-python-software",
+      "title": "Python software engineer",
+      "description": "Generic study profile for practical software construction and debugging. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "algorithm-selection",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Algorithm selection, invariants, traversal and complexity supports practical software construction and debugging; a core generic study requirement."
+        },
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "API contracts, service boundaries and compatibility supports practical software construction and debugging; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "async-resource-lifetime",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Concurrency, async, cancellation and resource lifetime supports practical software construction and debugging; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "feature-legacy-debug",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Implementing, reviewing and debugging an unfamiliar codebase supports practical software construction and debugging; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports practical software construction and debugging; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "integration-automation",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "External API/event integration, duplicates and partial failure supports practical software construction and debugging; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports practical software construction and debugging; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "python-data-transform",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Collections, parsing, validation and data transformation supports practical software construction and debugging; a core generic study requirement."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports practical software construction and debugging; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports practical software construction and debugging; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "coding and repository exercise",
+        "test design and code review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Specific language/runtime expertise, production tooling and platform release practice remain unassessed."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "frontend",
+      "title": "Frontend engineer",
+      "description": "Generic study profile for browser-facing implementation and user journeys. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "API contracts, service boundaries and compatibility supports browser-facing implementation and user journeys; a core generic study requirement."
+        },
+        {
+          "id": "feature-legacy-debug",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Implementing, reviewing and debugging an unfamiliar codebase supports browser-facing implementation and user journeys; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports browser-facing implementation and user journeys; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports browser-facing implementation and user journeys; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "python-data-transform",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Collections, parsing, validation and data transformation supports browser-facing implementation and user journeys; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-automation-reliability",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Flaky tests, fixtures, CI feedback and automation maintainability supports browser-facing implementation and user journeys; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports browser-facing implementation and user journeys; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-ui-accessibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "UI state, end-to-end behavior, accessibility and user journeys supports browser-facing implementation and user journeys; a core generic study requirement."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports browser-facing implementation and user journeys; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "coding and repository exercise",
+        "test design and code review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Specific language/runtime expertise, production tooling and platform release practice remain unassessed."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "backend",
+      "title": "Backend engineer",
+      "description": "Generic study profile for service contracts and persistent state. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "API contracts, service boundaries and compatibility supports service contracts and persistent state; a core generic study requirement."
+        },
+        {
+          "id": "async-resource-lifetime",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Concurrency, async, cancellation and resource lifetime supports service contracts and persistent state; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "cache-consistency",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Caching, freshness, state ownership and consistency supports service contracts and persistent state; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "data-transactions",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Transactions, concurrent updates and data integrity supports service contracts and persistent state; a core generic study requirement."
+        },
+        {
+          "id": "distributed-work",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Queues, worker ownership, coordination and overload control supports service contracts and persistent state; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "feature-legacy-debug",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Implementing, reviewing and debugging an unfamiliar codebase supports service contracts and persistent state; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports service contracts and persistent state; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "integration-automation",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "External API/event integration, duplicates and partial failure supports service contracts and persistent state; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports service contracts and persistent state; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports service contracts and persistent state; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "query-performance",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Indexes, query plans and database performance supports service contracts and persistent state; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports service contracts and persistent state; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "coding and repository exercise",
+        "test design and code review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Specific language/runtime expertise, production tooling and platform release practice remain unassessed."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "fullstack",
+      "title": "Full-stack engineer",
+      "description": "Generic study profile for end-to-end application boundaries. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "API contracts, service boundaries and compatibility supports end-to-end application boundaries; a core generic study requirement."
+        },
+        {
+          "id": "cache-consistency",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Caching, freshness, state ownership and consistency supports end-to-end application boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "data-transactions",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Transactions, concurrent updates and data integrity supports end-to-end application boundaries; a core generic study requirement."
+        },
+        {
+          "id": "deploy-migrate",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Website/service deployment and migration, including WordPress supports end-to-end application boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "feature-legacy-debug",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Implementing, reviewing and debugging an unfamiliar codebase supports end-to-end application boundaries; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports end-to-end application boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "integration-automation",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "External API/event integration, duplicates and partial failure supports end-to-end application boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports end-to-end application boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports end-to-end application boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-ui-accessibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "UI state, end-to-end behavior, accessibility and user journeys supports end-to-end application boundaries; a core generic study requirement."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports end-to-end application boundaries; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "coding and repository exercise",
+        "test design and code review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Specific language/runtime expertise, production tooling and platform release practice remain unassessed."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "mobile",
+      "title": "Mobile engineer",
+      "description": "Generic study profile for shared application correctness before platform specialization. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "API contracts, service boundaries and compatibility supports shared application correctness before platform specialization; a core generic study requirement."
+        },
+        {
+          "id": "async-resource-lifetime",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Concurrency, async, cancellation and resource lifetime supports shared application correctness before platform specialization; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "cache-consistency",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Caching, freshness, state ownership and consistency supports shared application correctness before platform specialization; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "feature-legacy-debug",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Implementing, reviewing and debugging an unfamiliar codebase supports shared application correctness before platform specialization; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports shared application correctness before platform specialization; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports shared application correctness before platform specialization; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-automation-reliability",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Flaky tests, fixtures, CI feedback and automation maintainability supports shared application correctness before platform specialization; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports shared application correctness before platform specialization; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-ui-accessibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "UI state, end-to-end behavior, accessibility and user journeys supports shared application correctness before platform specialization; a core generic study requirement."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports shared application correctness before platform specialization; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "coding and repository exercise",
+        "test design and code review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Specific language/runtime expertise, production tooling and platform release practice remain unassessed.",
+        "Mobile specialist gap: Swift/Kotlin or chosen framework, lifecycle, offline sync, device accessibility, platform security and simulator/device release proof are unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "systems-programming",
+      "title": "Systems programmer",
+      "description": "Generic study profile for resource lifetime and implementation invariants. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "algorithm-selection",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Algorithm selection, invariants, traversal and complexity supports resource lifetime and implementation invariants; a core generic study requirement."
+        },
+        {
+          "id": "async-resource-lifetime",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Concurrency, async, cancellation and resource lifetime supports resource lifetime and implementation invariants; a core generic study requirement."
+        },
+        {
+          "id": "capacity-cost",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Capacity, scaling, latency and cost decisions supports resource lifetime and implementation invariants; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "feature-legacy-debug",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Implementing, reviewing and debugging an unfamiliar codebase supports resource lifetime and implementation invariants; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports resource lifetime and implementation invariants; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "outage-resources",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Unavailable/overloaded services and CPU, memory or disk pressure supports resource lifetime and implementation invariants; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports resource lifetime and implementation invariants; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-automation-reliability",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Flaky tests, fixtures, CI feedback and automation maintainability supports resource lifetime and implementation invariants; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports resource lifetime and implementation invariants; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports resource lifetime and implementation invariants; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "coding and repository exercise",
+        "test design and code review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Specific language/runtime expertise, production tooling and platform release practice remain unassessed.",
+        "Low-level specialist gap: C/C++/Rust as applicable, memory model, ABI, operating systems and performance profiling are unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "cloud",
+      "title": "Cloud engineer",
+      "description": "Generic study profile for cloud service boundaries and recovery. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "backup-disaster-recovery",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Backup, restoration, recovery objectives and dependency loss supports cloud service boundaries and recovery; a core generic study requirement."
+        },
+        {
+          "id": "capacity-cost",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Capacity, scaling, latency and cost decisions supports cloud service boundaries and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "deploy-migrate",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Website/service deployment and migration, including WordPress supports cloud service boundaries and recovery; a core generic study requirement."
+        },
+        {
+          "id": "dns-network-tls",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "DNS, network reachability, routing and TLS diagnosis supports cloud service boundaries and recovery; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports cloud service boundaries and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "infrastructure-drift",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Containers, infrastructure configuration, drift and rollout failure supports cloud service boundaries and recovery; a core generic study requirement."
+        },
+        {
+          "id": "integration-automation",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "External API/event integration, duplicates and partial failure supports cloud service boundaries and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "outage-resources",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Unavailable/overloaded services and CPU, memory or disk pressure supports cloud service boundaries and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports cloud service boundaries and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports cloud service boundaries and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports cloud service boundaries and recovery; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "incident tabletop",
+        "architecture and recovery plan"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Provider/vendor-specific operations, supervised incident practice and production recovery evidence remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "devops",
+      "title": "DevOps engineer",
+      "description": "Generic study profile for repeatable delivery and feedback. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "backup-disaster-recovery",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Backup, restoration, recovery objectives and dependency loss supports repeatable delivery and feedback; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "deploy-migrate",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Website/service deployment and migration, including WordPress supports repeatable delivery and feedback; a core generic study requirement."
+        },
+        {
+          "id": "dns-network-tls",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "DNS, network reachability, routing and TLS diagnosis supports repeatable delivery and feedback; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports repeatable delivery and feedback; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "infrastructure-drift",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Containers, infrastructure configuration, drift and rollout failure supports repeatable delivery and feedback; a core generic study requirement."
+        },
+        {
+          "id": "integration-automation",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "External API/event integration, duplicates and partial failure supports repeatable delivery and feedback; a core generic study requirement."
+        },
+        {
+          "id": "outage-resources",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Unavailable/overloaded services and CPU, memory or disk pressure supports repeatable delivery and feedback; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports repeatable delivery and feedback; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-automation-reliability",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Flaky tests, fixtures, CI feedback and automation maintainability supports repeatable delivery and feedback; a core generic study requirement."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports repeatable delivery and feedback; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports repeatable delivery and feedback; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "incident tabletop",
+        "architecture and recovery plan"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Provider/vendor-specific operations, supervised incident practice and production recovery evidence remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "platform",
+      "title": "Platform engineer",
+      "description": "Generic study profile for internal platform contracts and adoption. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "API contracts, service boundaries and compatibility supports internal platform contracts and adoption; a core generic study requirement."
+        },
+        {
+          "id": "architecture-evolution",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Architecture migration, build/buy and adoption tradeoffs supports internal platform contracts and adoption; a core generic study requirement."
+        },
+        {
+          "id": "capacity-cost",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Capacity, scaling, latency and cost decisions supports internal platform contracts and adoption; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "deploy-migrate",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Website/service deployment and migration, including WordPress supports internal platform contracts and adoption; a core generic study requirement."
+        },
+        {
+          "id": "distributed-work",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Queues, worker ownership, coordination and overload control supports internal platform contracts and adoption; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports internal platform contracts and adoption; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "infrastructure-drift",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Containers, infrastructure configuration, drift and rollout failure supports internal platform contracts and adoption; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports internal platform contracts and adoption; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-automation-reliability",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Flaky tests, fixtures, CI feedback and automation maintainability supports internal platform contracts and adoption; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports internal platform contracts and adoption; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports internal platform contracts and adoption; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "incident tabletop",
+        "architecture and recovery plan"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Provider/vendor-specific operations, supervised incident practice and production recovery evidence remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "sre",
+      "title": "Site reliability engineer",
+      "description": "Generic study profile for service failure diagnosis and recovery objectives. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "backup-disaster-recovery",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Backup, restoration, recovery objectives and dependency loss supports service failure diagnosis and recovery objectives; a core generic study requirement."
+        },
+        {
+          "id": "capacity-cost",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Capacity, scaling, latency and cost decisions supports service failure diagnosis and recovery objectives; a core generic study requirement."
+        },
+        {
+          "id": "distributed-work",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Queues, worker ownership, coordination and overload control supports service failure diagnosis and recovery objectives; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "dns-network-tls",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "DNS, network reachability, routing and TLS diagnosis supports service failure diagnosis and recovery objectives; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports service failure diagnosis and recovery objectives; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "incident-coordination",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Incident ownership, communication, mitigation and follow-through supports service failure diagnosis and recovery objectives; a core generic study requirement."
+        },
+        {
+          "id": "infrastructure-drift",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Containers, infrastructure configuration, drift and rollout failure supports service failure diagnosis and recovery objectives; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "outage-resources",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Unavailable/overloaded services and CPU, memory or disk pressure supports service failure diagnosis and recovery objectives; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports service failure diagnosis and recovery objectives; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports service failure diagnosis and recovery objectives; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports service failure diagnosis and recovery objectives; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "technical-debt-reliability",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Reliability investment, technical debt and long-term maintenance supports service failure diagnosis and recovery objectives; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "incident tabletop",
+        "architecture and recovery plan"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Provider/vendor-specific operations, supervised incident practice and production recovery evidence remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "network-engineering",
+      "title": "Network engineer",
+      "description": "Generic study profile for shared reachability and service-boundary diagnosis. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "backup-disaster-recovery",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Backup, restoration, recovery objectives and dependency loss supports shared reachability and service-boundary diagnosis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "capacity-cost",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Capacity, scaling, latency and cost decisions supports shared reachability and service-boundary diagnosis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "dns-network-tls",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "DNS, network reachability, routing and TLS diagnosis supports shared reachability and service-boundary diagnosis; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports shared reachability and service-boundary diagnosis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "incident-coordination",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Incident ownership, communication, mitigation and follow-through supports shared reachability and service-boundary diagnosis; a core generic study requirement."
+        },
+        {
+          "id": "infrastructure-drift",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Containers, infrastructure configuration, drift and rollout failure supports shared reachability and service-boundary diagnosis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "outage-resources",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Unavailable/overloaded services and CPU, memory or disk pressure supports shared reachability and service-boundary diagnosis; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports shared reachability and service-boundary diagnosis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports shared reachability and service-boundary diagnosis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports shared reachability and service-boundary diagnosis; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "incident tabletop",
+        "architecture and recovery plan"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Provider/vendor-specific operations, supervised incident practice and production recovery evidence remain unsatisfied.",
+        "Advanced network vendor operations are unsatisfied: BGP/OSPF, switching, routing policy, packet captures, hardware and authorized change/rollback practice."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "ai-applications",
+      "title": "Applied AI engineer",
+      "description": "Generic study profile for grounded applications and bounded tool effects. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "ai-adversarial-boundaries",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Prompt injection, sensitive data and adversarial boundaries supports grounded applications and bounded tool effects; a core generic study requirement."
+        },
+        {
+          "id": "ai-agent-actions",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Agent/workflow control, tool permissions and external effects supports grounded applications and bounded tool effects; a core generic study requirement."
+        },
+        {
+          "id": "ai-evaluation",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Task-specific evaluation, regression, judging and human calibration supports grounded applications and bounded tool effects; a core generic study requirement."
+        },
+        {
+          "id": "ai-provider-operations",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Provider/model integration, latency, cost, failures and fallback supports grounded applications and bounded tool effects; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ai-retrieval-grounding",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Retrieval, search relevance, citations and source support supports grounded applications and bounded tool effects; a core generic study requirement."
+        },
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "API contracts, service boundaries and compatibility supports grounded applications and bounded tool effects; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports grounded applications and bounded tool effects; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "integration-automation",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "External API/event integration, duplicates and partial failure supports grounded applications and bounded tool effects; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports grounded applications and bounded tool effects; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports grounded applications and bounded tool effects; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports grounded applications and bounded tool effects; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "Python / SQL artifact",
+        "evaluation or experiment review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Domain-specific datasets, mathematical depth, real evaluation calibration and operated pipelines remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "machine-learning",
+      "title": "Machine learning engineer",
+      "description": "Generic study profile for eligible data and measurable prediction behavior. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "algorithm-selection",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Algorithm selection, invariants, traversal and complexity supports eligible data and measurable prediction behavior; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "data-pipelines",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Ingestion, schema change, quality, lineage and replay supports eligible data and measurable prediction behavior; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports eligible data and measurable prediction behavior; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-data-eligibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Feature availability, splitting, leakage and preprocessing supports eligible data and measurable prediction behavior; a core generic study requirement."
+        },
+        {
+          "id": "ml-error-drift",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Generalization, error analysis, slices, drift and feedback loops supports eligible data and measurable prediction behavior; a core generic study requirement."
+        },
+        {
+          "id": "ml-framing",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Prediction decisions, labels, metrics, baselines and error costs supports eligible data and measurable prediction behavior; a core generic study requirement."
+        },
+        {
+          "id": "ml-serving-lifecycle",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Reproducibility, training/serving consistency, deployment and rollback supports eligible data and measurable prediction behavior; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-statistics-experiments",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Statistical reasoning, experiments, uncertainty and causal limitations supports eligible data and measurable prediction behavior; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports eligible data and measurable prediction behavior; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "python-data-transform",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Collections, parsing, validation and data transformation supports eligible data and measurable prediction behavior; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports eligible data and measurable prediction behavior; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports eligible data and measurable prediction behavior; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "Python / SQL artifact",
+        "evaluation or experiment review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Domain-specific datasets, mathematical depth, real evaluation calibration and operated pipelines remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "mlops",
+      "title": "MLOps engineer",
+      "description": "Generic study profile for reproducible model delivery and recovery. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "data-pipelines",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Ingestion, schema change, quality, lineage and replay supports reproducible model delivery and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "deploy-migrate",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Website/service deployment and migration, including WordPress supports reproducible model delivery and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports reproducible model delivery and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "infrastructure-drift",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Containers, infrastructure configuration, drift and rollout failure supports reproducible model delivery and recovery; a core generic study requirement."
+        },
+        {
+          "id": "ml-data-eligibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Feature availability, splitting, leakage and preprocessing supports reproducible model delivery and recovery; a core generic study requirement."
+        },
+        {
+          "id": "ml-error-drift",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Generalization, error analysis, slices, drift and feedback loops supports reproducible model delivery and recovery; a core generic study requirement."
+        },
+        {
+          "id": "ml-framing",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prediction decisions, labels, metrics, baselines and error costs supports reproducible model delivery and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-serving-lifecycle",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Reproducibility, training/serving consistency, deployment and rollback supports reproducible model delivery and recovery; a core generic study requirement."
+        },
+        {
+          "id": "outage-resources",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Unavailable/overloaded services and CPU, memory or disk pressure supports reproducible model delivery and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports reproducible model delivery and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports reproducible model delivery and recovery; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports reproducible model delivery and recovery; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "Python / SQL artifact",
+        "evaluation or experiment review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Domain-specific datasets, mathematical depth, real evaluation calibration and operated pipelines remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "data-engineering",
+      "title": "Data engineer",
+      "description": "Generic study profile for replayable ingestion and integrity. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "data-pipelines",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Ingestion, schema change, quality, lineage and replay supports replayable ingestion and integrity; a core generic study requirement."
+        },
+        {
+          "id": "data-transactions",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Transactions, concurrent updates and data integrity supports replayable ingestion and integrity; a core generic study requirement."
+        },
+        {
+          "id": "distributed-work",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Queues, worker ownership, coordination and overload control supports replayable ingestion and integrity; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports replayable ingestion and integrity; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "integration-automation",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "External API/event integration, duplicates and partial failure supports replayable ingestion and integrity; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports replayable ingestion and integrity; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "python-data-transform",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Collections, parsing, validation and data transformation supports replayable ingestion and integrity; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports replayable ingestion and integrity; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "query-performance",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Indexes, query plans and database performance supports replayable ingestion and integrity; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "sql-analytics",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Windows, ranking, cohorts and time-based analytics supports replayable ingestion and integrity; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "sql-grain-joins",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Relational grain, joins, nulls and duplicate handling supports replayable ingestion and integrity; a core generic study requirement."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports replayable ingestion and integrity; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "Python / SQL artifact",
+        "evaluation or experiment review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Domain-specific datasets, mathematical depth, real evaluation calibration and operated pipelines remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "data-science",
+      "title": "Data scientist",
+      "description": "Generic study profile for statistical decisions and trustworthy analysis. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "data-pipelines",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Ingestion, schema change, quality, lineage and replay supports statistical decisions and trustworthy analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports statistical decisions and trustworthy analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-data-eligibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Feature availability, splitting, leakage and preprocessing supports statistical decisions and trustworthy analysis; a core generic study requirement."
+        },
+        {
+          "id": "ml-error-drift",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Generalization, error analysis, slices, drift and feedback loops supports statistical decisions and trustworthy analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-framing",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Prediction decisions, labels, metrics, baselines and error costs supports statistical decisions and trustworthy analysis; a core generic study requirement."
+        },
+        {
+          "id": "ml-statistics-experiments",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Statistical reasoning, experiments, uncertainty and causal limitations supports statistical decisions and trustworthy analysis; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports statistical decisions and trustworthy analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "python-data-transform",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Collections, parsing, validation and data transformation supports statistical decisions and trustworthy analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports statistical decisions and trustworthy analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "sql-analytics",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Windows, ranking, cohorts and time-based analytics supports statistical decisions and trustworthy analysis; a core generic study requirement."
+        },
+        {
+          "id": "sql-grain-joins",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Relational grain, joins, nulls and duplicate handling supports statistical decisions and trustworthy analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports statistical decisions and trustworthy analysis; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "Python / SQL artifact",
+        "evaluation or experiment review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Domain-specific datasets, mathematical depth, real evaluation calibration and operated pipelines remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "analytics-bi",
+      "title": "Analytics and BI practitioner",
+      "description": "Generic study profile for decision-oriented metrics and relational analysis. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "data-pipelines",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Ingestion, schema change, quality, lineage and replay supports decision-oriented metrics and relational analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports decision-oriented metrics and relational analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-statistics-experiments",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Statistical reasoning, experiments, uncertainty and causal limitations supports decision-oriented metrics and relational analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports decision-oriented metrics and relational analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports decision-oriented metrics and relational analysis; a core generic study requirement."
+        },
+        {
+          "id": "query-performance",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Indexes, query plans and database performance supports decision-oriented metrics and relational analysis; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "sql-analytics",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Windows, ranking, cohorts and time-based analytics supports decision-oriented metrics and relational analysis; a core generic study requirement."
+        },
+        {
+          "id": "sql-grain-joins",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Relational grain, joins, nulls and duplicate handling supports decision-oriented metrics and relational analysis; a core generic study requirement."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports decision-oriented metrics and relational analysis; a core generic study requirement."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "Python / SQL artifact",
+        "evaluation or experiment review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Domain-specific datasets, mathematical depth, real evaluation calibration and operated pipelines remain unsatisfied.",
+        "BI semantic layers, visualization craft, metric governance and stakeholder adoption require separate product-specific artifacts."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "qa",
+      "title": "QA analyst / engineer",
+      "description": "Generic study profile for risk-driven investigation and release evidence. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "API contracts, service boundaries and compatibility supports risk-driven investigation and release evidence; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "data-transactions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Transactions, concurrent updates and data integrity supports risk-driven investigation and release evidence; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "dns-network-tls",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "DNS, network reachability, routing and TLS diagnosis supports risk-driven investigation and release evidence; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports risk-driven investigation and release evidence; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports risk-driven investigation and release evidence; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-api-data",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "API, integration, contract and data-validation failures supports risk-driven investigation and release evidence; a core generic study requirement."
+        },
+        {
+          "id": "qa-exploration-triage",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Exploratory testing, reproducible defects and release decisions supports risk-driven investigation and release evidence; a core generic study requirement."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports risk-driven investigation and release evidence; a core generic study requirement."
+        },
+        {
+          "id": "qa-ui-accessibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "UI state, end-to-end behavior, accessibility and user journeys supports risk-driven investigation and release evidence; a core generic study requirement."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports risk-driven investigation and release evidence; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "exploratory charter and bug report",
+        "oracle and regression design"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Actual product exploration, automation-framework operation, release decisions and independent defect evidence remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "sdet-test-automation",
+      "title": "SDET / test automation engineer",
+      "description": "Generic study profile for maintainable automated oracles and fixtures. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "feature-legacy-debug",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Implementing, reviewing and debugging an unfamiliar codebase supports maintainable automated oracles and fixtures; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports maintainable automated oracles and fixtures; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "integration-automation",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "External API/event integration, duplicates and partial failure supports maintainable automated oracles and fixtures; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports maintainable automated oracles and fixtures; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "python-data-transform",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Collections, parsing, validation and data transformation supports maintainable automated oracles and fixtures; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-api-data",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "API, integration, contract and data-validation failures supports maintainable automated oracles and fixtures; a core generic study requirement."
+        },
+        {
+          "id": "qa-automation-reliability",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Flaky tests, fixtures, CI feedback and automation maintainability supports maintainable automated oracles and fixtures; a core generic study requirement."
+        },
+        {
+          "id": "qa-exploration-triage",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Exploratory testing, reproducible defects and release decisions supports maintainable automated oracles and fixtures; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports maintainable automated oracles and fixtures; a core generic study requirement."
+        },
+        {
+          "id": "qa-ui-accessibility",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "UI state, end-to-end behavior, accessibility and user journeys supports maintainable automated oracles and fixtures; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports maintainable automated oracles and fixtures; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "exploratory charter and bug report",
+        "oracle and regression design"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Actual product exploration, automation-framework operation, release decisions and independent defect evidence remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "application-security",
+      "title": "Application security engineer",
+      "description": "Generic study profile for application trust boundaries and verification. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "ai-adversarial-boundaries",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prompt injection, sensitive data and adversarial boundaries supports application trust boundaries and verification; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "API contracts, service boundaries and compatibility supports application trust boundaries and verification; a core generic study requirement."
+        },
+        {
+          "id": "data-transactions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Transactions, concurrent updates and data integrity supports application trust boundaries and verification; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "feature-legacy-debug",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Implementing, reviewing and debugging an unfamiliar codebase supports application trust boundaries and verification; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports application trust boundaries and verification; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports application trust boundaries and verification; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-api-data",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "API, integration, contract and data-validation failures supports application trust boundaries and verification; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports application trust boundaries and verification; a core generic study requirement."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports application trust boundaries and verification; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "authorized threat-model tabletop",
+        "security finding and remediation review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Authorized security testing, threat modeling depth, forensic practice and security research are unsatisfied specialist work; this shared core does not authorize testing any target."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "cloud-security",
+      "title": "Cloud security engineer",
+      "description": "Generic study profile for cloud identity and configuration boundaries. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "ai-agent-actions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Agent/workflow control, tool permissions and external effects supports cloud identity and configuration boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "backup-disaster-recovery",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Backup, restoration, recovery objectives and dependency loss supports cloud identity and configuration boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "deploy-migrate",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Website/service deployment and migration, including WordPress supports cloud identity and configuration boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "dns-network-tls",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "DNS, network reachability, routing and TLS diagnosis supports cloud identity and configuration boundaries; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports cloud identity and configuration boundaries; a core generic study requirement."
+        },
+        {
+          "id": "incident-coordination",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Incident ownership, communication, mitigation and follow-through supports cloud identity and configuration boundaries; a core generic study requirement."
+        },
+        {
+          "id": "infrastructure-drift",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Containers, infrastructure configuration, drift and rollout failure supports cloud identity and configuration boundaries; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports cloud identity and configuration boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports cloud identity and configuration boundaries; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports cloud identity and configuration boundaries; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "authorized threat-model tabletop",
+        "security finding and remediation review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Authorized security testing, threat modeling depth, forensic practice and security research are unsatisfied specialist work; this shared core does not authorize testing any target."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "defensive-security-incident-response",
+      "title": "Defensive security / incident responder",
+      "description": "Generic study profile for evidence preservation and bounded incident response. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "backup-disaster-recovery",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Backup, restoration, recovery objectives and dependency loss supports evidence preservation and bounded incident response; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "dns-network-tls",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "DNS, network reachability, routing and TLS diagnosis supports evidence preservation and bounded incident response; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports evidence preservation and bounded incident response; a core generic study requirement."
+        },
+        {
+          "id": "incident-coordination",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Incident ownership, communication, mitigation and follow-through supports evidence preservation and bounded incident response; a core generic study requirement."
+        },
+        {
+          "id": "infrastructure-drift",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Containers, infrastructure configuration, drift and rollout failure supports evidence preservation and bounded incident response; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "outage-resources",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Unavailable/overloaded services and CPU, memory or disk pressure supports evidence preservation and bounded incident response; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports evidence preservation and bounded incident response; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-exploration-triage",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Exploratory testing, reproducible defects and release decisions supports evidence preservation and bounded incident response; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports evidence preservation and bounded incident response; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports evidence preservation and bounded incident response; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "authorized threat-model tabletop",
+        "security finding and remediation review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Authorized security testing, threat modeling depth, forensic practice and security research are unsatisfied specialist work; this shared core does not authorize testing any target."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "authorized-penetration-testing",
+      "title": "Authorized penetration tester",
+      "description": "Generic study profile for scoped security hypotheses and reproducible findings. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "ai-adversarial-boundaries",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prompt injection, sensitive data and adversarial boundaries supports scoped security hypotheses and reproducible findings; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "API contracts, service boundaries and compatibility supports scoped security hypotheses and reproducible findings; a core generic study requirement."
+        },
+        {
+          "id": "dns-network-tls",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "DNS, network reachability, routing and TLS diagnosis supports scoped security hypotheses and reproducible findings; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "feature-legacy-debug",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Implementing, reviewing and debugging an unfamiliar codebase supports scoped security hypotheses and reproducible findings; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports scoped security hypotheses and reproducible findings; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports scoped security hypotheses and reproducible findings; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-exploration-triage",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Exploratory testing, reproducible defects and release decisions supports scoped security hypotheses and reproducible findings; a core generic study requirement."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports scoped security hypotheses and reproducible findings; a core generic study requirement."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports scoped security hypotheses and reproducible findings; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "authorized threat-model tabletop",
+        "security finding and remediation review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Authorized security testing, threat modeling depth, forensic practice and security research are unsatisfied specialist work; this shared core does not authorize testing any target.",
+        "Advanced security research, exploit development and forensic depth are not covered; written authorization, scope and rules of engagement precede any target testing."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "quant-development",
+      "title": "Quantitative developer",
+      "description": "Generic study profile for numerical implementation and reliable data paths. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "algorithm-selection",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Algorithm selection, invariants, traversal and complexity supports numerical implementation and reliable data paths; a core generic study requirement."
+        },
+        {
+          "id": "async-resource-lifetime",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Concurrency, async, cancellation and resource lifetime supports numerical implementation and reliable data paths; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "data-transactions",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Transactions, concurrent updates and data integrity supports numerical implementation and reliable data paths; a core generic study requirement."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports numerical implementation and reliable data paths; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-data-eligibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Feature availability, splitting, leakage and preprocessing supports numerical implementation and reliable data paths; a core generic study requirement."
+        },
+        {
+          "id": "ml-statistics-experiments",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Statistical reasoning, experiments, uncertainty and causal limitations supports numerical implementation and reliable data paths; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports numerical implementation and reliable data paths; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "python-data-transform",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Collections, parsing, validation and data transformation supports numerical implementation and reliable data paths; a core generic study requirement."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports numerical implementation and reliable data paths; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "query-performance",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Indexes, query plans and database performance supports numerical implementation and reliable data paths; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports numerical implementation and reliable data paths; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "numerical / statistical reasoning",
+        "research validity and data review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Quantitative finance specialist work remains unsatisfied: probability/stochastic processes, numerical methods, instruments, market microstructure, backtesting controls and domain risk validation."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "quant-research",
+      "title": "Quantitative researcher",
+      "description": "Generic study profile for uncertainty, experiment design and decision-time data. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "algorithm-selection",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Algorithm selection, invariants, traversal and complexity supports uncertainty, experiment design and decision-time data; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports uncertainty, experiment design and decision-time data; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-data-eligibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Feature availability, splitting, leakage and preprocessing supports uncertainty, experiment design and decision-time data; a core generic study requirement."
+        },
+        {
+          "id": "ml-error-drift",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Generalization, error analysis, slices, drift and feedback loops supports uncertainty, experiment design and decision-time data; a core generic study requirement."
+        },
+        {
+          "id": "ml-framing",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Prediction decisions, labels, metrics, baselines and error costs supports uncertainty, experiment design and decision-time data; a core generic study requirement."
+        },
+        {
+          "id": "ml-statistics-experiments",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Statistical reasoning, experiments, uncertainty and causal limitations supports uncertainty, experiment design and decision-time data; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports uncertainty, experiment design and decision-time data; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "python-data-transform",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Collections, parsing, validation and data transformation supports uncertainty, experiment design and decision-time data; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports uncertainty, experiment design and decision-time data; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "sql-analytics",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Windows, ranking, cohorts and time-based analytics supports uncertainty, experiment design and decision-time data; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports uncertainty, experiment design and decision-time data; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "numerical / statistical reasoning",
+        "research validity and data review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Quantitative finance specialist work remains unsatisfied: probability/stochastic processes, numerical methods, instruments, market microstructure, backtesting controls and domain risk validation."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "model-validation-risk",
+      "title": "Model validation / risk practitioner",
+      "description": "Generic study profile for independent challenge of assumptions and model error. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "data-pipelines",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Ingestion, schema change, quality, lineage and replay supports independent challenge of assumptions and model error; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports independent challenge of assumptions and model error; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-data-eligibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Feature availability, splitting, leakage and preprocessing supports independent challenge of assumptions and model error; a core generic study requirement."
+        },
+        {
+          "id": "ml-error-drift",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Generalization, error analysis, slices, drift and feedback loops supports independent challenge of assumptions and model error; a core generic study requirement."
+        },
+        {
+          "id": "ml-framing",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Prediction decisions, labels, metrics, baselines and error costs supports independent challenge of assumptions and model error; a core generic study requirement."
+        },
+        {
+          "id": "ml-statistics-experiments",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Statistical reasoning, experiments, uncertainty and causal limitations supports independent challenge of assumptions and model error; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports independent challenge of assumptions and model error; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports independent challenge of assumptions and model error; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports independent challenge of assumptions and model error; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "numerical / statistical reasoning",
+        "research validity and data review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Quantitative finance specialist work remains unsatisfied: probability/stochastic processes, numerical methods, instruments, market microstructure, backtesting controls and domain risk validation."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "financial-risk-analysis",
+      "title": "Financial risk analyst",
+      "description": "Generic study profile for data integrity and uncertainty in risk decisions. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "data-pipelines",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Ingestion, schema change, quality, lineage and replay supports data integrity and uncertainty in risk decisions; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports data integrity and uncertainty in risk decisions; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-data-eligibility",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Feature availability, splitting, leakage and preprocessing supports data integrity and uncertainty in risk decisions; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "ml-framing",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Prediction decisions, labels, metrics, baselines and error costs supports data integrity and uncertainty in risk decisions; a core generic study requirement."
+        },
+        {
+          "id": "ml-statistics-experiments",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Statistical reasoning, experiments, uncertainty and causal limitations supports data integrity and uncertainty in risk decisions; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports data integrity and uncertainty in risk decisions; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports data integrity and uncertainty in risk decisions; a core generic study requirement."
+        },
+        {
+          "id": "sql-analytics",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Windows, ranking, cohorts and time-based analytics supports data integrity and uncertainty in risk decisions; a core generic study requirement."
+        },
+        {
+          "id": "sql-grain-joins",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Relational grain, joins, nulls and duplicate handling supports data integrity and uncertainty in risk decisions; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports data integrity and uncertainty in risk decisions; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "numerical / statistical reasoning",
+        "research validity and data review"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Quantitative finance specialist work remains unsatisfied: probability/stochastic processes, numerical methods, instruments, market microstructure, backtesting controls and domain risk validation."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "enterprise-it-saas-administration",
+      "title": "Enterprise IT / SaaS administrator",
+      "description": "Generic study profile for identity, integration and recovery ownership. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "backup-disaster-recovery",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Backup, restoration, recovery objectives and dependency loss supports identity, integration and recovery ownership; a core generic study requirement."
+        },
+        {
+          "id": "dns-network-tls",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "DNS, network reachability, routing and TLS diagnosis supports identity, integration and recovery ownership; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports identity, integration and recovery ownership; a core generic study requirement."
+        },
+        {
+          "id": "incident-coordination",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Incident ownership, communication, mitigation and follow-through supports identity, integration and recovery ownership; a core generic study requirement."
+        },
+        {
+          "id": "infrastructure-drift",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Containers, infrastructure configuration, drift and rollout failure supports identity, integration and recovery ownership; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "integration-automation",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "External API/event integration, duplicates and partial failure supports identity, integration and recovery ownership; a core generic study requirement."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports identity, integration and recovery ownership; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports identity, integration and recovery ownership; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports identity, integration and recovery ownership; a shared or adjacent foundation to revisit in role context."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "discovery and presentation",
+        "design critique / decision artifact"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Product/vendor/domain-specific discovery, implementation and stakeholder acceptance evidence remain unsatisfied."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "solutions-architecture",
+      "title": "Solutions architect",
+      "description": "Generic study profile for requirements, adoption and system tradeoffs. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "api-service-boundaries",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "API contracts, service boundaries and compatibility supports requirements, adoption and system tradeoffs; a core generic study requirement."
+        },
+        {
+          "id": "architecture-evolution",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Architecture migration, build/buy and adoption tradeoffs supports requirements, adoption and system tradeoffs; a core generic study requirement."
+        },
+        {
+          "id": "backup-disaster-recovery",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Backup, restoration, recovery objectives and dependency loss supports requirements, adoption and system tradeoffs; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "capacity-cost",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Capacity, scaling, latency and cost decisions supports requirements, adoption and system tradeoffs; a core generic study requirement."
+        },
+        {
+          "id": "deploy-migrate",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Website/service deployment and migration, including WordPress supports requirements, adoption and system tradeoffs; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports requirements, adoption and system tradeoffs; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports requirements, adoption and system tradeoffs; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports requirements, adoption and system tradeoffs; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports requirements, adoption and system tradeoffs; a core generic study requirement."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "discovery and presentation",
+        "design critique / decision artifact"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Product/vendor/domain-specific discovery, implementation and stakeholder acceptance evidence remain unsatisfied.",
+        "Commercial constraints, discovery facilitation, customer presentations and provider-specific implementation proof require separate review."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    },
+    {
+      "id": "ux-ui-design",
+      "title": "UX / UI designer",
+      "description": "Generic study profile for user journeys and evidence-based product decisions. Authored curriculum relevance only; vacancy calibration and observed performance are pending.",
+      "required_families": [
+        {
+          "id": "architecture-evolution",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Architecture migration, build/buy and adoption tradeoffs supports user journeys and evidence-based product decisions; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "identity-security",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Authentication, authorization, tenancy, secrets and trust boundaries supports user journeys and evidence-based product decisions; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "project-defense",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Genuine project defense, failures, learning and evidence of contribution supports user journeys and evidence-based product decisions; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-exploration-triage",
+          "minimum_depth": 1,
+          "critical": false,
+          "rationale": "Exploratory testing, reproducible defects and release decisions supports user journeys and evidence-based product decisions; a shared or adjacent foundation to revisit in role context."
+        },
+        {
+          "id": "qa-risk-oracles",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Requirements, risk prioritization and trustworthy test oracles supports user journeys and evidence-based product decisions; a core generic study requirement."
+        },
+        {
+          "id": "qa-ui-accessibility",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "UI state, end-to-end behavior, accessibility and user journeys supports user journeys and evidence-based product decisions; a core generic study requirement."
+        },
+        {
+          "id": "stakeholder-decisions",
+          "minimum_depth": 2,
+          "critical": true,
+          "rationale": "Prioritization, disagreement, ambiguity, handoffs and stakeholder decisions supports user journeys and evidence-based product decisions; a core generic study requirement."
+        }
+      ],
+      "formats": [
+        "evidence-based scenario diagnosis",
+        "changed-constraint explanation",
+        "genuine project defense",
+        "behavioral / stakeholder discussion",
+        "discovery and presentation",
+        "design critique / decision artifact"
+      ],
+      "specialist_gaps": [
+        "Vacancy-specific language, product, domain, interview format and depth calibration are pending; these study targets are not hiring requirements or job-readiness evidence.",
+        "Engineering management and research-science branches are outside these 30 mapped profiles: people leadership, hiring, performance management and original research require separate evidence.",
+        "Product/vendor/domain-specific discovery, implementation and stakeholder acceptance evidence remain unsatisfied.",
+        "Professional UX/product design remains unsatisfied: user research, interaction/visual craft, prototypes, usability studies, design systems and portfolio evidence."
+      ],
+      "source_basis": [
+        "system-contract.json",
+        "scenario-scope-plan.json"
+      ],
+      "levels": {
+        "entry": 1,
+        "mid": 2,
+        "senior": 3,
+        "staff": 4
+      },
+      "status": "generic-study-profile"
+    }
+  ]
+}

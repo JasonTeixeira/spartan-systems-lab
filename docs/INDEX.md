@@ -45,4 +45,4 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
 
 ## 5. Active Hands-On Lab & Cold Drills
 - **`lab-1-core-engine/`** — 11-service live stack (`nginx`, `api` + `/metrics`, `pgbouncer`, `postgres` + 3 Executive FinOps SQL views, `redis`, `metabase` Executive BI `:3000`, `prometheus` `:9090`, `grafana` auto-provisioned 6-panel dashboard `:3001`, `postgres-exporter`, `redis-exporter`, `sre-toolbox`), `seed_events.py`, `load_k6.js`, `chaos_lab1.sh`.
-- **`drills/`** — Cold unassisted Python/DSA stubs (`drills/python-dsa/`), SQL drills (`drills/sql/`), and Linux triage drills (`drills/linux/`).
+- **`drills/`** — Cold unassisted Python/DSA stubs (`drills/python-dsa/`), SQL drills (`drills/sql/`), Linux triage drills (`drills/linux/`), **9 self-contained pure-Python break-fix micro-labs (`drills/micro-labs/`, `make drill-labs`, 93 tests + 74 subtests)**, and the **Interview Bank & Role Benchmarks (`drills/interview-bank/`)**.

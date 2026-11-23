@@ -1,0 +1,669 @@
+{
+  "status": "draft-seed; not complete bank",
+  "primary_prompts": 30,
+  "scenario_families": 6,
+  "level_specific_prompts_counted_separately": true,
+  "followups_counted_as_primary": false,
+  "questions": [
+    {
+      "id": "SAGE-INT-0001",
+      "scenario_family": "cloud-recovery",
+      "level": "junior",
+      "roles": [
+        "cloud-engineer",
+        "solutions-architect"
+      ],
+      "format": "architecture",
+      "time_minutes": 8,
+      "prompt": "A web app runs on one virtual machine and saves uploads on its local disk. What can disappear when that machine fails, and what would you ask before changing the design?",
+      "expected_elements": [
+        "Distinguish process restart from loss of local storage and dependency availability.",
+        "Ask about acceptable data loss, outage duration and existing backup/restore evidence."
+      ],
+      "follow_up": "How would you demonstrate that a backup is recoverable?",
+      "visual_task": "Draw traffic, state, failure domains and recovery ownership; label assumptions.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0002",
+      "scenario_family": "cloud-recovery",
+      "level": "mid",
+      "roles": [
+        "cloud-engineer",
+        "solutions-architect"
+      ],
+      "format": "architecture",
+      "time_minutes": 15,
+      "prompt": "A service must survive one compute-instance failure. Design a bounded replacement and explain how you would test it without assuming its database is highly available.",
+      "expected_elements": [
+        "Separate stateless compute redundancy from database/session/upload state.",
+        "Define health checks, traffic routing, failure injection and observed recovery criteria."
+      ],
+      "follow_up": "What happens if replacement instances start but cannot access the database?",
+      "visual_task": "Draw traffic, state, failure domains and recovery ownership; label assumptions.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0003",
+      "scenario_family": "cloud-recovery",
+      "level": "senior",
+      "roles": [
+        "cloud-engineer",
+        "solutions-architect"
+      ],
+      "format": "architecture",
+      "time_minutes": 30,
+      "prompt": "Design recovery for a fictional service with a stated 15-minute recovery-time objective and 5-minute recovery-point objective. Which facts must you establish before promising those objectives?",
+      "expected_elements": [
+        "Define start/end measurement and write-loss boundary; inventory dependencies.",
+        "Demonstrate restores and failover, quantify detection/provisioning/data-replay time and retained failures."
+      ],
+      "follow_up": "A restore takes 12 minutes but incident detection takes 8. Does the recovery-time objective pass?",
+      "visual_task": "Draw traffic, state, failure domains and recovery ownership; label assumptions.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0004",
+      "scenario_family": "cloud-recovery",
+      "level": "staff",
+      "roles": [
+        "cloud-engineer",
+        "solutions-architect"
+      ],
+      "format": "architecture",
+      "time_minutes": 40,
+      "prompt": "Three teams depend on a shared data service but each defines recovery differently. Propose a common recovery contract and a migration plan that retains existing guarantees.",
+      "expected_elements": [
+        "Define service boundaries, dependency-specific objectives, ownership and evidence standards.",
+        "Phase rollout with compatibility, exercises, rollback and explicit gaps; avoid averaging incompatible objectives."
+      ],
+      "follow_up": "One team requires a lower data-loss tolerance than the shared design can provide. What choices do you present?",
+      "visual_task": "Draw traffic, state, failure domains and recovery ownership; label assumptions.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0005",
+      "scenario_family": "cloud-recovery",
+      "level": "principal-architect",
+      "roles": [
+        "cloud-engineer",
+        "solutions-architect"
+      ],
+      "format": "architecture",
+      "time_minutes": 45,
+      "prompt": "An executive requests multi-region recovery for every workload after one outage. Propose an investment decision framework rather than assuming multi-region is always justified.",
+      "expected_elements": [
+        "Segment business criticality, failure risks and regulatory/data constraints.",
+        "Compare tested alternatives, cost/complexity/concentration risk, decision owners and criteria for revisiting the choice."
+      ],
+      "follow_up": "How do you proceed when the business will not specify acceptable loss or downtime?",
+      "visual_task": "Draw traffic, state, failure domains and recovery ownership; label assumptions.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0006",
+      "scenario_family": "operation-identity",
+      "level": "junior",
+      "roles": [
+        "backend-engineer",
+        "platform-engineer"
+      ],
+      "format": "debugging",
+      "time_minutes": 8,
+      "prompt": "A client times out after submitting a job. Explain why this does not tell you whether the job exists.",
+      "expected_elements": [
+        "Separate client observation from server commit state.",
+        "Identify a stable operation identity and a safe way to inspect saved state."
+      ],
+      "follow_up": "Which extra evidence would distinguish failure before acceptance from a lost response after commit?",
+      "visual_task": "Draw client, handler, database and worker; mark acceptance, publication and read checks.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0007",
+      "scenario_family": "operation-identity",
+      "level": "mid",
+      "roles": [
+        "backend-engineer",
+        "platform-engineer"
+      ],
+      "format": "debugging",
+      "time_minutes": 15,
+      "prompt": "Specify an endpoint where the same owner/key/body reuses a job but the same owner/key with a changed body conflicts. What must be written atomically?",
+      "expected_elements": [
+        "Persist scoped key, request identity and accepted job together with uniqueness/conflict semantics.",
+        "Test concurrent acceptance, unchanged retries and changed-body conflicts; define canonical request equality."
+      ],
+      "follow_up": "Two identical requests arrive concurrently. What prevents two accepted jobs?",
+      "visual_task": "Draw client, handler, database and worker; mark acceptance, publication and read checks.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0008",
+      "scenario_family": "operation-identity",
+      "level": "senior",
+      "roles": [
+        "backend-engineer",
+        "platform-engineer"
+      ],
+      "format": "debugging",
+      "time_minutes": 30,
+      "prompt": "A worker performs an external action and crashes before marking the job complete. Design recovery without claiming a local transaction makes the external action exactly once.",
+      "expected_elements": [
+        "Name the uncertainty boundary between external effect and local record.",
+        "Consider receiver-supported idempotency, reconciliation, transactional messaging boundaries and compensation where appropriate."
+      ],
+      "follow_up": "The external receiver has no idempotency API. What guarantee can you honestly provide?",
+      "visual_task": "Draw client, handler, database and worker; mark acceptance, publication and read checks.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0009",
+      "scenario_family": "operation-identity",
+      "level": "staff",
+      "roles": [
+        "backend-engineer",
+        "platform-engineer"
+      ],
+      "format": "debugging",
+      "time_minutes": 40,
+      "prompt": "Several teams independently implemented retry keys with incompatible scopes and expiry. Design a shared contract and incremental migration.",
+      "expected_elements": [
+        "Specify identity, retention, payload equality, ownership and compatibility semantics.",
+        "Plan adapter rollout, mixed-version tests, observability and safe rollback without invalidating in-flight operations."
+      ],
+      "follow_up": "Old keys expire before long-running clients retry. How do you handle the ambiguity?",
+      "visual_task": "Draw client, handler, database and worker; mark acceptance, publication and read checks.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0010",
+      "scenario_family": "operation-identity",
+      "level": "principal-architect",
+      "roles": [
+        "backend-engineer",
+        "platform-engineer"
+      ],
+      "format": "debugging",
+      "time_minutes": 45,
+      "prompt": "A proposed platform claims exactly-once business operations across five third-party providers. Review the claim and set an organization-wide reliability standard.",
+      "expected_elements": [
+        "Decompose each effect/record boundary and identify unsupported provider assumptions.",
+        "Define acceptable business outcomes, reconciliation obligations, audit evidence, residual risk and decision authority."
+      ],
+      "follow_up": "A stakeholder refuses duplicate effects but also refuses reconciliation delays. How do you expose the incompatible requirements?",
+      "visual_task": "Draw client, handler, database and worker; mark acceptance, publication and read checks.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0011",
+      "scenario_family": "evaluation-leakage",
+      "level": "junior",
+      "roles": [
+        "ml-engineer",
+        "data-scientist"
+      ],
+      "format": "ml-reasoning",
+      "time_minutes": 8,
+      "prompt": "Why can fitting a data transformation using future evaluation rows make a reported score misleading?",
+      "expected_elements": [
+        "Explain information flow from evaluation into model preparation.",
+        "Distinguish fitted transforms from fixed constants and state the intended prediction setting."
+      ],
+      "follow_up": "Would a fixed unit conversion necessarily create the same problem?",
+      "visual_task": "Draw rows, time boundaries, fit operations and evaluation; show which information each step may see.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0012",
+      "scenario_family": "evaluation-leakage",
+      "level": "mid",
+      "roles": [
+        "ml-engineer",
+        "data-scientist"
+      ],
+      "format": "ml-reasoning",
+      "time_minutes": 15,
+      "prompt": "Build a time-ordered evaluation plan for a classifier whose labels arrive seven days after each event. What must be checked at a training cutoff?",
+      "expected_elements": [
+        "Use feature availability and label availability, not only event time.",
+        "Fit transforms on eligible development data and define temporal evaluation and baseline."
+      ],
+      "follow_up": "An event happened before cutoff but its label arrived afterward. Can that label be used?",
+      "visual_task": "Draw rows, time boundaries, fit operations and evaluation; show which information each step may see.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0013",
+      "scenario_family": "evaluation-leakage",
+      "level": "senior",
+      "roles": [
+        "ml-engineer",
+        "data-scientist"
+      ],
+      "format": "ml-reasoning",
+      "time_minutes": 30,
+      "prompt": "A model wins on an inspected test set after 30 rounds of tuning. What can that score support, and how would you obtain a stronger evaluation?",
+      "expected_elements": [
+        "Identify adaptive selection and limits of calling inspected data untouched.",
+        "Retain all trials, establish a suitable new evaluation protocol and compare against relevant baselines with appropriate uncertainty."
+      ],
+      "follow_up": "No additional historical data exists. Which claims would you weaken?",
+      "visual_task": "Draw rows, time boundaries, fit operations and evaluation; show which information each step may see.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0014",
+      "scenario_family": "evaluation-leakage",
+      "level": "staff",
+      "roles": [
+        "ml-engineer",
+        "data-scientist"
+      ],
+      "format": "ml-reasoning",
+      "time_minutes": 40,
+      "prompt": "Different teams compute incompatible offline metrics and ship models with undocumented training-serving differences. Propose a shared evaluation contract.",
+      "expected_elements": [
+        "Define data/label/feature identities, time semantics and metric versions.",
+        "Assign ownership, rollout gates, online monitoring, rollback and exceptions rather than enforcing one metric for every task."
+      ],
+      "follow_up": "One team improves a global metric while harming a critical subgroup. How does the release decision work?",
+      "visual_task": "Draw rows, time boundaries, fit operations and evaluation; show which information each step may see.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0015",
+      "scenario_family": "evaluation-leakage",
+      "level": "principal-architect",
+      "roles": [
+        "ml-engineer",
+        "data-scientist"
+      ],
+      "format": "ml-reasoning",
+      "time_minutes": 45,
+      "prompt": "A company wants to replace an operational decision process with ML, but historical labels reflect its prior decisions. Frame the evidence needed before broad rollout.",
+      "expected_elements": [
+        "Distinguish predictive evaluation from causal/product benefit and historical selection effects.",
+        "Propose staged measurement, safeguards, economic/error costs, governance and limits on generalization."
+      ],
+      "follow_up": "What would make you recommend retaining the simpler process?",
+      "visual_task": "Draw rows, time boundaries, fit operations and evaluation; show which information each step may see.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0016",
+      "scenario_family": "retrieval-boundary",
+      "level": "junior",
+      "roles": [
+        "ai-engineer",
+        "security-engineer"
+      ],
+      "format": "system-design",
+      "time_minutes": 8,
+      "prompt": "A chatbot returns a plausible answer with a document link. What does that link establish, and what remains unchecked?",
+      "expected_elements": [
+        "Separate document existence, current quote/support, factual truth and access authorization.",
+        "Request evidence for the specific claim rather than treating a citation badge as validation."
+      ],
+      "follow_up": "Can a real document be cited for a claim it does not support?",
+      "visual_task": "Draw user identity, permitted corpus, retrieval, generated answer and citation checks.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0017",
+      "scenario_family": "retrieval-boundary",
+      "level": "mid",
+      "roles": [
+        "ai-engineer",
+        "security-engineer"
+      ],
+      "format": "system-design",
+      "time_minutes": 15,
+      "prompt": "Design retrieval for two tenants so that unauthorized documents are excluded before answer construction. What tests would you write?",
+      "expected_elements": [
+        "Resolve identity from trusted application state and enforce resource relationships before protected reads.",
+        "Test cross-tenant IDs, stale access, cached results and denied paths without allowing the model to grant authority."
+      ],
+      "follow_up": "What if a document contains instructions telling the assistant to ignore tenant filters?",
+      "visual_task": "Draw user identity, permitted corpus, retrieval, generated answer and citation checks.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0018",
+      "scenario_family": "retrieval-boundary",
+      "level": "senior",
+      "roles": [
+        "ai-engineer",
+        "security-engineer"
+      ],
+      "format": "system-design",
+      "time_minutes": 30,
+      "prompt": "A retrieval update improves relevance but increases unsupported answers and exposes one revoked document through a cache. Design the release and incident response.",
+      "expected_elements": [
+        "Separate relevance, support and authorization outcomes; isolate the leak and preserve evidence.",
+        "Fix cache/identity invalidation boundaries, rerun adversarial cases and retain rollback criteria."
+      ],
+      "follow_up": "Would lowering generation temperature repair the authorization defect? Why?",
+      "visual_task": "Draw user identity, permitted corpus, retrieval, generated answer and citation checks.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0019",
+      "scenario_family": "retrieval-boundary",
+      "level": "staff",
+      "roles": [
+        "ai-engineer",
+        "security-engineer"
+      ],
+      "format": "system-design",
+      "time_minutes": 40,
+      "prompt": "Four product teams share retrieval infrastructure with different document permissions and evaluation needs. Define the platform boundary and migration strategy.",
+      "expected_elements": [
+        "Keep application-owned authorization distinct from shared indexing/model services.",
+        "Specify versioned retrieval/evidence contracts, scoped evaluations, cache identities, ownership and compatibility rollout."
+      ],
+      "follow_up": "Which protections must remain enforceable if a model or retriever is replaced?",
+      "visual_task": "Draw user identity, permitted corpus, retrieval, generated answer and citation checks.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0020",
+      "scenario_family": "retrieval-boundary",
+      "level": "principal-architect",
+      "roles": [
+        "ai-engineer",
+        "security-engineer"
+      ],
+      "format": "system-design",
+      "time_minutes": 45,
+      "prompt": "An organization wants autonomous agents to read internal documents and execute business actions. Propose an adoption architecture and risk decision process.",
+      "expected_elements": [
+        "Separate reading, proposing and acting; define allowed effects and approval authority.",
+        "Use bounded permissions, evaluations tied to real tasks, audit/recovery ownership and explicit residual-risk decisions."
+      ],
+      "follow_up": "What evidence would justify expanding an agent capability, and what would trigger revocation?",
+      "visual_task": "Draw user identity, permitted corpus, retrieval, generated answer and citation checks.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0021",
+      "scenario_family": "capacity-incident",
+      "level": "junior",
+      "roles": [
+        "sre",
+        "platform-engineer"
+      ],
+      "format": "incident",
+      "time_minutes": 8,
+      "prompt": "A dashboard reports fast successful requests while users report many rejected requests. How can both statements be true?",
+      "expected_elements": [
+        "Identify the denominator and exclusions in successful-request latency.",
+        "Inspect offered, admitted, rejected and completed counts rather than latency alone."
+      ],
+      "follow_up": "Which chart would reveal that rejected users were omitted?",
+      "visual_task": "Draw offered load, admission, queue, workers and downstream dependencies with explicit units.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0022",
+      "scenario_family": "capacity-incident",
+      "level": "mid",
+      "roles": [
+        "sre",
+        "platform-engineer"
+      ],
+      "format": "incident",
+      "time_minutes": 15,
+      "prompt": "Four jobs arrive together; one worker finishes one job per second. Compare admitting two jobs with admitting all four, using admitted-job completion time and rejection count.",
+      "expected_elements": [
+        "State FIFO/no overhead/no service variance assumptions and enumerate completion times.",
+        "Report 2 rejected with completions1,2 versus0 rejected with completions1,2,3,4; specify percentile convention."
+      ],
+      "follow_up": "How would variable service time change the strength of your conclusion?",
+      "visual_task": "Draw offered load, admission, queue, workers and downstream dependencies with explicit units.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0023",
+      "scenario_family": "capacity-incident",
+      "level": "senior",
+      "roles": [
+        "sre",
+        "platform-engineer"
+      ],
+      "format": "incident",
+      "time_minutes": 30,
+      "prompt": "An API accumulates work faster than a database can process it. Diagnose before adding workers, and propose an admission/recovery plan.",
+      "expected_elements": [
+        "Measure bottleneck, queue age, concurrency, database saturation and demand.",
+        "Explain backpressure, bounded queues, retry amplification, safe shedding and recovery criteria."
+      ],
+      "follow_up": "Why could doubling worker count make the outage worse?",
+      "visual_task": "Draw offered load, admission, queue, workers and downstream dependencies with explicit units.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0024",
+      "scenario_family": "capacity-incident",
+      "level": "staff",
+      "roles": [
+        "sre",
+        "platform-engineer"
+      ],
+      "format": "incident",
+      "time_minutes": 40,
+      "prompt": "A shared platform lets every tenant retry aggressively during partial outages. Design a cross-team overload contract.",
+      "expected_elements": [
+        "Specify retry budgets, jitter/backoff, admission/fairness and dependency-specific limits.",
+        "Plan compatible client changes, load experiments, on-call ownership and evidence-based exceptions."
+      ],
+      "follow_up": "A high-priority tenant consumes all capacity. How do you make the allocation explicit?",
+      "visual_task": "Draw offered load, admission, queue, workers and downstream dependencies with explicit units.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0025",
+      "scenario_family": "capacity-incident",
+      "level": "principal-architect",
+      "roles": [
+        "sre",
+        "platform-engineer"
+      ],
+      "format": "incident",
+      "time_minutes": 45,
+      "prompt": "An organization repeatedly meets average uptime targets while critical workflows fail during peak events. Redesign reliability governance.",
+      "expected_elements": [
+        "Measure end-to-end user journeys, failure distribution and business impact rather than a comforting aggregate.",
+        "Assign objectives, error-budget decisions, investment and exception ownership with incident learning."
+      ],
+      "follow_up": "How would you arbitrate revenue growth against reliability work when objectives are already exceeded?",
+      "visual_task": "Draw offered load, admission, queue, workers and downstream dependencies with explicit units.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0026",
+      "scenario_family": "architecture-evolution",
+      "level": "junior",
+      "roles": [
+        "solutions-architect",
+        "software-engineer"
+      ],
+      "format": "project-defense",
+      "time_minutes": 8,
+      "prompt": "Explain why a small application might reasonably begin as one deployable service. What future evidence would make you reconsider?",
+      "expected_elements": [
+        "Consider team/operational simplicity and current requirements.",
+        "Name concrete scaling, ownership or isolation pressures instead of equating more services with better architecture."
+      ],
+      "follow_up": "Which parts can be modular without being independently deployed?",
+      "visual_task": "Draw current system, proposed change, compatibility boundary and reversible rollout stages.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0027",
+      "scenario_family": "architecture-evolution",
+      "level": "mid",
+      "roles": [
+        "solutions-architect",
+        "software-engineer"
+      ],
+      "format": "project-defense",
+      "time_minutes": 15,
+      "prompt": "A team needs to change a database column used by two deployed application versions. Propose a compatible rollout.",
+      "expected_elements": [
+        "Separate expansion, mixed-version operation, migration and later contraction.",
+        "Test reads/writes across versions, backfill correctness, rollback limits and observability."
+      ],
+      "follow_up": "What happens if the old application still writes after the backfill?",
+      "visual_task": "Draw current system, proposed change, compatibility boundary and reversible rollout stages.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0028",
+      "scenario_family": "architecture-evolution",
+      "level": "senior",
+      "roles": [
+        "solutions-architect",
+        "software-engineer"
+      ],
+      "format": "project-defense",
+      "time_minutes": 30,
+      "prompt": "A monolith is blamed for slow delivery, but incidents show unclear ownership and weak tests. Design a diagnosis and a bounded improvement proposal.",
+      "expected_elements": [
+        "Separate architectural coupling from organizational/process causes using evidence.",
+        "Compare modularization, tooling and selective extraction; define outcomes and reversal criteria."
+      ],
+      "follow_up": "What observation would falsify your preferred explanation?",
+      "visual_task": "Draw current system, proposed change, compatibility boundary and reversible rollout stages.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0029",
+      "scenario_family": "architecture-evolution",
+      "level": "staff",
+      "roles": [
+        "solutions-architect",
+        "software-engineer"
+      ],
+      "format": "project-defense",
+      "time_minutes": 40,
+      "prompt": "Three teams propose different event contracts for one business entity. Lead a convergence process that allows existing systems to keep working.",
+      "expected_elements": [
+        "Define semantics, owners, identifiers, schema evolution and consistency needs.",
+        "Plan compatibility, adapters, replay boundaries, adoption incentives and migration evidence."
+      ],
+      "follow_up": "When is keeping distinct bounded-context models preferable to forcing one global schema?",
+      "visual_task": "Draw current system, proposed change, compatibility boundary and reversible rollout stages.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    },
+    {
+      "id": "SAGE-INT-0030",
+      "scenario_family": "architecture-evolution",
+      "level": "principal-architect",
+      "roles": [
+        "solutions-architect",
+        "software-engineer"
+      ],
+      "format": "project-defense",
+      "time_minutes": 45,
+      "prompt": "You inherit an architecture roadmap spanning acquisitions, cloud migration and AI investment. Present a decision framework for the next three years.",
+      "expected_elements": [
+        "Tie options to business capability, constraints, security, economics and team capacity.",
+        "Use explicit assumptions, staged commitments, governance, measurable outcomes and exit/reassessment conditions."
+      ],
+      "follow_up": "How do you keep the roadmap useful when its most important business assumption changes?",
+      "visual_task": "Draw current system, proposed change, compatibility boundary and reversible rollout stages.",
+      "rubric_reference": "README.md: Scoring and visual connection",
+      "status": "original-draft; technical-and-teaching-review-pending",
+      "answer_scope": "Expected elements are a draft outline, not an exhaustive worked answer or empirical hiring rubric.",
+      "provenance": "Authored here from stated competencies; no bulk import of Percruit. No exhaustive textual-overlap audit. Topic planning references are in README."
+    }
+  ]
+}

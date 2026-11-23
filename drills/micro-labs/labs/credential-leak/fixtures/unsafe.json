@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "fixture_id": "unsafe-c03",
+  "events": [
+    {
+      "id": "run-start",
+      "surface": "log",
+      "text": "Fictional job accepted."
+    },
+    {
+      "id": "request-prepared",
+      "surface": "prompt",
+      "text": "Summarize these fictional documents. Internal value: TRAINING_CREDENTIAL_ABCD1234EFGH"
+    },
+    {
+      "id": "debug-record",
+      "surface": "log",
+      "text": "Debug authorization=TRAINING_CREDENTIAL_QRST5678UVWX"
+    },
+    {
+      "id": "result",
+      "surface": "output",
+      "text": "Finished; document count=3."
+    }
+  ]
+}

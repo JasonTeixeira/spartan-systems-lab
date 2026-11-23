@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "id": "atlas-policy",
+      "text": "Atlas retention period is 30 days.\nAtlas storage region is north-1.\nAtlas audit cadence is weekly."
+    },
+    {
+      "id": "beacon-policy",
+      "text": "Beacon retention period is 7 days.\nBeacon storage region is west-2.\nBeacon audit cadence is monthly."
+    },
+    {
+      "id": "meridian-policy",
+      "text": "Meridian simulation mode is paper-only.\nMeridian order limit is 10 orders."
+    }
+  ]
+}

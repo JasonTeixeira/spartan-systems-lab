@@ -1,0 +1,19 @@
+{
+  "edition_id": "credential-leak-v1",
+  "finding_id": "C03",
+  "source_path": "library/academy/course_packages/qa_sdet_mastery_system/BUILD/job_ready_hybrid_expansion/lessons/security-governance-automation/E259_credential-leak-test.md",
+  "lesson_path": "teaching/security/credential-leak/lesson.md",
+  "feedback_path": "teaching/security/credential-leak/feedback.md",
+  "implementation_path": "labs/credential-leak/scanner.py",
+  "rule": "Word-bounded TRAINING_CREDENTIAL_ followed by 12 to 32 uppercase ASCII letters or digits, in accepted event text fields only.",
+  "cases": [
+    {"fixture": "unsafe", "exit_code": 1, "status": "findings", "scanned_events": 4, "matches": 2},
+    {"fixture": "repaired", "exit_code": 0, "status": "clean", "scanned_events": 4, "matches": 0},
+    {"fixture": "invalid", "exit_code": 2, "status": "error"}
+  ],
+  "repair_invariants": ["same event IDs, order and surfaces", "same benign text", "only marker occurrences replaced", "unsafe input unchanged"],
+  "report_policy": "Metadata only; no matched values, raw event text, paths or exception details in scan/error reports.",
+  "bounds": {"input_bytes": 65536, "min_events": 1, "max_events": 50, "text_utf8_bytes": 8192},
+  "safety_scope": "Only supplied synthetic local fixtures. No credentials, network, recursive scanning, provider validity checks, source execution or file writes.",
+  "limitations": "Passing this rule does not establish real-secret detection, whole-repository coverage, credential revocation, full source assignment completion or production security."
+}
