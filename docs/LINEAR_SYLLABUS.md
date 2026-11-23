@@ -11,7 +11,7 @@
 2. **Track B (20-30 min) — Bash/Linux Pipes & SQL Speed:** Live `awk`/`sed`/`jq`/`ss`/`strace`/`tcpdump` + Postgres window functions, CTEs, `EXPLAIN (ANALYZE, BUFFERS)`.
 3. **Track C (2-6 hrs) — Learn -> Immediately Build & Break in the Active Lab:** Read ONLY the 2-3 pages for the current module -> write the code/SQL/IaC yourself -> run `make review` -> stress & break it -> `make snapshot-incident` -> `make reset`.
 4. **Track D (End of Module) — Module Boss Fight Gate:** Pass **(1) 1 unseen coding problem**, **(2) 1 live break-fix**, and **(3) 1 15-min whiteboard trade-off defense** before unlocking Module `N+1`.
-5. **Track E (Weekly Friday, 30–45 min, No IDE) — Executive, Org Scale & Vocal Leadership Rep (`LEADERSHIP_AND_EXEC_MASTERY.md`):** Write **1 Executive BLUF / PR-FAQ memo** for your week's lab (`$` & risk impact), record a **3-min spoken defense**, and drill **1 STAR-L Behavioral Card** or **DACI/RAID/Org-Scale** scenario.
+5. **Track E (Weekly Friday, 30–55 min, No IDE) — Executive, Content Factory & Consulting Rep (`LEADERSHIP_AND_EXEC_MASTERY.md`):** Write **1 Executive BLUF / PR-FAQ memo** (`$` & risk impact), record a **3-min spoken defense**, drill **1 STAR-L / DACI / MEDDPICC** scenario, and run the **25-min "1 Lab Rep -> 5 Assets" capture loop** (LinkedIn ArchOS carousel + YouTube teardown + 45s IG/Shorts clip + GitHub receipt).
 
 ---
 
