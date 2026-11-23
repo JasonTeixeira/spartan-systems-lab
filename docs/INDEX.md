@@ -5,7 +5,8 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
 ---
 
 ## 0. Start Here (Visual Atlas v2, Tool Belt, Linear Syllabus, Operator Manual & Tracker)
-- **`docs/index.html`** (`make portal`) — **Interactive Visual Architecture Atlas v2.0** (offline browser & GitHub Pages): **440+ units**, expandable **12-Module Daily Rep Sprint Board** (with infinite Nightmare-Mode reset), **Visual IaC & 8-Stage CI/CD Pipeline Maps**, **Searchable Master Tool Belt** (including React/React Native/Frontend), **GPU Silicon / Crypto / NIST / MITRE Cards**, 6-Role Switcher ($200k–$600k+), and 5-lane End-to-End Platform Diagram.
+- **`docs/index.html`** (`make portal`) — **Interactive Visual Architecture Atlas v2.0** (offline browser & GitHub Pages): **440+ units**, **3 standalone SVG architecture blueprints (`docs/diagrams/`)**, expandable **12-Module Daily Rep Sprint Board** (paired with **114 local ArchOS canvases** + infinite Nightmare-Mode reset), **Visual IaC & 8-Stage CI/CD Pipeline Maps**, **Searchable Master Tool Belt** (including React/React Native/Frontend), **GPU Silicon / Crypto / NIST / MITRE Cards**, 6-Role Switcher ($200k–$600k+), and 5-lane End-to-End Platform Diagram.
+- **`docs/diagrams/`** — Standalone publication-grade SVG architecture blueprints (`01-network-vpc-request-flow.svg`, `02-data-lifecycle-bi-pipeline.svg`, `03-ai-rag-mcp-eval-architecture.svg`) embedded in `docs/index.html` and served live on GitHub Pages.
 - **`docs/TOOLBELT.md`** — Complete searchable Master Tool Belt (Linux/SRE, Python/QA, Data/BI, AI/ML/LLM, Cloud/IaC/K8s, Security, and **React/Next.js/React Native/Frontend**) with 1-line commands — ready for `spartan-mcp` Step 2.
 - **`docs/LINEAR_SYLLABUS.md`** — **The 12-Module Linear Compounding Syllabus** (`M01 -> M12`, 4 parallel daily tracks, Boss Fight gates, Constraint-First LeetCode-100x method, and 10 "30-Year Veteran" Battle Scars).
 - **`docs/mastery_tracker.html`** (`make tracker`) — Interactive browser mastery checklist tracking all 6 Labs, 10 Archetypes, 12 DDIA Chapters, 12 Data Safeguards, 12 Automation Archetypes, 22 Daily Loops, Failure Drills, and 8 Mini-System Katas with CSV export.
@@ -35,7 +36,7 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
 - `docs/postmortems/` — Blameless post-mortems (`000-template.md`)
 
 ## 4. Reusable On-the-Job Tools (`mcp_server/`, `tools/` & `scripts/`)
-- **`mcp_server/` (`make mcp` — [README](../mcp_server/README.md))** — Personal Principal Engineer MCP Server (`finops_estimate`, `toolbelt_and_runbook_lookup`, `qa_and_code_review`, approval-gated `generate_dashboard_pack`, `visualize_infra_and_cicd`) ready to plug into Claude Code, Cursor, or Antigravity.
+- **`mcp_server/` (`make mcp` — [README](../mcp_server/README.md))** — Personal Principal Engineer MCP Server with **6 tools** (`finops_estimate`, `toolbelt_and_runbook_lookup`, `qa_and_code_review`, approval-gated `generate_dashboard_pack`, `visualize_infra_and_cicd`, `archos_canvas_lookup`) ready to plug into Claude Code, Cursor, or Antigravity.
 - **`tools/sql-diagnostics/pg_xray.sql`** — Read-only Production Postgres X-Ray (locks, `idle in transaction`, dead-tuple bloat, seq scans, buffer cache hit ratio, XID wraparound age, `pg_stat_statements`).
 - **`tools/linux-triage.sh`** — Safe 60-second read-only Linux triage collector (USE/TSA, cgroup v2 throttling, `df -i`, `ss -s`, `ip route`, D-state procs, `dmesg`).
 - **`tools/finops_calc.py`** — Tested Python CLI for Little's Law capacity, LLM semantic-cache/routing dollar savings, and GPU VRAM/KV-cache sizing.

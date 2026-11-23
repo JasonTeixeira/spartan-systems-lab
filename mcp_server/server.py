@@ -12,6 +12,7 @@ from mcp.server import MCPServer
 
 from mcp_server.core import (
     build_dashboard_pack,
+    lookup_archos_canvases,
     lookup_toolbelt_and_runbooks,
     run_finops_estimate,
     run_qa_and_code_review,
@@ -113,6 +114,20 @@ def visualize_infra_and_cicd(
         compose_path=compose_path,
         workflow_path=workflow_path,
     )
+
+
+@mcp.tool()
+def archos_canvas_lookup(
+    query: str = "",
+    folder: str = "all",
+    max_matches: int = 25,
+) -> dict[str, Any]:
+    """
+    [READ-ONLY | scope: local:archos:read] Search your 114+ local ArchOS interactive
+    architecture canvases by keyword or folder (foundations, data-lifecycle,
+    classic-systems, ai-agents, pilots) to pair visual whiteboards with Spartan Labs.
+    """
+    return lookup_archos_canvases(query=query, folder=folder, max_matches=max_matches)
 
 
 def main() -> None:

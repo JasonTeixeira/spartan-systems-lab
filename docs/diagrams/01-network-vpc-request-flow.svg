@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 340" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#fb7185"/>
+    </marker>
+  </defs>
+  <rect width="1120" height="340" rx="14" fill="#0b1222"/>
+  <text x="24" y="34" fill="#edf2ff" font-size="16" font-weight="800">01 • Request Lifecycle &amp; 3-Tier Segmented Network / VPC Perimeter (Labs 1 &amp; 2)</text>
+  <text x="24" y="54" fill="#93a4c4" font-size="12">Zero-trust subnet isolation: edge_net cannot reach private_data_net directly — mirrors AWS Public / App / Private VPC Subnets</text>
+
+  <!-- Public / Edge Subnet -->
+  <rect x="24" y="76" width="290" height="220" rx="12" fill="#101b33" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="38" y="98" fill="#38bdf8" font-size="11" font-weight="800">PUBLIC / EDGE SUBNET (edge_net)</text>
+  <rect x="42" y="114" width="110" height="62" rx="9" fill="#162442" stroke="#38bdf8"/>
+  <text x="97" y="138" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">Client / k6</text>
+  <text x="97" y="156" text-anchor="middle" fill="#93a4c4" font-size="10">HTTPS / DNS</text>
+  <rect x="182" y="114" width="116" height="62" rx="9" fill="#162442" stroke="#38bdf8"/>
+  <text x="240" y="138" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">Nginx / TLS</text>
+  <text x="240" y="156" text-anchor="middle" fill="#93a4c4" font-size="10">L7 Proxy :8080</text>
+  <rect x="42" y="200" width="256" height="76" rx="9" fill="#162442" stroke="#fb7185"/>
+  <text x="170" y="224" text-anchor="middle" fill="#fb7185" font-size="11.5" font-weight="700">Firewall (nftables) &amp; SSH Bastion</text>
+  <text x="170" y="242" text-anchor="middle" fill="#93a4c4" font-size="10">Allow 443/80 only • Rate Limit • WAF</text>
+  <text x="170" y="258" text-anchor="middle" fill="#93a4c4" font-size="10">Direct edge → DB port 5432 = DROPPED</text>
+
+  <!-- App Subnet -->
+  <rect x="352" y="76" width="290" height="220" rx="12" fill="#101b33" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="366" y="98" fill="#818cf8" font-size="11" font-weight="800">APP TIER SUBNET (app_net)</text>
+  <rect x="372" y="114" width="250" height="74" rx="9" fill="#162442" stroke="#818cf8"/>
+  <text x="497" y="138" text-anchor="middle" fill="#edf2ff" font-size="12.5" font-weight="700">FastAPI Hexagonal Core (:8000)</text>
+  <text x="497" y="156" text-anchor="middle" fill="#93a4c4" font-size="10.5">Pydantic v2 • Idempotency • /metrics</text>
+  <text x="497" y="172" text-anchor="middle" fill="#34d399" font-size="10">Timeout 4s &lt; Nginx 5s (Hierarchical)</text>
+  <rect x="372" y="206" width="250" height="70" rx="9" fill="#162442" stroke="#fbbf24"/>
+  <text x="497" y="230" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">Prometheus (:9090) &amp; Grafana (:3001)</text>
+  <text x="497" y="248" text-anchor="middle" fill="#93a4c4" font-size="10">RED Metrics • p99 • $/min Tenant Burn</text>
+  <text x="497" y="263" text-anchor="middle" fill="#93a4c4" font-size="10">4 Golden Signals + Burn-Rate Alerts</text>
+
+  <!-- Private Data Subnet -->
+  <rect x="680" y="76" width="416" height="220" rx="12" fill="#101b33" stroke="#34d399" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="694" y="98" fill="#34d399" font-size="11" font-weight="800">PRIVATE DATA SUBNET (private_data_net • internal: true)</text>
+  <rect x="698" y="114" width="124" height="68" rx="9" fill="#162442" stroke="#34d399"/>
+  <text x="760" y="138" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">PgBouncer</text>
+  <text x="760" y="155" text-anchor="middle" fill="#93a4c4" font-size="10">Tx Pool :6432</text>
+  <text x="760" y="170" text-anchor="middle" fill="#34d399" font-size="9.5">500 → 20 conns</text>
+
+  <rect x="846" y="114" width="232" height="68" rx="9" fill="#162442" stroke="#34d399"/>
+  <text x="962" y="138" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">PostgreSQL 16 (OLTP 3NF)</text>
+  <text x="962" y="155" text-anchor="middle" fill="#93a4c4" font-size="10">Composite B-Tree • RLS • pg_stat</text>
+  <text x="962" y="170" text-anchor="middle" fill="#34d399" font-size="9.5">statement_timeout 3s • Exec KPI Views</text>
+
+  <rect x="698" y="204" width="176" height="72" rx="9" fill="#162442" stroke="#fb923c"/>
+  <text x="786" y="228" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">Redis 7 (:6379)</text>
+  <text x="786" y="246" text-anchor="middle" fill="#93a4c4" font-size="10">Sliding-Window Limits</text>
+  <text x="786" y="261" text-anchor="middle" fill="#93a4c4" font-size="10">Cache • Pub/Sub • Leases</text>
+
+  <rect x="894" y="204" width="184" height="72" rx="9" fill="#162442" stroke="#fbbf24"/>
+  <text x="986" y="228" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">Metabase BI (:3000)</text>
+  <text x="986" y="246" text-anchor="middle" fill="#93a4c4" font-size="10">Executive CFO / VP KPIs</text>
+  <text x="986" y="261" text-anchor="middle" fill="#93a4c4" font-size="10">Cap Risk &amp; Cost Drivers</text>
+
+  <!-- Arrows -->
+  <line x1="152" y1="145" x2="180" y2="145" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="298" y1="145" x2="370" y2="145" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="622" y1="145" x2="696" y2="145" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="822" y1="145" x2="844" y2="145" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr)"/>
+  <path d="M 622 164 L 660 164 L 660 238 L 696 238" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="497" y1="188" x2="497" y2="204" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="986" y1="182" x2="986" y2="202" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arr)"/>
+
+  <!-- Footer legend -->
+  <text x="24" y="322" fill="#93a4c4" font-size="11">SRE Toolbox attaches across all 3 subnets (ss, tcpdump, strace, dig, tc netem, pg_xray.sql, linux-triage.sh) for zero-blind-spot live forensics.</text>
+</svg>

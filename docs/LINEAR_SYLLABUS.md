@@ -47,6 +47,25 @@
 
 ---
 
+## ArchOS Visual Canvas Pairing (`http://127.0.0.1:5180/` -> Spartan Lab Modules)
+
+Before starting any Module below, open its matching **ArchOS interactive canvases** (114 authored canvases in `/Users/Sage/archos`) for 15 minutes of visual Recall Mode + FSRS spaced repetition, then switch to your terminal to build & break it on real metal:
+
+- **M01 (Python, Clean Arch & APIs):** `dgm_request-lifecycle`, `dgm_stateless-web-tier`, `dgm_api-styles`, `dgm_idempotency-retries`
+- **M02 (SQL, Postgres & 10M Rows):** `dgm_transactions-and-isolation`, `dgm_db-scaling-ladder-v3`, `dgm_oltp-olap-split`, `dgm_serving-bi`
+- **M03 (Linux, SRE & Grafana):** `dgm_observability-pillars`, `dgm_resilience-timeouts-breakers-bulkheads-shedding`, `dgm_capacity-estimation`
+- **M04 (DSA, Scale APIs & 3 Katas):** `dgm_url-shortener`, `dgm_rate-limiter`, `dgm_api-gateway-design`, `dgm_digital-wallet`, `dgm_banking-ledger`
+- **M05 (TCP/IP, Linux VM, TLS & Deploys):** `dgm_load-balancing-tiers`, `dgm_authn-authz-flow-v3`, `dgm_caching-layers`, `dgm_scale-from-zero`
+- **M06 (IaC & Core 12 AWS):** `dgm_multi-tenant-saas`, `dgm_s3-object-storage`, `dgm_distributed-message-queue`, `dgm_orchestration-anatomy`
+- **M07 (Apache Data, Lifecycle & FinOps):** `dgm_data-lifecycle-overview`, `dgm_cdc-to-lake`, `dgm_medallion-pipeline-v3`, `dgm_lakehouse-table-formats`, `dgm_dimensional-modeling`, `dgm_late-data-watermarks`, `dgm_data-quality-gates`, `dgm_retention-deletion-v3`
+- **M08 (Embeddings, RAG & Inference):** `dgm_rag-basic`, `dgm_rag-hybrid-rerank`, `dgm_rag-enterprise-acl`, `dgm_embedding-ingest-pipeline`, `dgm_llm-gateway-routing`, `dgm_llm-prefill-decode-and-batching`
+- **M09 (Agents, MCP, ML & Evals):** `dgm_agent-platform`, `dgm_tool-gateway-mcp`, `dgm_agent-protocols-mcp-a2a-tool-registry`, `dgm_agent-eval-regression-gating-ci`, `dgm_agent-human-in-the-loop-approval`, `dgm_ml-training-pipeline`, `dgm_recommendation-system`, `dgm_fraud-detection-realtime`
+- **M10 (Pure-Code DB/Raft/LLM Internals):** `dgm_kv-store-v3`, `dgm_consistent-hashing-ring`, `dgm_cap-pacelc`, `dgm_consistency-models`, `dgm_llm-attention-and-kv-cache`, `dgm_llm-constrained-decoding-and-structured-output`
+- **M11 (K8s, Zero-Trust, CDC & Chaos):** `dgm_k8s-cni-services-and-network-policy`, `dgm_k8s-autoscaling-hpa-keda-node-provisioning`, `dgm_k8s-scheduler-requests-limits-qos`, `dgm_cdc-failure-backfill`, `dgm_ai-threat-model`, `dgm_sec-owasp-llm-top10-reference-architecture`
+- **M12 (Principal Capstone & Whiteboards):** `dgm_interview-framework-45min`, `dgm_chat-system`, `dgm_video-streaming`, `dgm_news-feed-v3`, `dgm_payment-system`, `dgm_hotel-reservation`, `dgm_distributed-task-scheduler`
+
+---
+
 ## The 10 "30-Year Veteran Battle Scars" (Never Taught in Courses)
 
 1. **Hierarchical Timeouts (Inner < Outer):** Nginx `5s` > FastAPI `4s` > Postgres `statement_timeout 3s`. Reverse this and retries pile onto still-running dead DB queries.

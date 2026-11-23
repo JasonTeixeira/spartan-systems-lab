@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 320" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif">
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2dd4bf"/>
+    </marker>
+  </defs>
+  <rect width="1120" height="320" rx="14" fill="#0b1222"/>
+  <text x="24" y="34" fill="#edf2ff" font-size="16" font-weight="800">02 • 6-Stage Data Lifecycle, Apache Lakehouse &amp; Dual SRE / Executive BI Pipeline (Lab 3)</text>
+  <text x="24" y="54" fill="#93a4c4" font-size="12">Protected by all 12 Data Safeguards: Idempotent MERGE, Watermarks, Schema Contracts, Quarantine DLQ, SCD Type 2, ASOF JOIN &amp; Write-Audit-Publish (WAP)</text>
+
+  <!-- Stage boxes -->
+  <rect x="24" y="80" width="154" height="142" rx="10" fill="#121c33" stroke="#38bdf8" stroke-width="1.5"/>
+  <text x="101" y="102" text-anchor="middle" fill="#38bdf8" font-size="10.5" font-weight="800">1. GENERATION</text>
+  <text x="101" y="128" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">Postgres OLTP</text>
+  <text x="101" y="146" text-anchor="middle" fill="#93a4c4" font-size="10">3NF • Row Heap</text>
+  <text x="101" y="168" text-anchor="middle" fill="#93a4c4" font-size="10">Webhooks &amp; APIs</text>
+  <text x="101" y="186" text-anchor="middle" fill="#93a4c4" font-size="10">Outbox / WAL</text>
+
+  <rect x="206" y="80" width="154" height="142" rx="10" fill="#121c33" stroke="#2dd4bf" stroke-width="1.5"/>
+  <text x="283" y="102" text-anchor="middle" fill="#2dd4bf" font-size="10.5" font-weight="800">2. INGESTION</text>
+  <text x="283" y="128" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">Kafka / Redpanda</text>
+  <text x="283" y="146" text-anchor="middle" fill="#93a4c4" font-size="10">Debezium CDC</text>
+  <text x="283" y="168" text-anchor="middle" fill="#93a4c4" font-size="10">dlt + Backoff/Jitter</text>
+  <text x="283" y="186" text-anchor="middle" fill="#fb7185" font-size="10">Bad Rows → DLQ</text>
+
+  <rect x="388" y="80" width="164" height="142" rx="10" fill="#121c33" stroke="#34d399" stroke-width="1.5"/>
+  <text x="470" y="102" text-anchor="middle" fill="#34d399" font-size="10.5" font-weight="800">3. LAKEHOUSE</text>
+  <text x="470" y="128" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">MinIO S3 + Iceberg</text>
+  <text x="470" y="146" text-anchor="middle" fill="#93a4c4" font-size="10">Apache Parquet/Arrow</text>
+  <text x="470" y="168" text-anchor="middle" fill="#93a4c4" font-size="10">Bronze → Silver → Gold</text>
+  <text x="470" y="186" text-anchor="middle" fill="#93a4c4" font-size="10">128MB Compaction</text>
+
+  <rect x="580" y="80" width="164" height="142" rx="10" fill="#121c33" stroke="#818cf8" stroke-width="1.5"/>
+  <text x="662" y="102" text-anchor="middle" fill="#818cf8" font-size="10.5" font-weight="800">4. TRANSFORM</text>
+  <text x="662" y="128" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">Airflow + dbt + Spark</text>
+  <text x="662" y="146" text-anchor="middle" fill="#93a4c4" font-size="10">DuckDB / ClickHouse</text>
+  <text x="662" y="168" text-anchor="middle" fill="#93a4c4" font-size="10">Star Schema + ML OBT</text>
+  <text x="662" y="186" text-anchor="middle" fill="#34d399" font-size="10">WAP Atomic Swap</text>
+
+  <rect x="772" y="80" width="162" height="142" rx="10" fill="#121c33" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="853" y="102" text-anchor="middle" fill="#fbbf24" font-size="10.5" font-weight="800">5. SERVING</text>
+  <text x="853" y="128" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">Dual Visual Plane</text>
+  <text x="853" y="146" text-anchor="middle" fill="#fbbf24" font-size="10">Metabase/Superset (CFO)</text>
+  <text x="853" y="166" text-anchor="middle" fill="#38bdf8" font-size="10">Grafana/OTel (SRE)</text>
+  <text x="853" y="186" text-anchor="middle" fill="#a78bfa" font-size="10">Redis/Qdrant + 429 Cap</text>
+
+  <rect x="962" y="80" width="134" height="142" rx="10" fill="#121c33" stroke="#fb7185" stroke-width="1.5"/>
+  <text x="1029" y="102" text-anchor="middle" fill="#fb7185" font-size="10.5" font-weight="800">6. ARCHIVAL</text>
+  <text x="1029" y="128" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">Cold &amp; GDPR</text>
+  <text x="1029" y="146" text-anchor="middle" fill="#93a4c4" font-size="10">S3 Glacier Tier</text>
+  <text x="1029" y="168" text-anchor="middle" fill="#93a4c4" font-size="10">Iceberg VACUUM</text>
+  <text x="1029" y="186" text-anchor="middle" fill="#93a4c4" font-size="10">PII Purge Audit</text>
+
+  <!-- Stage Arrows -->
+  <line x1="178" y1="150" x2="204" y2="150" stroke="#2dd4bf" stroke-width="2" marker-end="url(#a2)"/>
+  <line x1="360" y1="150" x2="386" y2="150" stroke="#2dd4bf" stroke-width="2" marker-end="url(#a2)"/>
+  <line x1="552" y1="150" x2="578" y2="150" stroke="#2dd4bf" stroke-width="2" marker-end="url(#a2)"/>
+  <line x1="744" y1="150" x2="770" y2="150" stroke="#2dd4bf" stroke-width="2" marker-end="url(#a2)"/>
+  <line x1="934" y1="150" x2="960" y2="150" stroke="#2dd4bf" stroke-width="2" marker-end="url(#a2)"/>
+
+  <!-- 3 Undercurrents -->
+  <rect x="24" y="242" width="1072" height="54" rx="10" fill="#101b33" stroke="#334155"/>
+  <text x="560" y="264" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">3 CONTINUOUS UNDERCURRENTS ACROSS ALL 6 STAGES</text>
+  <text x="560" y="284" text-anchor="middle" fill="#93a4c4" font-size="11">1. Security &amp; Governance (PII Hashing, Postgres RLS, KMS, OpenLineage)   •   2. DataOps &amp; QA (Slim CI, Row-Count Drift Alerts)   •   3. FinOps ($/Tenant Caps &amp; Mailpit Alerts)</text>
+</svg>

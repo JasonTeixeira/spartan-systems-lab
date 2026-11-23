@@ -1,10 +1,12 @@
 import asyncio
+import json
 from pathlib import Path
 
 import pytest
 
 from mcp_server.core import (
     build_dashboard_pack,
+    lookup_archos_canvases,
     lookup_toolbelt_and_runbooks,
     run_finops_estimate,
     visualize_infra_and_cicd,
@@ -12,7 +14,7 @@ from mcp_server.core import (
 from mcp_server.server import mcp
 
 
-def test_mcp_server_registers_all_5_tools() -> None:
+def test_mcp_server_registers_all_6_tools() -> None:
     tools = asyncio.run(mcp.list_tools())
     tool_names = {t.name for t in tools}
     expected = {
@@ -21,6 +23,7 @@ def test_mcp_server_registers_all_5_tools() -> None:
         "qa_and_code_review",
         "generate_dashboard_pack",
         "visualize_infra_and_cicd",
+        "archos_canvas_lookup",
     }
     assert expected.issubset(tool_names)
 
@@ -104,3 +107,34 @@ def test_visualize_infra_and_cicd_parses_real_lab1_and_ci() -> None:
     assert "postgres" in res["infra_mermaid"]
     assert "metabase" in res["infra_d2"]
     assert "quality_and_tests" in res["cicd_mermaid"]
+
+
+def test_archos_canvas_lookup_reads_manifest_and_handles_missing(tmp_path: Path) -> None:
+    # Graceful fallback when ArchOS is absent (e.g., on GitHub Actions Linux runner)
+    missing = lookup_archos_canvases(query="mcp", archos_root=tmp_path / "nonexistent")
+    assert missing["available"] is False
+    assert missing["match_count"] == 0
+
+    # Reads synthetic manifest cleanly
+    kdir = tmp_path / "knowledge"
+    ddir = kdir / "diagrams"
+    ddir.mkdir(parents=True)
+    (ddir / "dgm_tool-gateway-mcp.canvas.json").write_text("{}", encoding="utf-8")
+    manifest = {
+        "folders": [
+            {"id": "lib-ai-agents", "title": "AI and agents"},
+            {"id": "lib-foundations", "title": "Foundations"},
+        ],
+        "diagrams": {
+            "lib-ai-agents": ["dgm_tool-gateway-mcp", "dgm_llm-attention-and-kv-cache"],
+            "lib-foundations": ["dgm_request-lifecycle"],
+        },
+    }
+    (kdir / "library.manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+    found = lookup_archos_canvases(query="mcp", folder="ai", archos_root=tmp_path)
+    assert found["available"] is True
+    assert found["total_canvases"] == 3
+    assert found["match_count"] == 1
+    assert found["matches"][0]["canvas_id"] == "dgm_tool-gateway-mcp"
+    assert found["matches"][0]["file_exists"] is True

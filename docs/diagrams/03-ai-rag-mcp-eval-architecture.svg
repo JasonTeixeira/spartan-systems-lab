@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 340" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif">
+  <defs>
+    <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#a78bfa"/>
+    </marker>
+  </defs>
+  <rect width="1120" height="340" rx="14" fill="#0b1222"/>
+  <text x="24" y="34" fill="#edf2ff" font-size="16" font-weight="800">03 • Production AI, Hybrid Vector RAG, Approval-Gated MCP Agents &amp; 5-Layer CI Eval Gate (Lab 4)</text>
+  <text x="24" y="54" fill="#93a4c4" font-size="12">Designed for &lt;2.5s p95 latency, 0% cross-tenant leakage, &gt;=0.95 faithfulness, and 60%+ token spend reduction via Semantic Cache + Model Routing</text>
+
+  <!-- Step 1: Edge Guard & Cache -->
+  <rect x="24" y="78" width="204" height="170" rx="11" fill="#121c33" stroke="#38bdf8" stroke-width="1.5"/>
+  <text x="126" y="100" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="800">1. INGRESS &amp; CACHE</text>
+  <rect x="40" y="112" width="172" height="52" rx="8" fill="#162442" stroke="#fb7185"/>
+  <text x="126" y="134" text-anchor="middle" fill="#edf2ff" font-size="11.5" font-weight="700">OWASP LLM Firewall</text>
+  <text x="126" y="150" text-anchor="middle" fill="#93a4c4" font-size="9.5">Injection &amp; PII Redaction</text>
+  <rect x="40" y="176" width="172" height="58" rx="8" fill="#162442" stroke="#34d399"/>
+  <text x="126" y="198" text-anchor="middle" fill="#34d399" font-size="11.5" font-weight="700">Redis Semantic Cache</text>
+  <text x="126" y="214" text-anchor="middle" fill="#93a4c4" font-size="9.5">Cosine &gt; 0.92 → &lt;15ms hit</text>
+  <text x="126" y="226" text-anchor="middle" fill="#93a4c4" font-size="9.5">Skips GPU (Saves ~35% $)</text>
+
+  <!-- Step 2: Hybrid Retrieval -->
+  <rect x="258" y="78" width="230" height="170" rx="11" fill="#121c33" stroke="#2dd4bf" stroke-width="1.5"/>
+  <text x="373" y="100" text-anchor="middle" fill="#2dd4bf" font-size="11" font-weight="800">2. HYBRID RETRIEVAL + RBAC</text>
+  <rect x="274" y="112" width="198" height="54" rx="8" fill="#162442" stroke="#2dd4bf"/>
+  <text x="373" y="134" text-anchor="middle" fill="#edf2ff" font-size="11.5" font-weight="700">Qdrant (Dense + BM25 RRF)</text>
+  <text x="373" y="150" text-anchor="middle" fill="#fb7185" font-size="9.5">Mandatory tenant_id PRE-FILTER</text>
+  <rect x="274" y="178" width="198" height="56" rx="8" fill="#162442" stroke="#818cf8"/>
+  <text x="373" y="200" text-anchor="middle" fill="#edf2ff" font-size="11.5" font-weight="700">Cross-Encoder Reranker</text>
+  <text x="373" y="216" text-anchor="middle" fill="#93a4c4" font-size="9.5">Top-50 → Top-5 Parent Chunks</text>
+
+  <!-- Step 3: Router & Inference -->
+  <rect x="518" y="78" width="268" height="170" rx="11" fill="#121c33" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="652" y="100" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="800">3. ROUTING, INFERENCE &amp; AGENTS</text>
+  <rect x="534" y="112" width="236" height="54" rx="8" fill="#162442" stroke="#a78bfa"/>
+  <text x="652" y="134" text-anchor="middle" fill="#edf2ff" font-size="11.5" font-weight="700">LiteLLM Gateway → Ollama / vLLM</text>
+  <text x="652" y="150" text-anchor="middle" fill="#93a4c4" font-size="9.5">Small 7B vs Frontier • PagedAttention</text>
+  <rect x="534" y="178" width="236" height="56" rx="8" fill="#162442" stroke="#fbbf24"/>
+  <text x="652" y="200" text-anchor="middle" fill="#fbbf24" font-size="11.5" font-weight="700">LangGraph + spartan-mcp Server</text>
+  <text x="652" y="216" text-anchor="middle" fill="#93a4c4" font-size="9.5">Strict Schemas • HITL Approval Gate</text>
+
+  <!-- Step 4: Evals & MLOps -->
+  <rect x="816" y="78" width="280" height="170" rx="11" fill="#121c33" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="956" y="100" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="800">4. 5-LAYER EVALS &amp; MLOPS CI</text>
+  <rect x="832" y="112" width="248" height="54" rx="8" fill="#162442" stroke="#fbbf24"/>
+  <text x="956" y="134" text-anchor="middle" fill="#edf2ff" font-size="11.5" font-weight="700">Arize Phoenix / Promptfoo Gate</text>
+  <text x="956" y="150" text-anchor="middle" fill="#93a4c4" font-size="9.5">Recall@K • Faithfulness &gt;= 0.95 • Red-Team</text>
+  <rect x="832" y="178" width="248" height="56" rx="8" fill="#162442" stroke="#34d399"/>
+  <text x="956" y="200" text-anchor="middle" fill="#edf2ff" font-size="11.5" font-weight="700">MLflow + DVC + LightGBM/PyTorch</text>
+  <text x="956" y="216" text-anchor="middle" fill="#93a4c4" font-size="9.5">Slice/Invariance Tests • PSI/KL Drift</text>
+
+  <!-- Arrows -->
+  <line x1="228" y1="162" x2="256" y2="162" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3)"/>
+  <line x1="488" y1="162" x2="516" y2="162" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3)"/>
+  <line x1="786" y1="162" x2="814" y2="162" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3)"/>
+
+  <!-- Bottom Voice + Telemetry strip -->
+  <rect x="24" y="266" width="1072" height="52" rx="10" fill="#101b33" stroke="#334155"/>
+  <text x="560" y="288" text-anchor="middle" fill="#edf2ff" font-size="12" font-weight="700">REAL-TIME VOICE AI (LiveKit / WebRTC: VAD → STT → LLM → TTS &lt;500ms)   +   OTel Traces / TTFT / $/1M Tokens in Grafana &amp; Metabase</text>
+  <text x="560" y="306" text-anchor="middle" fill="#93a4c4" font-size="11">CI blocks any prompt, chunking, or model merge if faithfulness drops below 0.95, p95 exceeds 2.5s, or any tenant-isolation / injection test fails.</text>
+</svg>

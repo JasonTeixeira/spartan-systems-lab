@@ -23,6 +23,7 @@ from tools.finops_calc import (
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = REPO_ROOT / "docs"
+DEFAULT_ARCHOS_ROOT = Path("/Users/Sage/archos")
 
 PRINCIPAL_OPTIMIZER_RUBRIC: list[dict[str, str]] = [
     {
@@ -447,4 +448,83 @@ def visualize_infra_and_cicd(
         "infra_mermaid": "\n".join(mermaid_lines),
         "infra_d2": "\n".join(d2_lines),
         "cicd_mermaid": "\n".join(ci_mermaid),
+    }
+
+
+def lookup_archos_canvases(
+    *,
+    query: str = "",
+    folder: str = "all",
+    max_matches: int = 25,
+    archos_root: Path | None = None,
+) -> dict[str, Any]:
+    """
+    [READ-ONLY] Search the local ArchOS interactive canvas library
+    (knowledge/library.manifest.json) by keyword or folder so AI assistants can
+    cross-reference all 114+ ArchOS visual architecture canvases alongside Spartan Labs.
+    """
+    if max_matches < 1 or max_matches > 150:
+        raise ValueError("max_matches must be between 1 and 150.")
+
+    root = (archos_root or DEFAULT_ARCHOS_ROOT).resolve()
+    manifest_path = root / "knowledge" / "library.manifest.json"
+    if not manifest_path.exists():
+        return {
+            "risk_level": "read_only",
+            "available": False,
+            "archos_root": str(root),
+            "message": f"ArchOS manifest not found at {manifest_path}",
+            "match_count": 0,
+            "matches": [],
+        }
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    folder_titles = {
+        f["id"]: f.get("title", f["id"]) for f in manifest.get("folders", []) if "id" in f
+    }
+    diagrams_by_folder: dict[str, list[str]] = manifest.get("diagrams", {})
+    q = query.strip().lower()
+    tokens = [t for t in re.split(r"\s+", q) if t]
+    folder_norm = folder.strip().lower()
+
+    total_canvases = 0
+    matches: list[dict[str, Any]] = []
+    for fid, ids in diagrams_by_folder.items():
+        ftitle = folder_titles.get(fid, fid)
+        total_canvases += len(ids)
+        if (
+            folder_norm != "all"
+            and folder_norm not in fid.lower()
+            and folder_norm not in ftitle.lower()
+        ):
+            continue
+        for cid in ids:
+            haystack = f"{fid} {ftitle} {cid}".lower()
+            if not tokens or all(tok in haystack for tok in tokens):
+                canvas_file = root / "knowledge" / "diagrams" / f"{cid}.canvas.json"
+                if not canvas_file.exists():
+                    canvas_file = root / "knowledge" / "pilots" / f"{cid}.canvas.json"
+                matches.append(
+                    {
+                        "canvas_id": cid,
+                        "folder_id": fid,
+                        "folder_title": ftitle,
+                        "file_exists": canvas_file.exists(),
+                        "path": str(canvas_file),
+                    }
+                )
+                if len(matches) >= max_matches:
+                    break
+        if len(matches) >= max_matches:
+            break
+
+    return {
+        "risk_level": "read_only",
+        "available": True,
+        "archos_root": str(root),
+        "total_canvases": total_canvases,
+        "query": query,
+        "folder": folder,
+        "match_count": len(matches),
+        "matches": matches,
     }
