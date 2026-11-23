@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spartan Systems Lab - Master Progress Tracker</title>
+  <style>
+    :root { --bg:#0b1120; --panel:#111827; --card:#1e293b; --border:#334155; --text:#e2e8f0; --muted:#94a3b8; --accent:#38bdf8; --green:#10b981; --amber:#f59e0b; --slate:#64748b; }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:24px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width:1240px; margin:0 auto; }
+    h1 { margin:0 0 6px; color:var(--accent); font-size:26px; }
+    .sub { color:var(--muted); margin:0 0 20px; font-size:14px; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+    .stat { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center; }
+    .stat .n { font-size:26px; font-weight:700; color:var(--accent); margin-top:4px; }
+    .stat.done .n { color:var(--green); }
+    .stat.wip .n { color:var(--amber); }
+    .controls { display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+    input, select, button { padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:var(--panel); color:var(--text); font-size:14px; }
+    input { flex:2; min-width:220px; }
+    select { flex:1; min-width:180px; }
+    button { cursor:pointer; background:#1d4ed8; border-color:#2563eb; font-weight:600; }
+    button:hover { background:#2563eb; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:12px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:9px; padding:14px; display:flex; flex-direction:column; justify-content:space-between; gap:10px; }
+    .cat { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+    .title { font-size:14px; font-weight:600; line-height:1.35; }
+    .s-Unstarted { border-left:4px solid var(--slate); }
+    .s-Practicing { border-left:4px solid var(--amber); }
+    .s-Mastered { border-left:4px solid var(--green); }
+    .card select { width:100%; padding:6px 8px; font-size:13px; background:var(--bg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Spartan Systems Lab - Master Mastery Tracker</h1>
+    <p class="sub">Saved automatically in browser localStorage. Track Labs, Archetypes, DDIA, Data Safeguards, Automation, Daily Loops & Failure Drills.</p>
+    <div class="stats">
+      <div class="stat"><div>Total Tracked Items</div><div class="n" id="c-total">0</div></div>
+      <div class="stat done"><div>Mastered</div><div class="n" id="c-done">0</div></div>
+      <div class="stat wip"><div>Practicing</div><div class="n" id="c-wip">0</div></div>
+      <div class="stat"><div>Completion</div><div class="n" id="c-pct">0%</div></div>
+    </div>
+    <div class="controls">
+      <input id="q" type="text" placeholder="Search any lab, archetype, failure mode, or pattern..." oninput="render()" />
+      <select id="cat" onchange="render()">
+        <option value="ALL">All Categories</option>
+        <option value="6 Core Labs">6 Core Stacked Labs</option>
+        <option value="10 Archetypes">10 Universal System Archetypes</option>
+        <option value="12 DDIA Chapters">12 DDIA Chapters</option>
+        <option value="12 Data Safeguards">12 Data Pipeline Safeguards</option>
+        <option value="12 Automation">12 Automation Archetypes</option>
+        <option value="22 Daily Loops">22 Daily Operational Loops</option>
+        <option value="Failure Drills">Core Production Failure Drills</option>
+        <option value="Mini-System Katas">8 Everyday Mini-System Katas</option>
+      </select>
+      <select id="st" onchange="render()">
+        <option value="ALL">All Statuses</option>
+        <option value="Unstarted">Unstarted</option>
+        <option value="Practicing">Practicing</option>
+        <option value="Mastered">Mastered</option>
+      </select>
+      <button onclick="exportCSV()">Export CSV</button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+  <script>
+    const ITEMS = [
+      // 6 Core Labs
+      ["6 Core Labs", "Lab 1: Core Engine (Nginx, FastAPI, PgBouncer, Postgres 16, Redis, Metabase, Grafana, SRE Toolbox)"],
+      ["6 Core Labs", "Lab 2: On-Prem Networking & Deploys (Lima Linux VM, nftables, DNS, TLS/CDN, SSH Bastion, gRPC)"],
+      ["6 Core Labs", "Lab 3: Cloud & Apache Data Platform (aws-emulator, Terraform, Kafka, ClickHouse, Iceberg, Airflow, PySpark, Mailpit)"],
+      ["6 Core Labs", "Lab 4: Production AI, Agents, MCP, Voice AI (WebRTC) & MLOps (Qdrant, Ollama, LiteLLM, MLflow, Phoenix, vLLM)"],
+      ["6 Core Labs", "Lab 5: Under-the-Hood Internals (300-line LSM-Tree, 3-Node Raft over TCP, Zero-Copy sendfile)"],
+      ["6 Core Labs", "Lab 6: Kubernetes, Zero-Trust, Debezium CDC Migration, Blind Chaos Roulette & Real AWS Live-Fire"],
+      // 10 Universal System Archetypes
+      ["10 Archetypes", "Archetype 1: High-Throughput Write, Telemetry & Metering (Datadog/Stripe Metering)"],
+      ["10 Archetypes", "Archetype 2: Strong-Consistency ACID Financial / Booking Ledger (Stripe/Hotel/Wallet)"],
+      ["10 Archetypes", "Archetype 3: Read-Heavy Feeds, Caching & Edge CDN (Twitter/Reddit/CDN)"],
+      ["10 Archetypes", "Archetype 4: Real-Time Bidirectional Sync, Presence & WebRTC Voice AI (Discord/Zoom/Voice)"],
+      ["10 Archetypes", "Archetype 5: Search, Autocomplete Trie & Geospatial Indexing (Google Search/Uber/Maps)"],
+      ["10 Archetypes", "Archetype 6: Large Blob / Media Pipeline & Transcoding DAG (Netflix/YouTube/Dropbox)"],
+      ["10 Archetypes", "Archetype 7: Distributed Coordination, Scheduling & Sandboxes (Temporal/Cron/Snowflake IDs)"],
+      ["10 Archetypes", "Archetype 8: Batch & Streaming Data Lakehouse (Iceberg/Kafka/Spark/Feature Store)"],
+      ["10 Archetypes", "Archetype 9: Production GenAI, RAG, Agents, MCP & Classical RecSys/ML"],
+      ["10 Archetypes", "Archetype 10: Virtualization (VM/Container/MicroVM), Zero-Trust, Chaos & Brownfield Migration"],
+      // 12 DDIA Chapters
+      ["12 DDIA Chapters", "DDIA Ch 1: Reliability, Scalability, Maintainability (p99, SLOs, Error Budgets)"],
+      ["12 DDIA Chapters", "DDIA Ch 2: Data Models (Relational 3NF vs Document vs Graph vs Star/OBT)"],
+      ["12 DDIA Chapters", "DDIA Ch 3: Storage & Retrieval (B+ Tree vs LSM-Tree, WAL, SSTables, Columnar)"],
+      ["12 DDIA Chapters", "DDIA Ch 4: Encoding & Evolution (JSON vs Protobuf/gRPC, Forward/Backward Compat)"],
+      ["12 DDIA Chapters", "DDIA Ch 5: Replication (Leader-Follower Lag, Read-Your-Writes, Quorums W+R>N)"],
+      ["12 DDIA Chapters", "DDIA Ch 6: Partitioning & Sharding (Consistent Hashing, Hot Keys, Rebalancing)"],
+      ["12 DDIA Chapters", "DDIA Ch 7: Transactions & Isolation Anomalies (Lost Update, Write Skew, MVCC, SSI)"],
+      ["12 DDIA Chapters", "DDIA Ch 8: Distributed Troubles (Partitions, Monotonic Clocks, Fencing Tokens)"],
+      ["12 DDIA Chapters", "DDIA Ch 9: Consistency & Consensus (Linearizability, CAP/PACELC, 2PC vs Raft)"],
+      ["12 DDIA Chapters", "DDIA Ch 10: Batch Processing (Unix Pipes, Spark, Join Skew)"],
+      ["12 DDIA Chapters", "DDIA Ch 11: Stream Processing (Append Logs, CDC, Event Time, Watermarks)"],
+      ["12 DDIA Chapters", "DDIA Ch 12: Derived Data, CQRS & End-to-End Auditing"],
+      // 12 Data Safeguards
+      ["12 Data Safeguards", "Safeguard 1: Idempotency (ON CONFLICT / MERGE / Partition Overwrite)"],
+      ["12 Data Safeguards", "Safeguard 2: Watermarking & Late-Arriving Lookback Windows"],
+      ["12 Data Safeguards", "Safeguard 3: Schema Contracts (Pydantic + dbt Enforced Contracts)"],
+      ["12 Data Safeguards", "Safeguard 4: Quarantine / Dead-Letter Queue (DLQ) Tables"],
+      ["12 Data Safeguards", "Safeguard 5: Deterministic Partitioned Backfills"],
+      ["12 Data Safeguards", "Safeguard 6: Point-in-Time ASOF JOIN & AI Embedding Versioning"],
+      ["12 Data Safeguards", "Safeguard 7: Pipeline Audit Logs & Statistical Drift Assertions"],
+      ["12 Data Safeguards", "Safeguard 8: Storage Compaction, Partition Pruning & FinOps"],
+      ["12 Data Safeguards", "Safeguard 9: PII Hashing/Redaction, Postgres RLS & KMS Governance"],
+      ["12 Data Safeguards", "Safeguard 10: Write-Audit-Publish (WAP) Atomic Table Swaps"],
+      ["12 Data Safeguards", "Safeguard 11: API Resilience (Backoff + Jitter + Checkpointed Cursors)"],
+      ["12 Data Safeguards", "Safeguard 12: Automated CI/CD, Slim Testing & Supply-Chain Scanning"],
+      // 12 Automation Archetypes
+      ["12 Automation", "Auto 1: Locked Scheduled Jobs (Cron + Advisory/Redis Lock)"],
+      ["12 Automation", "Auto 2: Event-Driven Queue & Signed Webhook Workers"],
+      ["12 Automation", "Auto 3: Data DAG Orchestration (Airflow / Dagster)"],
+      ["12 Automation", "Auto 4: Durable Multi-Step Workflows & Sagas (Temporal)"],
+      ["12 Automation", "Auto 5: Declarative Control-Loop Reconciliation (Terraform / ArgoCD / Ansible)"],
+      ["12 Automation", "Auto 6: Dirty-Data & Paginated API / SFTP Ingestion"],
+      ["12 Automation", "Auto 7: Self-Healing Ops & FinOps CLIs (Python + Bash + ShellCheck)"],
+      ["12 Automation", "Auto 8: Guardrailed Agentic & MCP Automation + HITL Routing"],
+      ["12 Automation", "Auto 9: Headless Browser & Legacy UI Automation (Playwright)"],
+      ["12 Automation", "Auto 10: Document / PDF / Excel / OCR Extraction Pipelines"],
+      ["12 Automation", "Auto 11: Business-Ops Hybrid Bridges (n8n + FastAPI/MCP)"],
+      ["12 Automation", "Auto 12: Release, Security & ChatOps Approval Automation"],
+      // 22 Daily Loops
+      ["22 Daily Loops", "Python Tasks 1-4: Ingest/Validate, Reshape Collections, Async APIs, Production FastAPI"],
+      ["22 Daily Loops", "Python Tasks 5-8: Safe DB Pooling, O(1) Streaming Generators, Debugging/Pytest, Git/CI"],
+      ["22 Daily Loops", "SQL Tasks 9-12: Multi-Table Analytics, Window Dedupe/LAG, EXPLAIN Tuning, Idempotent Upserts"],
+      ["22 Daily Loops", "SQL Tasks 13-15: Reconciliation Audits, Safe Schema Migrations, Resolving Lock Contention"],
+      ["22 Daily Loops", "Linux Tasks 16-19: Log Slicing (awk/jq), Docker Multi-Stage, 60s USE Triage, Network/DNS/ss"],
+      ["22 Daily Loops", "Linux Tasks 20-22: systemd/Signals, SSH Bastion Tunnels, Defensive Bash Automation"],
+      // Core Production Failure Drills
+      ["Failure Drills", "Drill: DB Lock Storm + idle in transaction + Deadlock Triage"],
+      ["Failure Drills", "Drill: 10M-Row Seq Scan -> Composite B-Tree EXPLAIN Speedup"],
+      ["Failure Drills", "Drill: DDIA Lost Update & Write Skew 2-Terminal Reproduction"],
+      ["Failure Drills", "Drill: Linux OOMKill (Exit 137) & cgroups CPU Throttling"],
+      ["Failure Drills", "Drill: DNS ndots:5 Storm, MTU Blackhole, TIME_WAIT & conntrack"],
+      ["Failure Drills", "Drill: Cascading Retry Storm & Cache Thundering Herd"],
+      ["Failure Drills", "Drill: Poison Pill Queue CrashLoop & Missing Upstream Timeouts"],
+      ["Failure Drills", "Drill: AI Hallucination Eval Regression, Tenant RAG Leak & KV-Cache Stall"],
+      ["Failure Drills", "Drill: Backup -> Wipe (make reset) -> Restore DR Verification (RPO/RTO)"],
+      // 8 Mini-System Katas
+      ["Mini-System Katas", "Kata 1: Base62 URL Shortener + Redis Cache + Analytics"],
+      ["Mini-System Katas", "Kata 2: Distributed Token-Bucket Rate Limiter (Redis Lua)"],
+      ["Mini-System Katas", "Kata 3: Signed Outbound Webhook Dispatcher (HMAC + Backoff + DLQ)"],
+      ["Mini-System Katas", "Kata 4: Double-Entry Financial Wallet Ledger (ACID + Idempotency)"],
+      ["Mini-System Katas", "Kata 5: Presigned S3/MinIO File Uploader & Async Processor"],
+      ["Mini-System Katas", "Kata 6: Search Typeahead Autocomplete (Trie + Frequency Ranking)"],
+      ["Mini-System Katas", "Kata 7: Real-Time WebSocket Chat & Presence Room (Redis Pub/Sub)"],
+      ["Mini-System Katas", "Kata 8: Locked Distributed Cron Scheduler (Lease + Fencing Token)"]
+    ];
+
+    function key(i) { return "spartan_v1_" + i; }
+    function getStatus(i) { return localStorage.getItem(key(i)) || "Unstarted"; }
+    function setStatus(i, v) { localStorage.setItem(key(i), v); render(); }
+
+    function render() {
+      const q = document.getElementById("q").value.toLowerCase();
+      const cat = document.getElementById("cat").value;
+      const st = document.getElementById("st").value;
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      let done = 0, wip = 0;
+
+      ITEMS.forEach(([c, t], i) => {
+        const s = getStatus(i);
+        if (s === "Mastered") done++;
+        if (s === "Practicing") wip++;
+        if (cat !== "ALL" && c !== cat) return;
+        if (st !== "ALL" && s !== st) return;
+        if (q && !t.toLowerCase().includes(q) && !c.toLowerCase().includes(q)) return;
+
+        const el = document.createElement("div");
+        el.className = "card s-" + s;
+        el.innerHTML = `
+          <div><div class="cat">${c}</div><div class="title">${t}</div></div>
+          <select onchange="setStatus(${i}, this.value)">
+            <option value="Unstarted" ${s==="Unstarted"?"selected":""}>Unstarted</option>
+            <option value="Practicing" ${s==="Practicing"?"selected":""}>Practicing</option>
+            <option value="Mastered" ${s==="Mastered"?"selected":""}>Mastered</option>
+          </select>`;
+        grid.appendChild(el);
+      });
+
+      document.getElementById("c-total").textContent = ITEMS.length;
+      document.getElementById("c-done").textContent = done;
+      document.getElementById("c-wip").textContent = wip;
+      document.getElementById("c-pct").textContent = Math.round((done / ITEMS.length) * 100) + "%";
+    }
+
+    function exportCSV() {
+      const rows = [["ID", "Category", "Item", "Status"]];
+      ITEMS.forEach(([c, t], i) => rows.push([i + 1, c, '"' + t.replace(/"/g, '""') + '"', getStatus(i)]));
+      const blob = new Blob([rows.map(r => r.join(",")).join("\n")], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "spartan_mastery_progress.csv";
+      a.click();
+    }
+    render();
+  </script>
+</body>
+</html>

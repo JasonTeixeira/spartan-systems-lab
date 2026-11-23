@@ -4,8 +4,9 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
 
 ---
 
-## 0. Start Here (Operator Manual)
+## 0. Start Here (Operator Manual & Visual Progress Tracker)
 - **`docs/HOW_TO_USE_THIS_LAB.md`** — Day-0 operator workflow, automated `make review` code/security/CVE reviewer, 5-Axis Principal Optimizer Rubric, ranked Python library stack (~25 core libraries), `uv` patching & container upgrade workflow, and audit-trail discipline.
+- **`docs/mastery_tracker.html`** — Interactive browser mastery dashboard (double-click or `open docs/mastery_tracker.html`) tracking all 6 Labs, 10 Archetypes, 12 DDIA Chapters, 12 Data Safeguards, 12 Automation Archetypes, 22 Daily Loops, Failure Drills, and 8 Mini-System Katas with CSV export.
 
 ## 1. Field Manuals (`docs/manuals/`)
 - **Manual #1 (Primitives, 126 Concepts, 22 Daily Loops, 5 Scaling Laws, 6 Master AHAs):**
@@ -14,6 +15,7 @@ Everything committed in this monorepo, organized from **Primitives -> Frameworks
   - `docs/manuals/HOME_LAB_SYSTEM_ARCHITECTURE_BLUEPRINT.pdf` (5 pages) & `.md`
 
 ## 2. Core Mastery Frameworks (`docs/`)
+- **`docs/DATA_LIFECYCLE_AND_SERVER_FUNDAMENTALS.md`** — The 6-Stage Data Lifecycle (*Fundamentals of Data Engineering*), 4-Question Visual DB Decision Tree & 5 Locked-In Data Stacks (3NF / Medallion / Star Schema / OBT / KV+Vector), SCD Type 2 / Grain / Point-in-Time `ASOF JOIN` / Write-Audit-Publish (WAP), 12 Local-vs-Cloud Data Safeguards, 5 Hardware Server Archetypes, and Self-Hosted CI Runners (ARC) / Forgejo.
 - **`docs/JUDGMENT_AND_COMMUNICATION_FRAMEWORKS.md`** — The 45-Minute Live System Design Clock (6 non-random clarifying questions + 7 physics constants), 6 Principal Judgment & Trade-Off Decision Matrices (Reversibility, Build/Buy/OSS, Simple->Scalable Thresholds, AI/ML Judgment Tree, Tech Debt Triage, Pre-Mortem Inversion), and 2 Communication Frameworks (Technical Peers + C-Suite BLUF / Executive Translation Dictionary).
 - **`docs/PRINCIPAL_FRAMEWORKS.md`** — 10 Universal System Archetypes (+ WebRTC Voice AI + VM/Container/MicroVM), Full 12-Chapter DDIA Audit, 5 Principal Thinking Frameworks, Enterprise Architecture Frameworks (C4, Well-Architected, Distributed Pattern Kit, Fitness Functions), Google SRE Mastery (SLI/SLO/Error Budgets, Golden Signals/RED/USE, Burn-Rate Alerting, Toil, ICS), 5-Layer QA & DR Standard, Build-in-Public Brand Engine, and 6 Additive Modular Packs.
 - **`docs/FAILURE_MODES_AND_PERFORMANCE.md`** — Brendan Gregg's 5 Scientific Performance Models (USE, RED, TSA, On-CPU vs Off-CPU, Pragmatic eBPF) + **40 Mapped Production Failures across 8 Domains (~96-98% real-world incident coverage)**.
