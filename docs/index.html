@@ -260,12 +260,13 @@
       <div class="brand"><span class="brand-dot"></span> Spartan Systems Lab — Master Atlas</div>
       <nav class="nav-links">
         <a href="#numbers">By The Numbers</a>
+        <a href="#syllabus">12-Module Syllabus</a>
+        <a href="#scars">Battle Scars</a>
         <a href="#domains">8 Domains</a>
-        <a href="#roles">By Role ($200k–$500k+)</a>
-        <a href="#architecture">System Architecture</a>
-        <a href="#labs">6 Stacked Labs</a>
-        <a href="#loop">Spartan Loop</a>
-        <a href="#library">Docs &amp; Tracker</a>
+        <a href="#roles">By Role</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#labs">6 Labs</a>
+        <a href="#library">Docs</a>
       </nav>
       <button class="theme-btn" onclick="toggleTheme()">Toggle Light / Dark</button>
     </div>
@@ -304,6 +305,67 @@
         <span>58-Component Periodic Table + 5 Brendan Gregg Models + 6 Judgment Matrices + C-Suite BLUF FinOps Proofs + Pure-Code LSM/Raft/Mini-GPT + Blind Chaos Roulette.</span>
       </div>
     </div>
+
+    <!-- 12-MODULE LINEAR COMPOUNDING SYLLABUS -->
+    <section class="sec" id="syllabus">
+      <div class="sec-head">
+        <div>
+          <h2>Linear Execution Track: 12 Sequential Compounding Modules (M01 → M12)</h2>
+          <p>Work strictly in order: Learn 2–3 pages → Code &amp; Break in the Lab → Pass Boss Fight Gate → Compound into M(N+1). Loop again in Nightmare Mode.</p>
+        </div>
+        <span class="pill" style="--c:var(--violet)">8–16 Hr/Day Spartan Mode • Repeatable Forever</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Mod</th><th>Lab / Track</th><th>Learn → Immediately Apply &amp; Break</th><th>Boss Fight Exit Gate</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>M01</strong></td><td>Lab 1A: Python, Clean Arch &amp; DSA</td><td>Hash Maps, Two Pointers, Sliding Window, Prefix Sums, Lazy Generators, Pydantic v2, Hexagonal Repository/Service, `uv`/`ruff`/`mypy`/`pytest`.</td><td>Pass `make drill-py`, Hexagonal refactor, 6-gate `make review`.</td></tr>
+          <tr><td><strong>M02</strong></td><td>Lab 1B: SQL, Postgres &amp; 10M Rows</td><td>Window functions, CTEs, 3-valued NULLs, `EXPLAIN (ANALYZE, BUFFERS)`, Composite B-Tree, PgBouncer, DDIA Lost Update/Write Skew, Metabase BI.</td><td>1M–10M rows, query `&lt;10ms`, live Write Skew fix, live BI views.</td></tr>
+          <tr><td><strong>M03</strong></td><td>Lab 1C: Linux, Bash, Grafana &amp; Chaos</td><td>`awk`/`sed`/`jq`/`xargs`, Brendan Gregg USE/TSA/Off-CPU, `ss`/`strace`/`tcpdump`, Prometheus+Grafana, `lock-storm` + `net-latency` + DR restore.</td><td>Solve compound outage cold, `make snapshot-incident`, DR verify.</td></tr>
+          <tr><td><strong>M04</strong></td><td>DSA Surge + Scale APIs + 3 Katas</td><td>Monotonic Stack/Queue, Heaps, Graphs/Topo, Union-Find, Binary Search on Answer, Intervals, DP, Tries + REST/RFC 7807/ETags/Webhooks + URL Shortener, Rate Limiter, Wallet.</td><td>3 unseen Hard/Med problems cold + `k6` all 3 Katas on Grafana.</td></tr>
+          <tr><td><strong>M05</strong></td><td>Lab 2: TCP/IP, Linux VM, TLS &amp; Deploys</td><td>Lima Ubuntu+Rocky VM, CIDR math, `nftables`, DNS, TLS 1.3/CDN (Nginx/Caddy), SSH Bastion, gRPC/Protobuf, Ansible + zero-downtime deploy.</td><td>Prove private DB blocked, decode TLS in `tcpdump`, zero-downtime rollback.</td></tr>
+          <tr><td><strong>M06</strong></td><td>Lab 3A: Deep IaC &amp; Core 12 AWS</td><td>`aws/aws-emulator` + Terraform modules, remote lock, `import`/`moved`, drift detection, `Checkov`/`Infracost`, VPC/IAM eval order, `boto3` + `spartan-cli`.</td><td>Zero-touch `terraform destroy &amp;&amp; apply` + `Checkov`/`Infracost` pass.</td></tr>
+          <tr><td><strong>M07</strong></td><td>Lab 3B: Apache Data &amp; FinOps Plane</td><td>6-Stage Lifecycle, Kafka/Redpanda, ClickHouse, MinIO Iceberg/Parquet, Airflow/PySpark/DuckDB/dbt, Mailpit, Superset BI, 12 Safeguards (WAP/SCD2/`ASOF`).</td><td>Survive 3-min ClickHouse kill at 10k RPS + duplicate flood, exact `$` cap.</td></tr>
+          <tr><td><strong>M08</strong></td><td>Lab 4A: Embeddings, RAG &amp; Inference</td><td>Hugging Face (`transformers`/`sentence-transformers`), Qdrant hybrid+BM25+RBAC pre-filter, Rerankers, Ollama/`mlx-lm`+LiteLLM, Semantic Cache, 6 RAG patterns.</td><td>`&lt;2.5s` p95 RAG, 0% tenant leak, 60% token savings proven.</td></tr>
+          <tr><td><strong>M09</strong></td><td>Lab 4B: Agents, MCP, Voice, ML &amp; Evals</td><td>MCP Server (schemas+approvals), LangGraph+OWASP LLM guards, WebRTC Voice AI, 7-Step/8 ML Systems, LightGBM/PyTorch + Behavioral ML Tests + Phoenix CI + RunPod vLLM.</td><td>CI eval gate auto-blocks degraded prompt + live vLLM KV-cache tune.</td></tr>
+          <tr><td><strong>M10</strong></td><td>Lab 5: Pure-Code Internals (No Docker)</td><td>300-line LSM-Tree + 3-Node Raft over TCP + Zero-Copy `sendfile` + `micrograd` + `minbpe` + Mini-GPT Attention + LoRA from scratch (M3 Max PyTorch MPS).</td><td>Raft split-brain pass, ~90% fewer `sendfile` switches, train Mini-GPT+LoRA.</td></tr>
+          <tr><td><strong>M11</strong></td><td>Lab 6: K8s, CISSP Security &amp; Chaos</td><td>3-node `kind`, Cilium eBPF/Hubble/Tetragon, ArgoCD, Vault 15m creds, Keycloak, RLS, STRIDE, Debezium CDC + Envoy Strangler Fig, 12 Blind Outages + Real AWS.</td><td>GitOps rebuild `&lt;10m`, solve blind Chaos `&lt;5m`, 50% canary fail = 0 5xx.</td></tr>
+          <tr><td><strong>M12</strong></td><td>Principal Capstone, Certs &amp; C-Suite</td><td>Timed unseen Hard coding + 10-Archetype 45-min whiteboards + AWS SAP-C02/GenAI Pro Delta + Executive BLUF FinOps receipts + 2 OSS PRs.</td><td>3 `make bench` savings proofs, 3 mock Principal loops, 3 terminal teardowns.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CONSTRAINT-FIRST CODING + 10 VETERAN BATTLE SCARS -->
+    <section class="sec" id="scars">
+      <div class="sec-head">
+        <div>
+          <h2>Battle-Scarred Reflexes: Constraint-First Coding &amp; 10 "30-Year Veteran" Laws</h2>
+          <p>The hard-won production and interview reflexes textbooks never teach — internalize these so you sound war-tested in every room.</p>
+        </div>
+        <span class="pill" style="--c:var(--rose)">Unseen Hard Coding + Production Survival</span>
+      </div>
+
+      <div class="pareto" style="margin-bottom:16px;">
+        <div class="pareto-step" style="--c:var(--cyan)">
+          <strong>Constraint-First Coding Reflex (Crack Unseen Hard LeetCode Cold)</strong>
+          <span><strong>N &le; 20:</strong> Backtracking / Bitmask DP O(2^N) &nbsp;|&nbsp; <strong>N &le; 500:</strong> O(N^3) &nbsp;|&nbsp; <strong>N &le; 5,000:</strong> O(N^2) 2D DP &nbsp;|&nbsp; <strong>N &le; 10^5:</strong> Must be O(N) or O(N log N) (Hash, Two Pointers, Sliding Window, Monotonic Stack, Heap, Binary Search on Answer) &nbsp;|&nbsp; <strong>N &ge; 10^9:</strong> O(log N) or O(1). <em>Always state your loop invariant out loud before coding.</em></span>
+        </div>
+      </div>
+
+      <div class="loop-steps" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+        <div class="lstep" style="--c:var(--rose)"><div class="idx">Battle Scar #1</div><h4>Hierarchical Timeouts (Inner &lt; Outer)</h4><p>Nginx 5s &gt; FastAPI 4s &gt; Postgres 3s. Reverse it and retries pile onto still-running dead DB queries.</p></div>
+        <div class="lstep" style="--c:var(--amber)"><div class="idx">Battle Scar #2</div><h4>Decouple Breaking DB Migrations</h4><p>v1 and v2 pods run together during rolling deploys. Always Expand &rarr; Deploy v2 &rarr; Contract.</p></div>
+        <div class="lstep" style="--c:var(--orange)"><div class="idx">Battle Scar #3</div><h4>Throttle Mass Deletes &amp; Backfills</h4><p>Never delete 50M rows in 1 tx. Loop 5k–10k rows/tx with 50ms sleep to avoid lock &amp; WAL lag storms.</p></div>
+        <div class="lstep" style="--c:var(--cyan)"><div class="idx">Battle Scar #4</div><h4>Queues Absorb Spikes, Not Overload</h4><p>If write rate &gt; drain rate permanently, Kafka just delays disk-full crash. Scale, batch, or shed load (`429`).</p></div>
+        <div class="lstep" style="--c:var(--violet)"><div class="idx">Battle Scar #5</div><h4>Averages Always Lie — Check p99 &amp; Skew</h4><p>Avg 40ms hides p99 = 12s for your biggest paying enterprise tenant with 100x more rows.</p></div>
+        <div class="lstep" style="--c:var(--emerald)"><div class="idx">Battle Scar #6</div><h4>Idempotency + Forward State Machines</h4><p>Beat "exactly-once" myths with At-Least-Once + `ON CONFLICT` + forward-only states (`PENDING &rarr; PAID`).</p></div>
+        <div class="lstep" style="--c:var(--indigo)"><div class="idx">Battle Scar #7</div><h4>Kill Switch &amp; Fallback Before Launch</h4><p>Every expensive LLM/RecSys call needs a feature flag + cached fallback so checkout survives vendor outages.</p></div>
+        <div class="lstep" style="--c:var(--teal)"><div class="idx">Battle Scar #8</div><h4>Read Literal Source of Truth First</h4><p>Check `EXPLAIN`, `pg_stat_activity`, `ss -tnp`, `curl -v`, `git log -n 5`, and stack line 1 before guessing.</p></div>
+        <div class="lstep" style="--c:var(--rose)"><div class="idx">Battle Scar #9</div><h4>3-Second Production Safety Reflex</h4><p>Verify context/env &rarr; run dry-run / `SELECT COUNT(*)` / `plan` &rarr; know exact rollback before hitting Enter.</p></div>
+        <div class="lstep" style="--c:var(--amber)"><div class="idx">Battle Scar #10</div><h4>Open &amp; Extensible Forever</h4><p>Any new 2027+ tech gets decoded via the 5 Physical Questions and slotted cleanly into its exact Domain + Lab.</p></div>
+      </div>
+    </section>
 
     <!-- 8 DOMAINS BY THE NUMBERS -->
     <section class="sec" id="domains">
