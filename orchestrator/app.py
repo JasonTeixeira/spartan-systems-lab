@@ -18,7 +18,12 @@ from orchestrator.models import (
     VerifySandboxRequest,
     VerifySandboxResponse,
 )
-from orchestrator.runtime import DockerSandboxRuntime, MemorySandboxRuntime, SandboxRuntime
+from orchestrator.runtime import (
+    DockerSandboxRuntime,
+    FlyMachinesRuntime,
+    MemorySandboxRuntime,
+    SandboxRuntime,
+)
 from orchestrator.service import (
     QuotaExceededError,
     SandboxAccessDeniedError,
@@ -47,7 +52,16 @@ def create_orchestrator_app(
     )
     if runtime is None:
         backend = os.environ.get("SPARTAN_SANDBOX_BACKEND", "memory").strip().lower()
-        runtime = DockerSandboxRuntime() if backend == "docker" else MemorySandboxRuntime()
+        if backend == "docker":
+            runtime = DockerSandboxRuntime()
+        elif backend == "fly":
+            runtime = FlyMachinesRuntime(
+                app_name=os.environ.get("FLY_SANDBOX_APP_NAME", "crucible-sandboxes").strip(),
+                api_token=os.environ.get("FLY_API_TOKEN", "").strip(),
+                region=os.environ.get("FLY_SANDBOX_REGION", "iad").strip() or "iad",
+            )
+        else:
+            runtime = MemorySandboxRuntime()
 
     service = SandboxOrchestratorService(
         runtime=runtime,

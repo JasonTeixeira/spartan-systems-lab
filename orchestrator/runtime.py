@@ -7,8 +7,11 @@ import hmac
 import json
 import subprocess
 import time
-from dataclasses import dataclass
-from typing import Protocol
+import urllib.error
+import urllib.request
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from typing import Any, Protocol
 
 from orchestrator.models import LabTemplateSpec, TierQuota
 
@@ -259,3 +262,128 @@ class DockerSandboxRuntime:
         )
         ok = proc.returncode == 0 and proc.stdout.strip() == "true"
         return ok, "container running" if ok else (proc.stderr.strip() or "container stopped")
+
+
+def build_fly_machine_payload(
+    *,
+    sandbox_id: str,
+    tenant_id: str,
+    container_name: str,
+    template: LabTemplateSpec,
+    quota: TierQuota,
+    expires_epoch: int,
+    region: str = "iad",
+) -> dict[str, Any]:
+    """Build a hardened Fly Machines Firecracker MicroVM launch payload."""
+    cpus = max(1, int(round(quota.cpu_limit)))
+    return {
+        "name": container_name,
+        "region": region,
+        "config": {
+            "image": template.image,
+            "auto_destroy": True,
+            "restart": {"policy": "no"},
+            "guest": {
+                "cpu_kind": "shared",
+                "cpus": cpus,
+                "memory_mb": quota.memory_mb,
+            },
+            "env": {
+                "SPARTAN_SANDBOX_ID": sandbox_id,
+                "SPARTAN_TENANT_ID": tenant_id,
+                "SPARTAN_MODULE": template.module,
+                "SPARTAN_EXPIRES_AT": str(expires_epoch),
+            },
+            "metadata": {
+                "spartan_managed": "true",
+                "spartan_sandbox": sandbox_id,
+                "spartan_tenant": tenant_id,
+                "spartan_template": template.id,
+            },
+        },
+    }
+
+
+FlyHttpSender = Callable[[str, str, dict[str, Any] | None], tuple[int, dict[str, Any]]]
+
+
+@dataclass
+class FlyMachinesRuntime:
+    """Production Firecracker MicroVM runtime backed by the Fly Machines REST API."""
+
+    app_name: str
+    api_token: str
+    region: str = "iad"
+    api_base: str = "https://api.machines.dev/v1"
+    backend_name: str = "fly"
+    http_sender: FlyHttpSender | None = None
+    _machine_ids: dict[str, str] = field(default_factory=dict)
+
+    def _request(
+        self, method: str, path: str, body: dict[str, Any] | None = None
+    ) -> tuple[int, dict[str, Any]]:
+        url = f"{self.api_base.rstrip('/')}{path}"
+        if self.http_sender is not None:
+            return self.http_sender(method, url, body)
+        if not self.app_name or not self.api_token:
+            raise RuntimeError("FLY_SANDBOX_APP_NAME and FLY_API_TOKEN are required for fly")
+        data = json.dumps(body).encode("utf-8") if body is not None else None
+        req = urllib.request.Request(
+            url,
+            data=data,
+            method=method,
+            headers={
+                "Authorization": f"Bearer {self.api_token}",
+                "Content-Type": "application/json",
+                "User-Agent": "crucible-sandbox-orchestrator/1.0",
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:  # noqa: S310
+                raw = resp.read().decode("utf-8") or "{}"
+                return resp.status, json.loads(raw)
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            raise RuntimeError(f"Fly Machines API {exc.code}: {detail}") from None
+
+    def start_sandbox(
+        self,
+        *,
+        sandbox_id: str,
+        tenant_id: str,
+        container_name: str,
+        network_name: str,
+        template: LabTemplateSpec,
+        quota: TierQuota,
+        expires_epoch: int,
+    ) -> None:
+        _ = network_name  # Fly provides hardware KVM + WireGuard isolation per MicroVM
+        payload = build_fly_machine_payload(
+            sandbox_id=sandbox_id,
+            tenant_id=tenant_id,
+            container_name=container_name,
+            template=template,
+            quota=quota,
+            expires_epoch=expires_epoch,
+            region=self.region,
+        )
+        status, resp = self._request("POST", f"/apps/{self.app_name}/machines", payload)
+        if status >= 400 or not isinstance(resp.get("id"), str):
+            raise RuntimeError(f"Failed to boot Fly Machine ({status}): {resp}")
+        self._machine_ids[container_name] = str(resp["id"])
+
+    def stop_sandbox(self, *, container_name: str, network_name: str) -> None:
+        _ = network_name
+        machine_id = self._machine_ids.pop(container_name, None)
+        if not machine_id:
+            return
+        self._request("DELETE", f"/apps/{self.app_name}/machines/{machine_id}?force=true")
+
+    def exec_health_probe(self, *, container_name: str) -> tuple[bool, str]:
+        machine_id = self._machine_ids.get(container_name)
+        if not machine_id:
+            return False, "fly machine not tracked"
+        status, resp = self._request("GET", f"/apps/{self.app_name}/machines/{machine_id}")
+        state = str(resp.get("state", "unknown"))
+        ok = status == 200 and state == "started"
+        return ok, f"fly firecracker machine {machine_id} state={state}"

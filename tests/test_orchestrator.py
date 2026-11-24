@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from orchestrator.app import create_orchestrator_app
 from orchestrator.runtime import (
+    FlyMachinesRuntime,
     MemorySandboxRuntime,
     verify_terminal_token,
 )
@@ -165,3 +166,65 @@ def test_ttl_reaper_cleans_expired_sandboxes() -> None:
     reaped = service.reap_expired(now_epoch=9_999_999_999.0)
     assert sid in reaped
     assert service.active_count() == 0
+
+
+def test_fly_machines_runtime_boots_probes_and_destroys_firecracker_vm() -> None:
+    calls: list[tuple[str, str, dict[str, object] | None]] = []
+
+    def fake_sender(
+        method: str, url: str, body: dict[str, object] | None
+    ) -> tuple[int, dict[str, object]]:
+        calls.append((method, url, body))
+        if method == "POST":
+            return 200, {"id": "vm_firecracker_01", "state": "started"}
+        if method == "GET":
+            return 200, {"id": "vm_firecracker_01", "state": "started"}
+        return 200, {"ok": True}
+
+    rt = FlyMachinesRuntime(
+        app_name="crucible-sandboxes",
+        api_token="fly_test_token",
+        region="iad",
+        http_sender=fake_sender,
+    )
+    app = create_orchestrator_app(
+        api_key=TEST_API_KEY,
+        signing_secret=TEST_SIGNING_SECRET,
+        runtime=rt,
+    )
+    client = TestClient(app)
+    headers = {"X-Spartan-Orchestrator-Key": TEST_API_KEY}
+
+    prov = client.post(
+        "/v1/sandboxes",
+        headers=headers,
+        json={
+            "tenant_id": "crucible",
+            "user_id": "user_firecracker",
+            "template_id": "lab1-core-engine",
+            "tier": "pro",
+        },
+    )
+    assert prov.status_code == 200
+    sid = prov.json()["sandbox_id"]
+    assert calls[0][0] == "POST"
+    assert calls[0][1].endswith("/apps/crucible-sandboxes/machines")
+    assert calls[0][2] is not None
+    cfg = calls[0][2]["config"]
+    assert isinstance(cfg, dict) and cfg["auto_destroy"] is True
+
+    ver = client.post(
+        f"/v1/sandboxes/{sid}/verify",
+        headers=headers,
+        json={"tenant_id": "crucible", "user_id": "user_firecracker"},
+    )
+    assert ver.status_code == 200
+    assert ver.json()["passed"] is True
+
+    term = client.delete(
+        f"/v1/sandboxes/{sid}",
+        headers=headers,
+        params={"tenant_id": "crucible", "user_id": "user_firecracker"},
+    )
+    assert term.status_code == 200
+    assert any(m == "DELETE" and "vm_firecracker_01" in u for m, u, _ in calls)
