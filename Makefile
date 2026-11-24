@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test ci review mcp portal tracker up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py drill-sql drill-linux drill-labs chaos war-room war-room-verify boss-fight backup restore snapshot-incident pdf
+.PHONY: setup lint typecheck test ci review mcp orchestrator portal tracker up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py drill-sql drill-linux drill-labs chaos war-room war-room-verify boss-fight backup restore snapshot-incident pdf
 
 COMPOSE := docker compose -f lab-1-core-engine/docker-compose.yml
 ROWS ?= 100000
@@ -14,7 +14,7 @@ lint:
 	uv run ruff check .
 
 typecheck:
-	uv run mypy lab-1-core-engine/app mcp_server tools tests
+	uv run mypy lab-1-core-engine/app mcp_server orchestrator tools tests
 
 test:
 	uv run pytest tests/ -v
@@ -111,6 +111,10 @@ drill-labs:
 # --- Personal Principal Engineer MCP Server (stdio) ---
 mcp:
 	uv run python -m mcp_server.server
+
+# --- Multi-Tenant Ephemeral Cloud Sandbox Orchestrator ---
+orchestrator:
+	uv run uvicorn orchestrator.app:app --host 127.0.0.1 --port 8090
 
 # --- Visual Documentation Portal & Progress Tracker ---
 portal:

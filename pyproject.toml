@@ -32,7 +32,7 @@ target-version = "py311"
 select = ["E", "F", "I", "B", "UP"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["app", "mcp_server", "tools"]
+known-first-party = ["app", "mcp_server", "orchestrator", "tools"]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/generate_homelab_pdf.py" = ["E501"]
