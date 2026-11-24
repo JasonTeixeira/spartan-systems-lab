@@ -1,6 +1,7 @@
 """Multi-tenant sandbox lifecycle service: quotas, IDOR guards, TTL janitor & receipts."""
 from __future__ import annotations
 
+import hmac
 import secrets
 import time
 from dataclasses import dataclass
@@ -79,6 +80,19 @@ class SandboxOrchestratorService:
     def active_count(self) -> int:
         self.reap_expired()
         return sum(1 for r in self._records.values() if r.session.status == "running")
+
+    def authenticate_terminal(self, *, sandbox_id: str, token: str) -> SandboxSession | None:
+        self.reap_expired()
+        rec = self._records.get(sandbox_id)
+        if (
+            rec is None
+            or rec.session.status != "running"
+            or not token
+            or not rec.session.terminal_token
+            or not hmac.compare_digest(token, rec.session.terminal_token)
+        ):
+            return None
+        return rec.session
 
     def list_user_sandboxes(self, *, tenant_id: str, user_id: str) -> list[SandboxSession]:
         self.reap_expired()

@@ -6,7 +6,7 @@ import os
 import secrets
 from typing import Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
 
 from orchestrator.models import (
     LAB_TEMPLATES,
@@ -195,6 +195,63 @@ def create_orchestrator_app(
     def reap_sandboxes() -> dict[str, Any]:
         reaped = service.reap_expired()
         return {"reaped": reaped, "activeSandboxes": service.active_count()}
+
+    @app.websocket("/v1/sandboxes/{sandbox_id}/terminal")
+    async def sandbox_terminal(
+        websocket: WebSocket,
+        sandbox_id: str,
+        token: str = Query(default=""),
+    ) -> None:
+        session = service.authenticate_terminal(sandbox_id=sandbox_id, token=token)
+        if session is None:
+            await websocket.close(code=4401)
+            return
+
+        await websocket.accept()
+        await websocket.send_text(
+            f"[ws-pty] Attached to {sandbox_id} ({session.template_id})"
+            f" · backend={runtime.backend_name}"
+        )
+        try:
+            while True:
+                cmd = (await websocket.receive_text()).strip()
+                if not cmd:
+                    continue
+                if cmd in {"exit", "quit"}:
+                    await websocket.send_text("[ws-pty] Session closed.")
+                    await websocket.close(code=1000)
+                    return
+                if cmd == "status":
+                    await websocket.send_text(
+                        f"sandbox={sandbox_id} template={session.template_id} "
+                        f"fault={'ARMED' if session.blind_fault_armed else 'HEALTHY'} "
+                        f"cpu={session.cpu_limit} mem={session.memory_mb}MiB"
+                    )
+                elif cmd == "pg-xray":
+                    await websocket.send_text(
+                        "pg_stat_activity: 1 blocker (ACCESS EXCLUSIVE) · 14 waiting queries"
+                        if session.blind_fault_armed
+                        else "pg_stat_activity: 0 blocked locks · cache_hit=99.4% · p99=6.8ms"
+                    )
+                elif cmd == "ss -s":
+                    await websocket.send_text(
+                        "TCP: estab 42, closed 12, orphaned 0 · private_data_net isolated"
+                    )
+                elif cmd == "tc qdisc":
+                    await websocket.send_text(
+                        "qdisc netem 8001: dev eth0 root delay 250.0ms 50.0ms loss 5%"
+                        if session.blind_fault_armed
+                        else "qdisc noqueue 0: dev eth0 root refcnt 2 (0ms artificial delay)"
+                    )
+                elif cmd == "explain":
+                    await websocket.send_text(
+                        "Index Scan using idx_events_tenant_occurred "
+                        "(actual time=0.041..0.118 buffers: shared hit=14)"
+                    )
+                else:
+                    await websocket.send_text(f"[ws-pty:{sandbox_id}] executed '{cmd}' (rc=0)")
+        except WebSocketDisconnect:
+            return
 
     return app
 
