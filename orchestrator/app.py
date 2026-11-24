@@ -260,7 +260,7 @@ def create_orchestrator_app(
                 "HOME": str(ws_dir),
                 "TERM": "xterm-256color",
                 "LANG": "C.UTF-8",
-                "PS1": f"\\[\x1b[1;92m\\]operator@{session.template_id}\\[\\x1b[0m\\]:\\[\x1b[1;36m\\]\\w\\[\x1b[0m\\]\\$ ",
+                "PS1": f"\\[\\e[1;92m\\]operator@{session.template_id}\\[\\e[0m\\]:\\[\\e[1;36m\\]\\w\\[\\e[0m\\]\\$ ",
                 "SPARTAN_SANDBOX_ID": sandbox_id,
                 "SPARTAN_TEMPLATE": session.template_id,
                 "SPARTAN_MODULE": session.module,

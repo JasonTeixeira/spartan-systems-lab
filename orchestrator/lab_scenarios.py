@@ -401,14 +401,15 @@ def provision_workspace(
         root / "bin" / "hint",
         f"#!/usr/bin/env bash\necho 'REMEDIATION HINT: {fault.remediation_hint}'\n",
     )
+    repo_root = Path(__file__).resolve().parents[1]
     _write_executable(
         root / "bin" / "check-sla",
         f"#!/usr/bin/env python3\n"
         f"import sys\n"
-        f"sys.path.insert(0, '/srv/spartan-orchestrator')\n"
+        f"sys.path.insert(0, {str(repo_root)!r})\n"
         f"from pathlib import Path\n"
         f"from orchestrator.lab_scenarios import verify_workspace_sla\n"
-        f"ok, detail = verify_workspace_sla(Path('{root}'), '{template_id}')\n"
+        f"ok, detail = verify_workspace_sla(Path({str(root)!r}), {template_id!r})\n"
         f"print(('PASS: ' if ok else 'FAIL: ') + detail)\n"
         f"sys.exit(0 if ok else 1)\n",
     )
