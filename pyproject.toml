@@ -37,6 +37,7 @@ known-first-party = ["app", "mcp_server", "tools"]
 [tool.ruff.lint.per-file-ignores]
 "scripts/generate_homelab_pdf.py" = ["E501"]
 "drills/micro-labs/**" = ["E501"]
+"drills/sql/run_sql_drills.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.11"

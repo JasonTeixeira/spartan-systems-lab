@@ -1,8 +1,9 @@
-.PHONY: setup lint typecheck test ci review mcp portal tracker up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py drill-labs chaos backup restore snapshot-incident pdf
+.PHONY: setup lint typecheck test ci review mcp portal tracker up down reset logs ps sre-shell psql pg-xray linux-triage seed drill-py drill-sql drill-linux drill-labs chaos war-room war-room-verify boss-fight backup restore snapshot-incident pdf
 
 COMPOSE := docker compose -f lab-1-core-engine/docker-compose.yml
 ROWS ?= 100000
 SCENARIO ?= lock-storm
+MOD ?= M01
 NAME ?= drill
 BACKUP_FILE ?= backups/spartan_lab_latest.sql
 
@@ -23,7 +24,7 @@ ci: lint typecheck test
 # --- Automated Code Review, Security & Supply-Chain Gate ---
 review: ci
 	@echo "=== [4/6] ShellCheck on Bash scripts ==="
-	shellcheck scripts/*.sh tools/*.sh lab-1-core-engine/scripts/*.sh
+	shellcheck scripts/*.sh tools/*.sh lab-1-core-engine/scripts/*.sh drills/linux/*.sh
 	@echo "=== [5/6] Gitleaks secret scan ==="
 	gitleaks detect --source . --no-banner --redact
 	@echo "=== [6/6] Trivy filesystem CVE & misconfig scan ==="
@@ -72,6 +73,15 @@ seed:
 chaos:
 	bash lab-1-core-engine/scripts/chaos_lab1.sh $(SCENARIO)
 
+war-room:
+	uv run python -m tools.war_room start
+
+war-room-verify:
+	uv run python -m tools.war_room verify
+
+boss-fight:
+	uv run python -m tools.war_room boss-fight --module $(MOD)
+
 backup:
 	mkdir -p backups
 	$(COMPOSE) exec -T postgres pg_dump -U spartan -d spartan_lab --clean --if-exists > $(BACKUP_FILE)
@@ -87,6 +97,12 @@ snapshot-incident:
 # --- Spartan Daily Cold Drills (intentionally red until YOU implement the stubs!) ---
 drill-py:
 	uv run pytest drills/python-dsa/ -v
+
+drill-sql:
+	uv run python drills/sql/run_sql_drills.py --run
+
+drill-linux:
+	bash drills/linux/run_linux_drills.sh run
 
 # --- 9 Self-Contained Pure-Python Micro-Labs (93 tests + 74 subtests) ---
 drill-labs:
