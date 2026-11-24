@@ -147,7 +147,18 @@ class SandboxOrchestratorService:
 
         fault: ChaosFault | None = None
         if req.arm_blind_chaos:
-            fault = select_blind_fault()
+            injector = getattr(self.runtime, "inject_fault", None)
+            if callable(injector):
+                real_fault = injector(container_name=container_name)
+                if real_fault is not None:
+                    fault = ChaosFault(
+                        id=real_fault.fault_id,
+                        category=template.module,
+                        symptom=real_fault.symptom,
+                        remediation_hint=real_fault.remediation_hint,
+                    )
+            if fault is None:
+                fault = select_blind_fault()
 
         session = SandboxSession(
             sandbox_id=sandbox_id,
@@ -211,7 +222,19 @@ class SandboxOrchestratorService:
         )
         if rec.session.status != "running":
             raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
-        fault = select_blind_fault(seed=seed)
+        fault: ChaosFault | None = None
+        injector = getattr(self.runtime, "inject_fault", None)
+        if callable(injector):
+            real_fault = injector(container_name=rec.session.container_name)
+            if real_fault is not None:
+                fault = ChaosFault(
+                    id=real_fault.fault_id,
+                    category=rec.session.module,
+                    symptom=real_fault.symptom,
+                    remediation_hint=real_fault.remediation_hint,
+                )
+        if fault is None:
+            fault = select_blind_fault(seed=seed)
         now = self._now()
         rec.secret_fault = fault
         rec.fault_started_epoch = now

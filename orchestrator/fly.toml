@@ -6,7 +6,7 @@ primary_region = "iad"
   dockerfile = "Dockerfile"
 
 [env]
-  SPARTAN_SANDBOX_BACKEND = "memory"
+  SPARTAN_SANDBOX_BACKEND = "linux-pty"
   SPARTAN_TERMINAL_WS_URL = "wss://crucible-sandbox-orchestrator.fly.dev/v1/sandboxes"
 
 [http_service]

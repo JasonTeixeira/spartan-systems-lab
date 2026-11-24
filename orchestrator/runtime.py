@@ -5,14 +5,23 @@ import base64
 import hashlib
 import hmac
 import json
+import shutil
 import subprocess
+import tempfile
 import time
 import urllib.error
 import urllib.request
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Protocol
 
+from orchestrator.lab_scenarios import (
+    RealLabFault,
+    arm_scenario_fault,
+    provision_workspace,
+    verify_workspace_sla,
+)
 from orchestrator.models import LabTemplateSpec, TierQuota
 
 
@@ -387,3 +396,54 @@ class FlyMachinesRuntime:
         state = str(resp.get("state", "unknown"))
         ok = status == 200 and state == "started"
         return ok, f"fly firecracker machine {machine_id} state={state}"
+
+
+@dataclass
+class LinuxPtySandboxRuntime:
+    """Real Linux PTY runtime with isolated per-sandbox workspaces and live SLA probes."""
+
+    base_dir: Path = field(default_factory=lambda: Path(tempfile.gettempdir()) / "spartan-sandboxes")
+    backend_name: str = "linux-pty"
+    _workspaces: dict[str, tuple[Path, str, str]] = field(default_factory=dict)
+
+    def start_sandbox(
+        self,
+        *,
+        sandbox_id: str,
+        tenant_id: str,
+        container_name: str,
+        network_name: str,
+        template: LabTemplateSpec,
+        quota: TierQuota,
+        expires_epoch: int,
+    ) -> None:
+        _ = (tenant_id, network_name, quota, expires_epoch)
+        ws_dir = self.base_dir / sandbox_id
+        if ws_dir.exists():
+            shutil.rmtree(ws_dir, ignore_errors=True)
+        provision_workspace(ws_dir, template.id, sandbox_id, arm_fault=False)
+        self._workspaces[container_name] = (ws_dir, template.id, sandbox_id)
+
+    def inject_fault(self, *, container_name: str) -> RealLabFault | None:
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            return None
+        ws_dir, template_id, sandbox_id = entry
+        return arm_scenario_fault(ws_dir, template_id, sandbox_id)
+
+    def get_workspace_dir(self, *, container_name: str) -> Path | None:
+        entry = self._workspaces.get(container_name)
+        return entry[0] if entry else None
+
+    def stop_sandbox(self, *, container_name: str, network_name: str) -> None:
+        _ = network_name
+        entry = self._workspaces.pop(container_name, None)
+        if entry and entry[0].exists():
+            shutil.rmtree(entry[0], ignore_errors=True)
+
+    def exec_health_probe(self, *, container_name: str) -> tuple[bool, str]:
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            return False, "sandbox workspace not found"
+        ws_dir, template_id, _ = entry
+        return verify_workspace_sla(ws_dir, template_id)
