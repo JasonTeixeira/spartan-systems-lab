@@ -426,7 +426,10 @@ class FlyMachinesRuntime:
             meta = cfg.get("metadata") or {}
             if (
                 meta.get("crucible_pool") == "warm"
-                and str(cfg.get("image", "")).strip() == resolved_image
+                and (
+                    meta.get("crucible_image") == resolved_image
+                    or str(cfg.get("image", "")).strip().startswith(resolved_image)
+                )
                 and str(m.get("region", self.region)) == self.region
                 and str(m.get("state", "")) in {"stopped", "created"}
             ):
