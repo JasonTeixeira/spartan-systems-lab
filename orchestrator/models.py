@@ -73,7 +73,7 @@ class LabTemplateSpec(BaseModel):
     default_shell: str = "/bin/bash"
 
 
-SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v4"
+SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v5"
 
 LAB_TEMPLATES: dict[LabTemplateId, LabTemplateSpec] = {
     "lab1-core-engine": LabTemplateSpec(

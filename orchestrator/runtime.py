@@ -406,7 +406,7 @@ class FlyMachinesRuntime:
             self.image_override
             or os.environ.get("FLY_SANDBOX_IMAGE", "").strip()
             or template_image
-            or "registry.fly.io/crucible-sandboxes:v4"
+            or "registry.fly.io/crucible-sandboxes:v5"
         )
 
     def _list_warm_machines(self, resolved_image: str) -> list[dict[str, Any]]:

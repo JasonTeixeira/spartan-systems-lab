@@ -33,17 +33,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sqlite3 \
     tcpdump \
     vim-tiny \
+    && apt-get install -y --no-install-recommends build-essential postgresql-server-dev-15 \
+    && git clone --depth 1 --branch v0.8.0 https://github.com/pgvector/pgvector.git /tmp/pgvector \
+    && make -C /tmp/pgvector OPTFLAGS="" \
+    && make -C /tmp/pgvector install \
+    && rm -rf /tmp/pgvector \
+    && apt-get purge -y --auto-remove build-essential postgresql-server-dev-15 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create unprivileged student shell user (uid=1000, unprivileged group `users`)
 RUN useradd -m -u 1000 -g users -s /bin/bash operator
 
-# Install lightweight Python runtime for VM agent + FastAPI lab backends + psycopg + PyYAML
+# Install lightweight Python runtime for VM agent + FastAPI + Real DuckDB/PyArrow + psycopg + pgvector
 RUN python3 -m venv /opt/crucible-venv \
     && /opt/crucible-venv/bin/pip install --no-cache-dir \
        fastapi \
        "uvicorn[standard]" \
        "psycopg[binary]" \
+       duckdb \
+       pyarrow \
+       numpy \
        pyyaml \
        websockets
 

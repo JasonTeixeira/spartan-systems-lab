@@ -760,6 +760,36 @@ print(f"Published {len(good)} clean rows, quarantined {len(bad)} invalid rows to
 """
     )
     _write_executable(root / "wap" / "publish_gate.py", gate_code)
+
+    # Real DuckDB + Parquet Point-in-Time ML Leakage & WAP Audit script (runs on real DuckDB inside KVM v5!)
+    duckdb_script = """#!/usr/bin/env python3
+import duckdb
+from pathlib import Path
+
+con = duckdb.connect()
+con.execute(\"\"\"
+CREATE TABLE shipments AS SELECT * FROM (VALUES
+  ('s1', TIMESTAMP '2026-11-20 08:00:00', 1),
+  ('s2', TIMESTAMP '2026-11-20 09:00:00', 0)
+) t(shipment_id, pred_ts, delayed);
+CREATE TABLE carrier_events AS SELECT * FROM (VALUES
+  ('s1', TIMESTAMP '2026-11-20 07:30:00', 'in_transit'),
+  ('s1', TIMESTAMP '2026-11-21 14:00:00', 'delivered_late'),
+  ('s2', TIMESTAMP '2026-11-20 08:45:00', 'in_transit')
+) t(shipment_id, event_ts, status);
+\"\"\")
+# Point-in-Time ASOF join guarantees zero future leakage (event_ts <= pred_ts)
+rows = con.execute(\"\"\"
+SELECT s.shipment_id, e.status, e.event_ts <= s.pred_ts AS pit_safe
+FROM shipments s
+ASOF JOIN carrier_events e
+  ON s.shipment_id = e.shipment_id AND s.pred_ts >= e.event_ts
+ORDER BY s.shipment_id
+\"\"\").fetchall()
+assert all(r[2] for r in rows), f"Temporal leakage detected: {rows}"
+print(f"DUCKDB_PIT_PASS: {len(rows)} shipments verified with zero future leakage -> {rows}")
+"""
+    _write_executable(root / "wap" / "duckdb_pit_audit.py", duckdb_script)
     _chown_tree(root)
     subprocess.run(
         [sys.executable, "wap/publish_gate.py"],
@@ -821,6 +851,34 @@ res = retrieve_for_tenant(CORPUS, tenant_id="small_co", top_k=2)
 assert len(res) == 2, f"Expected 2 docs for small_co, got {len(res)} (post-filter starvation bug!)"
 assert all(d["tenant_id"] == "small_co" for d in res), "Cross-tenant ACL leak!"
 print("PASS: Local ACL smoke check passed (2/2 small_co docs, 0 leaks)")
+""",
+        encoding="utf-8",
+    )
+
+    # Real PostgreSQL pgvector HNSW + Pre-Filter Tenant ACL SQL lab script (runs on live Postgres + pgvector inside KVM v5!)
+    (root / "rag" / "pgvector_acl_lab.sql").write_text(
+        """-- Real PostgreSQL 15 + pgvector Pre-Filter vs Post-Filter Tenant ACL Proof
+CREATE EXTENSION IF NOT EXISTS vector;
+DROP TABLE IF EXISTS rag_chunks;
+CREATE TABLE rag_chunks (
+  id text PRIMARY KEY,
+  tenant_id text NOT NULL,
+  body text NOT NULL,
+  embedding vector(3) NOT NULL
+);
+CREATE INDEX idx_rag_chunks_tenant ON rag_chunks (tenant_id);
+INSERT INTO rag_chunks VALUES
+  ('d1', 'mega_corp', 'MegaCorp confidential M&A memo', '[0.99, 0.01, 0.00]'),
+  ('d2', 'mega_corp', 'MegaCorp Q4 board deck', '[0.96, 0.04, 0.00]'),
+  ('d3', 'small_co',  'SmallCo incident runbook A', '[0.82, 0.18, 0.00]'),
+  ('d4', 'small_co',  'SmallCo incident runbook B', '[0.78, 0.22, 0.00]');
+
+-- SAFE PRE-FILTER: WHERE tenant_id = JWT BEFORE vector distance ORDER BY + LIMIT 2
+SELECT id, tenant_id, body, round((embedding <=> '[1,0,0]')::numeric, 4) AS cosine_dist
+FROM rag_chunks
+WHERE tenant_id = 'small_co'
+ORDER BY embedding <=> '[1,0,0]'
+LIMIT 2;
 """,
         encoding="utf-8",
     )
