@@ -41,7 +41,7 @@ def test_orchestrator_fail_closed_and_auth_guards() -> None:
     )
     ok = client.get("/v1/templates", headers={"X-Spartan-Orchestrator-Key": TEST_API_KEY})
     assert ok.status_code == 200
-    assert len(ok.json()["templates"]) == 6
+    assert len(ok.json()["templates"]) == 11
 
 
 def test_provision_hardened_flags_quota_idor_chaos_receipt_and_terminate() -> None:

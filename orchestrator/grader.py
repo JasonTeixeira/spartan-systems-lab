@@ -34,6 +34,34 @@ except Exception:  # pragma: no cover
     psycopg = None
 
 
+try:
+    from scenarios_expanded import (  # type: ignore[import-not-found]
+        LAB_SCENARIO_CATALOG,
+        get_scenario_spec,
+        seed_lab7,
+        seed_lab8,
+        seed_lab9,
+        seed_lab10,
+        verify_lab7,
+        verify_lab8,
+        verify_lab9,
+        verify_lab10,
+    )
+except ImportError:
+    from orchestrator.scenarios_expanded import (
+        LAB_SCENARIO_CATALOG,
+        get_scenario_spec,
+        seed_lab7,
+        seed_lab8,
+        seed_lab9,
+        seed_lab10,
+        verify_lab7,
+        verify_lab8,
+        verify_lab9,
+        verify_lab10,
+    )
+
+
 @dataclass(frozen=True)
 class RealLabFault:
     fault_id: str
@@ -42,72 +70,12 @@ class RealLabFault:
 
 
 LAB_FAULTS: dict[str, RealLabFault] = {
-    "lab1-core-engine": RealLabFault(
-        fault_id="pg_missing_index_and_pool_starvation",
-        symptom=(
-            "P1 ALERT: /api/orders p99 crossed 6.8s (SLO < 50ms) and PgBouncer "
-            "wait queue is saturated. Inspect Postgres query plan (`pg-xray`) & config/pgbouncer.ini."
-        ),
-        remediation_hint=(
-            "Create composite index idx_orders_tenant_created ON orders(tenant_id, created_at) "
-            "and raise default_pool_size >= 25 in config/pgbouncer.ini, then run reload-pgbouncer."
-        ),
-    ),
-    "lab2-linux-tls": RealLabFault(
-        fault_id="keepalive_race_and_missing_prestop",
-        symptom=(
-            "P1 ALERT: Rolling deploy triggered 4.2% HTTP 502 resets on active HTTP/2 streams. "
-            "Inspect nginx/upstream.conf keepalive_timeout (and reload-nginx) + deploy/rollout.yaml preStop."
-        ),
-        remediation_hint=(
-            "Set nginx upstream keepalive_timeout <= 55s (below app idle 60s), run reload-nginx, "
-            "and add a lifecycle.preStop exec sleep drain hook in deploy/rollout.yaml."
-        ),
-    ),
-    "lab3-lakehouse-wap": RealLabFault(
-        fault_id="wap_null_tenant_poison_publish",
-        symptom=(
-            "P1 ALERT: Executive BI shows corrupted NULL/empty tenant revenue rows after last batch. "
-            "Inspect wap/staging_batch.jsonl and fix wap/publish_gate.py."
-        ),
-        remediation_hint=(
-            "Update wap/publish_gate.py to quarantine rows with missing/null/empty tenant_id "
-            "or negative revenue_cents into wap/dlq.jsonl and publish only valid rows to wap/curated.jsonl."
-        ),
-    ),
-    "lab4-rag-acl": RealLabFault(
-        fault_id="rag_post_filter_acl_leak",
-        symptom=(
-            "P1 SECURITY ALERT: Small enterprise tenant receives 0 recall while red-team probe "
-            "flags cross-tenant leakage risk. Fix rag/retriever.py and mcp/policy.json."
-        ),
-        remediation_hint=(
-            "Pre-filter docs strictly by tenant_id BEFORE sorting/slicing top_k in rag/retriever.py, "
-            "and set max_usd <= 2.00, max_steps <= 12, require_approval_for_writes=true in mcp/policy.json."
-        ),
-    ),
-    "lab5-raft-internals": RealLabFault(
-        fault_id="raft_split_brain_zombie_write",
-        symptom=(
-            "P1 DATA INTEGRITY ALERT: Partitioned stale Raft leader (term 14) overwrote "
-            "committed term 15 state. Fix monotonic fencing in raft/storage_guard.py."
-        ),
-        remediation_hint=(
-            "Reject writes whenever fencing_token < self.high_water_token in FencedStorage.write() "
-            "so stale zombie leaders fail closed without mutating state."
-        ),
-    ),
-    "lab6-k8s-ebpf": RealLabFault(
-        fault_id="cilium_egress_drop_and_pdb_stall",
-        symptom=(
-            "P1 ALERT: API pods cannot reach PgBouncer :6432 after Cilium policy rollout and "
-            "AZ node drain is stalled. Fix k8s/networkpolicy.yaml and k8s/pdb.yaml."
-        ),
-        remediation_hint=(
-            "Add TCP egress port 6432 (and DNS 53) in k8s/networkpolicy.yaml and change k8s/pdb.yaml "
-            "minAvailable from 100% to <= 80% (or set maxUnavailable: 1)."
-        ),
-    ),
+    tpl_id: RealLabFault(
+        fault_id=specs[0].scenario_id,
+        symptom=specs[0].symptom,
+        remediation_hint=specs[0].remediation_hint,
+    )
+    for tpl_id, specs in LAB_SCENARIO_CATALOG.items()
 }
 
 ALLOWED_TEXT_EXTS = {
@@ -309,6 +277,23 @@ def reload_lab_daemon(root: Path, template_id: str) -> dict[str, Any]:
         cmd = [str(root / "bin" / "reload-pgbouncer")]
     elif template_id == "lab2-linux-tls" and (root / "bin" / "reload-nginx").exists():
         cmd = [str(root / "bin" / "reload-nginx")]
+    elif template_id == "lab11-p0-capstone":
+        outs = []
+        for script_name in ("reload-pgbouncer", "reload-nginx"):
+            sp = root / "bin" / script_name
+            if sp.exists():
+                p = subprocess.run(
+                    [str(sp)],
+                    cwd=str(root),
+                    env=_scrubbed_subprocess_env(root),
+                    preexec_fn=_unprivileged_preexec(),
+                    capture_output=True,
+                    text=True,
+                    timeout=8,
+                )
+                outs.append((p.stdout + " " + p.stderr).strip())
+        if outs:
+            return {"reloaded": True, "exit_code": 0, "output": " | ".join(outs)[:400]}
     elif template_id == "lab3-lakehouse-wap" and (root / "wap" / "publish_gate.py").exists():
         cmd = [sys.executable, "wap/publish_gate.py"]
 
@@ -454,7 +439,7 @@ app = FastAPI(title="Crucible Lab1 Orders API")
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "orders-api"}
+    return {"status": "ok", "service": "orders-api", "upstream": "edge-api", "idle_timeout_s": 60}
 
 @app.get("/api/orders")
 def get_orders(tenant_id: str = "tenant_07"):
@@ -895,6 +880,12 @@ def _seed_lab6(root: Path, broken: bool) -> None:
     )
 
 
+def _seed_lab11(root: Path, broken: bool) -> None:
+    """Principal P0 Capstone: Simultaneous LIVE Postgres 16 + PgBouncer + NGINX TLS 1.3 meltdown."""
+    _seed_lab1(root, broken=broken)
+    _seed_lab2(root, broken=broken)
+
+
 def provision_workspace(
     root: Path, template_id: str, sandbox_id: str, arm_fault: bool = False
 ) -> None:
@@ -908,6 +899,11 @@ def provision_workspace(
         "lab4-rag-acl": _seed_lab4,
         "lab5-raft-internals": _seed_lab5,
         "lab6-k8s-ebpf": _seed_lab6,
+        "lab7-linux-sre": seed_lab7,
+        "lab8-scale-api": seed_lab8,
+        "lab9-iac-iam": seed_lab9,
+        "lab10-ai-gpu-mcp": seed_lab10,
+        "lab11-p0-capstone": _seed_lab11,
     }
     seeder = seeders.get(template_id, _seed_lab1)
     seeder(root, broken=arm_fault)
@@ -1376,6 +1372,19 @@ def _verify_lab6_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
     return all_ok, ("SLA healthy: structural K8s NetworkPolicy allows TCP:6432 egress & PDB permits safe AZ drains" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
 
 
+def _verify_lab11_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
+    ok1, d1, c1 = _verify_lab1_checks(root)
+    ok2, d2, c2 = _verify_lab2_checks(root)
+    checks = [*c1, *c2]
+    all_ok = ok1 and ok2
+    summary = (
+        "PRINCIPAL P0 RESOLVED: Live Postgres 16 Index + PgBouncer Pool + NGINX TLS 1.3 + K8s preStop ALL verified!"
+        if all_ok
+        else (d1 if not ok1 else d2)
+    )
+    return all_ok, summary, checks
+
+
 def verify_workspace_checks(root: Path, template_id: str) -> tuple[bool, str, list[dict[str, Any]]]:
     if not root.exists():
         return False, "sandbox workspace missing", [_chk("workspace", "Workspace Mounted", False, "missing")]
@@ -1386,6 +1395,11 @@ def verify_workspace_checks(root: Path, template_id: str) -> tuple[bool, str, li
         "lab4-rag-acl": _verify_lab4_checks,
         "lab5-raft-internals": _verify_lab5_checks,
         "lab6-k8s-ebpf": _verify_lab6_checks,
+        "lab7-linux-sre": verify_lab7,
+        "lab8-scale-api": lambda r: verify_lab8(r, _scrubbed_subprocess_env, _unprivileged_preexec),
+        "lab9-iac-iam": verify_lab9,
+        "lab10-ai-gpu-mcp": lambda r: verify_lab10(r, _scrubbed_subprocess_env, _unprivileged_preexec),
+        "lab11-p0-capstone": _verify_lab11_checks,
     }
     fn = verifiers.get(template_id)
     if fn is None:

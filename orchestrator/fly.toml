@@ -9,7 +9,7 @@ primary_region = "iad"
   SPARTAN_SANDBOX_BACKEND = "fly"
   FLY_SANDBOX_APP_NAME = "crucible-sandboxes"
   FLY_SANDBOX_REGION = "iad"
-  FLY_SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v2"
+  FLY_SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v3"
   SPARTAN_TERMINAL_WS_URL = "wss://crucible-sandbox-orchestrator.fly.dev/v1/sandboxes"
 
 [http_service]

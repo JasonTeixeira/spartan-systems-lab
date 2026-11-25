@@ -49,6 +49,7 @@ RUN python3 -m venv /opt/crucible-venv \
 
 # Place immutable root-owned grader & VM control agent strictly inaccessible to `operator` (0700)
 WORKDIR /opt/crucible-grader
+COPY orchestrator/scenarios_expanded.py /opt/crucible-grader/scenarios_expanded.py
 COPY orchestrator/grader.py /opt/crucible-grader/grader.py
 COPY orchestrator/vm_agent.py /opt/crucible-grader/vm_agent.py
 RUN chown -R root:root /opt/crucible-grader /opt/crucible-venv \
