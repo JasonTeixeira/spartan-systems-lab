@@ -186,7 +186,7 @@ def _wait_port(port: int, timeout_s: float = 10.0) -> bool:
 
 def _scrubbed_subprocess_env(cwd: Path) -> dict[str, str]:
     return {
-        "PATH": f"{cwd / 'bin'}:/usr/local/bin:/usr/bin:/bin",
+        "PATH": f"{cwd / 'bin'}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
         "HOME": str(cwd),
         "LANG": "C.UTF-8",
         "PYTHONDONTWRITEBYTECODE": "1",
