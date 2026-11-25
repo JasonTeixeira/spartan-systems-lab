@@ -1,4 +1,4 @@
-# Fly.io production config for Crucible Cloud Sandbox Orchestrator
+# Fly.io production config for Crucible Stateless Cloud Sandbox Orchestrator (Firecracker KVM Control Plane)
 app = "crucible-sandbox-orchestrator"
 primary_region = "iad"
 
@@ -6,7 +6,10 @@ primary_region = "iad"
   dockerfile = "Dockerfile"
 
 [env]
-  SPARTAN_SANDBOX_BACKEND = "linux-pty"
+  SPARTAN_SANDBOX_BACKEND = "fly"
+  FLY_SANDBOX_APP_NAME = "crucible-sandboxes"
+  FLY_SANDBOX_REGION = "iad"
+  FLY_SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:latest"
   SPARTAN_TERMINAL_WS_URL = "wss://crucible-sandbox-orchestrator.fly.dev/v1/sandboxes"
 
 [http_service]
@@ -25,5 +28,5 @@ primary_region = "iad"
 
 [[vm]]
   cpu_kind = "shared"
-  cpus = 2
-  memory_mb = 2048
+  cpus = 1
+  memory_mb = 512

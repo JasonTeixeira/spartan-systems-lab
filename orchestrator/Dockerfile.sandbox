@@ -1,0 +1,66 @@
+# Crucible Hardware-Isolated Firecracker MicroVM Lab Image
+# Packs REAL production daemons (PostgreSQL 16, PgBouncer, Redis, NGINX, OpenSSL, FastAPI/Uvicorn)
+# + root-owned tamper-proof grader (/opt/crucible-grader, chmod 700)
+# + unprivileged `operator` (uid 1000) shell user.
+FROM debian:bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    curl \
+    dnsutils \
+    file \
+    git \
+    iproute2 \
+    jq \
+    less \
+    lsof \
+    nano \
+    nginx \
+    openssl \
+    pgbouncer \
+    postgresql \
+    postgresql-client \
+    procps \
+    python3 \
+    python3-pip \
+    python3-venv \
+    redis-server \
+    sqlite3 \
+    tcpdump \
+    vim-tiny \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create unprivileged student shell user (uid=1000, unprivileged group `users`)
+RUN useradd -m -u 1000 -g users -s /bin/bash operator
+
+# Install lightweight Python runtime for VM agent + FastAPI lab backends + psycopg + PyYAML
+RUN python3 -m venv /opt/crucible-venv \
+    && /opt/crucible-venv/bin/pip install --no-cache-dir \
+       fastapi \
+       "uvicorn[standard]" \
+       "psycopg[binary]" \
+       pyyaml \
+       websockets
+
+# Place immutable root-owned grader & VM control agent strictly inaccessible to `operator` (0700)
+WORKDIR /opt/crucible-grader
+COPY orchestrator/grader.py /opt/crucible-grader/grader.py
+COPY orchestrator/vm_agent.py /opt/crucible-grader/vm_agent.py
+RUN chown -R root:root /opt/crucible-grader /opt/crucible-venv \
+    && chmod 700 /opt/crucible-grader \
+    && chmod 600 /opt/crucible-grader/*.py \
+    && chmod -R a+rX /opt/crucible-venv \
+    && ln -sf /opt/crucible-venv/bin/python3 /usr/local/bin/crucible-python \
+    && ln -sf /opt/crucible-venv/bin/uvicorn /usr/local/bin/uvicorn
+
+# Also allow `operator`'s python3 to import fastapi/psycopg/yaml for lab scripts
+ENV PYTHONPATH="/opt/crucible-venv/lib/python3.11/site-packages"
+
+EXPOSE 8091
+
+CMD ["/opt/crucible-venv/bin/uvicorn", "vm_agent:app", "--app-dir", "/opt/crucible-grader", "--host", "::", "--port", "8091", "--log-level", "warning"]

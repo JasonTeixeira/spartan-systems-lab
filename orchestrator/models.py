@@ -34,7 +34,7 @@ TIER_QUOTAS: dict[SandboxTier, TierQuota] = {
         tier="free",
         max_concurrent=1,
         ttl_minutes=30,
-        cpu_limit=0.5,
+        cpu_limit=1.0,
         memory_mb=512,
         pids_limit=64,
     ),
@@ -42,16 +42,16 @@ TIER_QUOTAS: dict[SandboxTier, TierQuota] = {
         tier="pro",
         max_concurrent=2,
         ttl_minutes=90,
-        cpu_limit=1.5,
-        memory_mb=2048,
+        cpu_limit=1.0,
+        memory_mb=1024,
         pids_limit=256,
     ),
     "enterprise": TierQuota(
         tier="enterprise",
         max_concurrent=5,
         ttl_minutes=180,
-        cpu_limit=4.0,
-        memory_mb=4096,
+        cpu_limit=2.0,
+        memory_mb=2048,
         pids_limit=512,
     ),
 }
@@ -72,22 +72,22 @@ LAB_TEMPLATES: dict[LabTemplateId, LabTemplateSpec] = {
     "lab1-core-engine": LabTemplateSpec(
         id="lab1-core-engine",
         module="M01",
-        title="Lab 1 · Core Engine (Nginx, FastAPI, PgBouncer, Postgres 16, Redis)",
-        image="ghcr.io/jasonteixeira/spartan-lab1-sre:latest",
+        title="Lab 1 · Core Engine (Real Postgres 16, PgBouncer, Redis, FastAPI)",
+        image="registry.fly.io/crucible-sandboxes:latest",
         summary=(
-            "Full 11-service production stack with Prometheus/Grafana, "
-            "10 chaos faults, and Postgres lock/query forensics."
+            "Live PostgreSQL 16 (15k rows), PgBouncer :6432, Redis :6379 & FastAPI :8000 "
+            "inside a dedicated Firecracker MicroVM with blind query-plan & pool starvation faults."
         ),
         archos_canvas_id="dgm_spartan-lab1-core-engine",
     ),
     "lab2-linux-tls": LabTemplateSpec(
         id="lab2-linux-tls",
         module="M05",
-        title="Lab 2 · Linux Kernel, TCP/IP, TLS & Zero-Downtime Rollback",
-        image="ghcr.io/jasonteixeira/spartan-lab2-linux:latest",
+        title="Lab 2 · Linux Kernel, Real NGINX TLS 1.3 & Zero-Downtime Rollback",
+        image="registry.fly.io/crucible-sandboxes:latest",
         summary=(
-            "Isolated netem/tc traffic shaping, tcpdump packet forensics, "
-            "TLS handshake debugging, and zero-downtime canary deploys."
+            "Live NGINX TLS 1.3 (:8443) proxying Uvicorn (:8000), OpenSSL handshake forensics, "
+            "keepalive race debugging, and K8s preStop drain verification."
         ),
         archos_canvas_id="dgm_spartan-lab2-linux-tcp-tls-deploy",
         needs_net_admin=True,
@@ -95,44 +95,44 @@ LAB_TEMPLATES: dict[LabTemplateId, LabTemplateSpec] = {
     "lab3-lakehouse-wap": LabTemplateSpec(
         id="lab3-lakehouse-wap",
         module="M07",
-        title="Lab 3 · Terraform IaC, Apache Iceberg WAP & ClickHouse Outage",
-        image="ghcr.io/jasonteixeira/spartan-lab3-data:latest",
+        title="Lab 3 · Terraform IaC, Apache Iceberg WAP & Quarantine Gate",
+        image="registry.fly.io/crucible-sandboxes:latest",
         summary=(
-            "Write-Audit-Publish data quality gates, schema-drift quarantine, "
-            "and ClickHouse OLAP partition recovery."
+            "Write-Audit-Publish data quality gates verified against hidden adversarial "
+            "poisoned batches and DLQ quarantine contracts."
         ),
         archos_canvas_id="dgm_spartan-lab3-iac-aws-apache-data",
     ),
     "lab4-rag-acl": LabTemplateSpec(
         id="lab4-rag-acl",
         module="M08",
-        title="Lab 4 · Enterprise Hybrid RAG, Pre-Filter ACLs, MCP & Evals",
-        image="ghcr.io/jasonteixeira/spartan-lab4-ai:latest",
+        title="Lab 4 · Enterprise Hybrid RAG, Pre-Filter ACLs & MCP Budget Guard",
+        image="registry.fly.io/crucible-sandboxes:latest",
         summary=(
-            "Hybrid BM25+Vector retrieval with zero-leak ACL pre-filtering, "
-            "BEIR ranking evals, and bounded agent tool loops."
+            "Multi-tenant pre-filter ACL retrieval audited by an immutable root-owned red-team "
+            "probe plus bounded MCP tool budget enforcement."
         ),
         archos_canvas_id="dgm_spartan-lab4-ai-rag-mcp-evals",
     ),
     "lab5-raft-internals": LabTemplateSpec(
         id="lab5-raft-internals",
         module="M10",
-        title="Lab 5 · Pure-Code LSM Storage Engine, Raft Consensus & KV Cache",
-        image="ghcr.io/jasonteixeira/spartan-lab5-internals:latest",
+        title="Lab 5 · LSM Storage Engine, Raft Consensus & Monotonic Fencing",
+        image="registry.fly.io/crucible-sandboxes:latest",
         summary=(
-            "WAL recovery, SSTable compaction storms, Raft leader election "
-            "split-brain fencing, and PagedAttention KV-cache math."
+            "Split-brain zombie leader fencing verified against hidden multi-term "
+            "monotonic token adversarial sequences."
         ),
         archos_canvas_id="dgm_spartan-lab5-internals-db-raft-llm",
     ),
     "lab6-k8s-ebpf": LabTemplateSpec(
         id="lab6-k8s-ebpf",
         module="M11",
-        title="Lab 6 · Kubernetes, Cilium eBPF Zero-Trust, CDC & Strangler Canary",
-        image="ghcr.io/jasonteixeira/spartan-lab6-k8s:latest",
+        title="Lab 6 · Kubernetes, Cilium eBPF Zero-Trust Egress & PDB Drain Safety",
+        image="registry.fly.io/crucible-sandboxes:latest",
         summary=(
-            "NetworkPolicy isolation, eBPF traffic observability, "
-            "Debezium CDC backfill recovery, and zero-downtime strangler cutover."
+            "Structural NetworkPolicy egress auditing (PgBouncer :6432 + DNS :53) and "
+            "PodDisruptionBudget AZ drain verification."
         ),
         archos_canvas_id="dgm_spartan-lab6-k8s-cilium-zerotrust-cdc",
     ),
@@ -155,6 +155,9 @@ class SandboxSession(BaseModel):
     module: str
     tier: SandboxTier
     status: SandboxStatus
+    backend: str = "fly"
+    fly_machine_id: str | None = None
+    region: str | None = None
     container_name: str
     network_name: str
     cpu_limit: float

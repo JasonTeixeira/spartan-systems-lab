@@ -1,10 +1,11 @@
-"""Hardened container runtime abstraction (Docker CLI + deterministic memory backend)."""
+"""Hardened multi-backend sandbox runtime (Fly Firecracker KVM, Docker, Linux PTY, Memory)."""
 from __future__ import annotations
 
 import base64
 import hashlib
 import hmac
 import json
+import os
 import shutil
 import subprocess
 import tempfile
@@ -16,7 +17,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
-from orchestrator.lab_scenarios import (
+from orchestrator.grader import (
     RealLabFault,
     arm_scenario_fault,
     provision_workspace,
@@ -122,24 +123,49 @@ def build_hardened_docker_run_cmd(
         f"spartan.tenant={tenant_id}",
         "--label",
         f"spartan.expires_at={expires_epoch}",
+        "-e",
+        f"SPARTAN_SANDBOX_ID={sandbox_id}",
+        "-e",
+        f"SPARTAN_MODULE={template.module}",
     ]
     if template.needs_net_admin:
         cmd.extend(["--cap-add=NET_ADMIN"])
-    cmd.extend([template.image, "sleep", "infinity"])
+    cmd.extend([template.image, "sleep", str(quota.ttl_minutes * 60)])
     return cmd
 
 
-def security_profile_summary(template: LabTemplateSpec, quota: TierQuota) -> list[str]:
-    caps = "cap-drop=ALL + NET_ADMIN (isolated net)" if template.needs_net_admin else "cap-drop=ALL"
-    return [
-        "read-only-rootfs",
+def security_profile_summary(
+    template: LabTemplateSpec, quota: TierQuota, *, backend: str = "fly"
+) -> list[str]:
+    if backend == "fly":
+        return [
+            "kvm-firecracker-microvm",
+            "zero-public-ip-6pn-mesh",
+            "per-vm-ephemeral-secret",
+            "unprivileged-operator-uid1000",
+            "immutable-root-grader-0700",
+            f"cpus={max(1, int(round(quota.cpu_limit)))}",
+            f"memory={max(512, quota.memory_mb)}m",
+            "auto-destroy-ttl-and-idle",
+        ]
+    flags = [
+        "non-root-shell",
         "no-new-privileges",
-        caps,
-        "isolated-internal-network",
-        f"cpu={quota.cpu_limit}",
-        f"mem={quota.memory_mb}MiB",
-        f"pids={quota.pids_limit}",
+        "immutable-grader",
+        f"cpus={quota.cpu_limit}",
+        f"memory={quota.memory_mb}m",
+        f"pids-limit={quota.pids_limit}",
     ]
+    if template.needs_net_admin:
+        flags.append("cap-add=NET_ADMIN")
+    return flags
+
+
+@dataclass(frozen=True)
+class StartSandboxResult:
+    machine_id: str | None = None
+    region: str | None = None
+    private_ip: str | None = None
 
 
 class SandboxRuntime(Protocol):
@@ -155,22 +181,31 @@ class SandboxRuntime(Protocol):
         template: LabTemplateSpec,
         quota: TierQuota,
         expires_epoch: int,
+        vm_secret: str = "",
+        arm_blind_chaos: bool = False,
+    ) -> StartSandboxResult | None: ...
+
+    def stop_sandbox(
+        self, *, container_name: str, network_name: str, machine_id: str | None = None
     ) -> None: ...
 
-    def stop_sandbox(self, *, container_name: str, network_name: str) -> None: ...
-
-    def exec_health_probe(self, *, container_name: str) -> tuple[bool, str]: ...
+    def exec_health_probe(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> tuple[bool, str]: ...
 
 
 @dataclass
 class MemorySandboxRuntime:
-    """In-memory deterministic runtime for CI, unit tests, and dry-run previews."""
+    """Deterministic in-memory runtime for fast unit/CI tests without Docker daemon."""
 
     backend_name: str = "memory"
-
-    def __post_init__(self) -> None:
-        self.running_containers: dict[str, list[str]] = {}
-        self.networks: set[str] = set()
+    running_containers: dict[str, list[str]] = field(default_factory=dict)
+    created_networks: set[str] = field(default_factory=set)
 
     def start_sandbox(
         self,
@@ -182,7 +217,10 @@ class MemorySandboxRuntime:
         template: LabTemplateSpec,
         quota: TierQuota,
         expires_epoch: int,
-    ) -> None:
+        vm_secret: str = "",
+        arm_blind_chaos: bool = False,
+    ) -> StartSandboxResult:
+        _ = (vm_secret, arm_blind_chaos)
         cmd = build_hardened_docker_run_cmd(
             sandbox_id=sandbox_id,
             tenant_id=tenant_id,
@@ -192,22 +230,33 @@ class MemorySandboxRuntime:
             quota=quota,
             expires_epoch=expires_epoch,
         )
-        self.networks.add(network_name)
+        self.created_networks.add(network_name)
         self.running_containers[container_name] = cmd
+        return StartSandboxResult()
 
-    def stop_sandbox(self, *, container_name: str, network_name: str) -> None:
+    def stop_sandbox(
+        self, *, container_name: str, network_name: str, machine_id: str | None = None
+    ) -> None:
+        _ = machine_id
         self.running_containers.pop(container_name, None)
-        self.networks.discard(network_name)
+        self.created_networks.discard(network_name)
 
-    def exec_health_probe(self, *, container_name: str) -> tuple[bool, str]:
-        if container_name in self.running_containers:
-            return True, "memory-probe healthy (p99=9.2ms, 0 blocked locks)"
-        return False, "container not running"
+    def exec_health_probe(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> tuple[bool, str]:
+        _ = (machine_id, vm_secret, private_ip)
+        alive = container_name in self.running_containers
+        return alive, "container running" if alive else "container missing"
 
 
 @dataclass
 class DockerSandboxRuntime:
-    """Production Docker CLI runtime for dedicated Linux/Hetzner/Fly sandbox hosts."""
+    """Production Docker CLI runtime with per-sandbox isolated bridge networks."""
 
     backend_name: str = "docker"
 
@@ -221,7 +270,10 @@ class DockerSandboxRuntime:
         template: LabTemplateSpec,
         quota: TierQuota,
         expires_epoch: int,
-    ) -> None:
+        vm_secret: str = "",
+        arm_blind_chaos: bool = False,
+    ) -> StartSandboxResult:
+        _ = (vm_secret, arm_blind_chaos)
         subprocess.run(
             ["docker", "network", "create", "--internal", network_name],
             check=True,
@@ -237,32 +289,25 @@ class DockerSandboxRuntime:
             quota=quota,
             expires_epoch=expires_epoch,
         )
-        try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
-        except subprocess.CalledProcessError:
-            subprocess.run(
-                ["docker", "network", "rm", network_name],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-            raise
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+        return StartSandboxResult()
 
-    def stop_sandbox(self, *, container_name: str, network_name: str) -> None:
-        subprocess.run(
-            ["docker", "rm", "-f", container_name],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        subprocess.run(
-            ["docker", "network", "rm", network_name],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
+    def stop_sandbox(
+        self, *, container_name: str, network_name: str, machine_id: str | None = None
+    ) -> None:
+        _ = machine_id
+        subprocess.run(["docker", "rm", "-f", container_name], check=False, capture_output=True, text=True)
+        subprocess.run(["docker", "network", "rm", network_name], check=False, capture_output=True, text=True)
 
-    def exec_health_probe(self, *, container_name: str) -> tuple[bool, str]:
+    def exec_health_probe(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> tuple[bool, str]:
+        _ = (machine_id, vm_secret, private_ip)
         proc = subprocess.run(
             ["docker", "inspect", "-f", "{{.State.Running}}", container_name],
             check=False,
@@ -282,27 +327,37 @@ def build_fly_machine_payload(
     quota: TierQuota,
     expires_epoch: int,
     region: str = "iad",
+    image_override: str | None = None,
+    vm_secret: str = "",
+    arm_blind_chaos: bool = False,
 ) -> dict[str, Any]:
-    """Build a hardened Fly Machines Firecracker MicroVM launch payload."""
+    """Build a hardened Fly Machines KVM Firecracker MicroVM launch payload (zero public IP)."""
     cpus = max(1, int(round(quota.cpu_limit)))
+    mem_mb = max(512, int(quota.memory_mb))
+    env: dict[str, str] = {
+        "SPARTAN_SANDBOX_ID": sandbox_id,
+        "SPARTAN_TENANT_ID": tenant_id,
+        "SPARTAN_TEMPLATE": template.id,
+        "SPARTAN_MODULE": template.module,
+        "SPARTAN_EXPIRES_AT": str(expires_epoch),
+        "SPARTAN_ARM_CHAOS": "1" if arm_blind_chaos else "0",
+        "SPARTAN_IDLE_TIMEOUT_SECONDS": "1200",
+    }
+    if vm_secret:
+        env["VM_SESSION_SECRET"] = vm_secret
     return {
         "name": container_name,
         "region": region,
         "config": {
-            "image": template.image,
+            "image": (image_override or template.image).strip(),
             "auto_destroy": True,
             "restart": {"policy": "no"},
             "guest": {
                 "cpu_kind": "shared",
                 "cpus": cpus,
-                "memory_mb": quota.memory_mb,
+                "memory_mb": mem_mb,
             },
-            "env": {
-                "SPARTAN_SANDBOX_ID": sandbox_id,
-                "SPARTAN_TENANT_ID": tenant_id,
-                "SPARTAN_MODULE": template.module,
-                "SPARTAN_EXPIRES_AT": str(expires_epoch),
-            },
+            "env": env,
             "metadata": {
                 "spartan_managed": "true",
                 "spartan_sandbox": sandbox_id,
@@ -314,18 +369,22 @@ def build_fly_machine_payload(
 
 
 FlyHttpSender = Callable[[str, str, dict[str, Any] | None], tuple[int, dict[str, Any]]]
+VmHttpSender = Callable[[str, str, dict[str, str], dict[str, Any] | None], tuple[int, dict[str, Any]]]
 
 
 @dataclass
 class FlyMachinesRuntime:
-    """Production Firecracker MicroVM runtime backed by the Fly Machines REST API."""
+    """Production hardware-isolated KVM Firecracker MicroVM runtime via Fly Machines API + 6pn mesh."""
 
     app_name: str
     api_token: str
     region: str = "iad"
     api_base: str = "https://api.machines.dev/v1"
+    image_override: str = ""
+    vm_agent_port: int = 8091
     backend_name: str = "fly"
     http_sender: FlyHttpSender | None = None
+    vm_http_sender: VmHttpSender | None = None
     _machine_ids: dict[str, str] = field(default_factory=dict)
 
     def _request(
@@ -344,16 +403,87 @@ class FlyMachinesRuntime:
             headers={
                 "Authorization": f"Bearer {self.api_token}",
                 "Content-Type": "application/json",
-                "User-Agent": "crucible-sandbox-orchestrator/1.0",
+                "User-Agent": "crucible-sandbox-orchestrator/2.0",
             },
         )
         try:
-            with urllib.request.urlopen(req, timeout=15) as resp:  # noqa: S310
+            with urllib.request.urlopen(req, timeout=20) as resp:  # noqa: S310
                 raw = resp.read().decode("utf-8") or "{}"
                 return resp.status, json.loads(raw)
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
             raise RuntimeError(f"Fly Machines API {exc.code}: {detail}") from None
+
+    def _vm_host(self, machine_id: str, private_ip: str | None = None) -> str:
+        if private_ip and ":" in private_ip:
+            return f"[{private_ip}]"
+        if private_ip:
+            return private_ip
+        return f"{machine_id}.vm.{self.app_name}.internal"
+
+    def _vm_base_url(self, machine_id: str, private_ip: str | None = None) -> str:
+        return f"http://{self._vm_host(machine_id, private_ip)}:{self.vm_agent_port}"
+
+    def get_internal_ws_url(self, *, machine_id: str, private_ip: str | None = None) -> str:
+        return f"ws://{self._vm_host(machine_id, private_ip)}:{self.vm_agent_port}/internal/terminal"
+
+    def _vm_request(
+        self,
+        *,
+        machine_id: str,
+        method: str,
+        path: str,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+        body: dict[str, Any] | None = None,
+        timeout: float = 12.0,
+    ) -> tuple[int, dict[str, Any]]:
+        url = f"{self._vm_base_url(machine_id, private_ip)}{path}"
+        headers = {"Content-Type": "application/json"}
+        if vm_secret:
+            headers["X-VM-Session-Secret"] = vm_secret
+        if self.vm_http_sender is not None:
+            return self.vm_http_sender(method, url, headers, body)
+        data = json.dumps(body).encode("utf-8") if body is not None else None
+        req = urllib.request.Request(url, data=data, method=method, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
+                raw = resp.read().decode("utf-8") or "{}"
+                return resp.status, json.loads(raw)
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            return exc.code, {"error": detail}
+        except Exception as exc:
+            return 503, {"error": str(exc)}
+
+    def _wait_until_vm_ready(
+        self, *, machine_id: str, private_ip: str | None = None, instance_id: str | None = None, timeout_s: float = 35.0
+    ) -> None:
+        # In pure mocked Fly API unit tests (http_sender set without vm_http_sender), skip 6pn polling
+        if self.http_sender is not None and self.vm_http_sender is None:
+            return
+        # Wait for Fly Machine to reach `started` state cleanly first (avoids premature DNS/TCP timeouts)
+        if self.http_sender is None:
+            wait_qs = f"state=started&timeout=25" + (f"&instance_id={instance_id}" if instance_id else "")
+            try:
+                self._request("GET", f"/apps/{self.app_name}/machines/{machine_id}/wait?{wait_qs}")
+            except RuntimeError:
+                pass
+        deadline = time.time() + timeout_s
+        last_err = "booting"
+        while time.time() < deadline:
+            status, payload = self._vm_request(
+                machine_id=machine_id,
+                private_ip=private_ip,
+                method="GET",
+                path="/internal/health",
+                timeout=1.5,
+            )
+            if status == 200 and payload.get("ready") is True:
+                return
+            last_err = str(payload.get("error") or payload.get("status") or status)
+            time.sleep(0.2)
+        raise RuntimeError(f"Firecracker MicroVM {machine_id} did not become ready in {timeout_s}s ({last_err})")
 
     def start_sandbox(
         self,
@@ -365,8 +495,15 @@ class FlyMachinesRuntime:
         template: LabTemplateSpec,
         quota: TierQuota,
         expires_epoch: int,
-    ) -> None:
-        _ = network_name  # Fly provides hardware KVM + WireGuard isolation per MicroVM
+        vm_secret: str = "",
+        arm_blind_chaos: bool = False,
+    ) -> StartSandboxResult:
+        _ = network_name  # Fly provides hardware KVM + private 6pn WireGuard per MicroVM
+        resolved_image = (
+            self.image_override
+            or os.environ.get("FLY_SANDBOX_IMAGE", "").strip()
+            or template.image
+        )
         payload = build_fly_machine_payload(
             sandbox_id=sandbox_id,
             tenant_id=tenant_id,
@@ -375,32 +512,127 @@ class FlyMachinesRuntime:
             quota=quota,
             expires_epoch=expires_epoch,
             region=self.region,
+            image_override=resolved_image,
+            vm_secret=vm_secret,
+            arm_blind_chaos=arm_blind_chaos,
         )
         status, resp = self._request("POST", f"/apps/{self.app_name}/machines", payload)
         if status >= 400 or not isinstance(resp.get("id"), str):
-            raise RuntimeError(f"Failed to boot Fly Machine ({status}): {resp}")
-        self._machine_ids[container_name] = str(resp["id"])
+            raise RuntimeError(f"Failed to boot Fly Firecracker Machine ({status}): {resp}")
+        machine_id = str(resp["id"])
+        actual_region = str(resp.get("region") or self.region)
+        private_ip = str(resp["private_ip"]) if isinstance(resp.get("private_ip"), str) and resp.get("private_ip") else None
+        instance_id = str(resp["instance_id"]) if isinstance(resp.get("instance_id"), str) else None
+        self._machine_ids[container_name] = machine_id
+        try:
+            self._wait_until_vm_ready(
+                machine_id=machine_id,
+                private_ip=private_ip,
+                instance_id=instance_id,
+            )
+        except Exception:
+            # Clean up failed VM immediately so it never leaks billing
+            self.stop_sandbox(container_name=container_name, network_name=network_name, machine_id=machine_id)
+            raise
+        return StartSandboxResult(machine_id=machine_id, region=actual_region, private_ip=private_ip)
 
-    def stop_sandbox(self, *, container_name: str, network_name: str) -> None:
+    def inject_fault(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> RealLabFault | None:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid or (self.http_sender is not None and self.vm_http_sender is None):
+            return None
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="POST",
+            path="/internal/chaos",
+            vm_secret=vm_secret,
+            body={},
+            timeout=15.0,
+        )
+        if status != 200 or not isinstance(resp.get("fault_id"), str):
+            raise RuntimeError(f"Failed to inject chaos in Firecracker VM {mid}: {resp}")
+        return RealLabFault(
+            fault_id=str(resp["fault_id"]),
+            symptom=str(resp.get("symptom", "")),
+            remediation_hint=str(resp.get("remediation_hint", "")),
+        )
+
+    def get_metrics(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            return {"status": "unknown"}
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="GET",
+            path="/internal/metrics",
+            vm_secret=vm_secret,
+            timeout=5.0,
+        )
+        return resp if status == 200 else {"status": "unreachable", "error": resp.get("error")}
+
+    def stop_sandbox(
+        self, *, container_name: str, network_name: str, machine_id: str | None = None
+    ) -> None:
         _ = network_name
-        machine_id = self._machine_ids.pop(container_name, None)
-        if not machine_id:
+        mid = machine_id or self._machine_ids.pop(container_name, None)
+        self._machine_ids.pop(container_name, None)
+        if not mid:
             return
-        self._request("DELETE", f"/apps/{self.app_name}/machines/{machine_id}?force=true")
+        try:
+            self._request("DELETE", f"/apps/{self.app_name}/machines/{mid}?force=true")
+        except RuntimeError:
+            # Already destroyed/stopped by auto_destroy
+            pass
 
-    def exec_health_probe(self, *, container_name: str) -> tuple[bool, str]:
-        machine_id = self._machine_ids.get(container_name)
-        if not machine_id:
+    def exec_health_probe(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> tuple[bool, str]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
             return False, "fly machine not tracked"
-        status, resp = self._request("GET", f"/apps/{self.app_name}/machines/{machine_id}")
-        state = str(resp.get("state", "unknown"))
-        ok = status == 200 and state == "started"
-        return ok, f"fly firecracker machine {machine_id} state={state}"
+        # In pure mocked Fly API unit tests (no vm_http_sender), fall back to Fly state check
+        if self.http_sender is not None and self.vm_http_sender is None:
+            status, resp = self._request("GET", f"/apps/{self.app_name}/machines/{mid}")
+            state = str(resp.get("state", "unknown"))
+            ok = status == 200 and state == "started"
+            return ok, f"fly firecracker machine {mid} state={state}"
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="POST",
+            path="/internal/verify",
+            vm_secret=vm_secret,
+            body={},
+            timeout=20.0,
+        )
+        if status != 200:
+            return False, f"Firecracker grader unreachable ({status}): {resp.get('error', 'unknown')}"
+        return bool(resp.get("passed", False)), str(resp.get("detail", "verified"))
 
 
 @dataclass
 class LinuxPtySandboxRuntime:
-    """Real Linux PTY runtime with isolated per-sandbox workspaces and live SLA probes."""
+    """Local dev/CI Linux PTY runtime with tamper-proof grader (never used for multi-tenant prod)."""
 
     base_dir: Path = field(default_factory=lambda: Path(tempfile.gettempdir()) / "spartan-sandboxes")
     backend_name: str = "linux-pty"
@@ -416,15 +648,26 @@ class LinuxPtySandboxRuntime:
         template: LabTemplateSpec,
         quota: TierQuota,
         expires_epoch: int,
-    ) -> None:
-        _ = (tenant_id, network_name, quota, expires_epoch)
+        vm_secret: str = "",
+        arm_blind_chaos: bool = False,
+    ) -> StartSandboxResult:
+        _ = (tenant_id, network_name, quota, expires_epoch, vm_secret)
         ws_dir = self.base_dir / sandbox_id
         if ws_dir.exists():
             shutil.rmtree(ws_dir, ignore_errors=True)
-        provision_workspace(ws_dir, template.id, sandbox_id, arm_fault=False)
+        provision_workspace(ws_dir, template.id, sandbox_id, arm_fault=arm_blind_chaos)
         self._workspaces[container_name] = (ws_dir, template.id, sandbox_id)
+        return StartSandboxResult()
 
-    def inject_fault(self, *, container_name: str) -> RealLabFault | None:
+    def inject_fault(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> RealLabFault | None:
+        _ = (machine_id, vm_secret, private_ip)
         entry = self._workspaces.get(container_name)
         if not entry:
             return None
@@ -435,13 +678,23 @@ class LinuxPtySandboxRuntime:
         entry = self._workspaces.get(container_name)
         return entry[0] if entry else None
 
-    def stop_sandbox(self, *, container_name: str, network_name: str) -> None:
-        _ = network_name
+    def stop_sandbox(
+        self, *, container_name: str, network_name: str, machine_id: str | None = None
+    ) -> None:
+        _ = (network_name, machine_id)
         entry = self._workspaces.pop(container_name, None)
         if entry and entry[0].exists():
             shutil.rmtree(entry[0], ignore_errors=True)
 
-    def exec_health_probe(self, *, container_name: str) -> tuple[bool, str]:
+    def exec_health_probe(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> tuple[bool, str]:
+        _ = (machine_id, vm_secret, private_ip)
         entry = self._workspaces.get(container_name)
         if not entry:
             return False, "sandbox workspace not found"

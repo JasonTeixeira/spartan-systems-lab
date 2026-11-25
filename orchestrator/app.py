@@ -1,4 +1,4 @@
-"""FastAPI HTTP control plane for the Spartan Multi-Tenant Cloud Sandbox Orchestrator."""
+"""FastAPI Stateless Control Plane for Crucible Hardware-Isolated Firecracker Sandboxes."""
 from __future__ import annotations
 
 import asyncio
@@ -13,7 +13,10 @@ import secrets
 import signal
 import struct
 import subprocess
+import sys
 import termios
+import time
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
@@ -42,6 +45,7 @@ from orchestrator.service import (
     SandboxNotFoundError,
     SandboxOrchestratorService,
 )
+from orchestrator.store import InMemorySessionStore, SessionStore, SupabaseSessionStore
 
 
 def create_orchestrator_app(
@@ -50,6 +54,7 @@ def create_orchestrator_app(
     signing_secret: str | None = None,
     runtime: SandboxRuntime | None = None,
     ws_base_url: str | None = None,
+    store: SessionStore | None = None,
 ) -> FastAPI:
     resolved_key = (
         api_key
@@ -73,20 +78,31 @@ def create_orchestrator_app(
                 app_name=os.environ.get("FLY_SANDBOX_APP_NAME", "crucible-sandboxes").strip(),
                 api_token=os.environ.get("FLY_API_TOKEN", "").strip(),
                 region=os.environ.get("FLY_SANDBOX_REGION", "iad").strip() or "iad",
+                image_override=os.environ.get("FLY_SANDBOX_IMAGE", "").strip(),
             )
         else:
             runtime = MemorySandboxRuntime()
+
+    resolved_store = store
+    if resolved_store is None:
+        sb_url = os.environ.get("SUPABASE_URL", "").strip()
+        sb_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+        if sb_url and sb_key and runtime.backend_name == "fly":
+            resolved_store = SupabaseSessionStore(supabase_url=sb_url, service_role_key=sb_key)
+        else:
+            resolved_store = InMemorySessionStore()
 
     service = SandboxOrchestratorService(
         runtime=runtime,
         signing_secret=resolved_secret,
         ws_base_url=ws_base_url
         or os.environ.get("SPARTAN_TERMINAL_WS_URL", "wss://sandbox.sageideas.dev/ws"),
+        store=resolved_store,
     )
 
     app = FastAPI(
-        title="Spartan Cloud Sandbox Orchestrator",
-        version="1.0.0",
+        title="Crucible Cloud Sandbox Orchestrator",
+        version="2.0.0",
         docs_url=None,
         redoc_url=None,
     )
@@ -110,6 +126,8 @@ def create_orchestrator_app(
         return {
             "status": "ok",
             "backend": runtime.backend_name,
+            "store": service.store_name,
+            "isolation": "kvm-firecracker-microvm" if runtime.backend_name == "fly" else runtime.backend_name,
             "activeSandboxes": service.active_count(),
         }
 
@@ -139,6 +157,8 @@ def create_orchestrator_app(
             return service.provision(req)
         except QuotaExceededError as exc:
             raise HTTPException(status_code=429, detail=str(exc)) from None
+        except RuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from None
 
     @app.get("/v1/sandboxes", dependencies=[Depends(require_api_key)])
     def list_sandboxes(
@@ -167,6 +187,21 @@ def create_orchestrator_app(
         except SandboxAccessDeniedError as exc:
             raise HTTPException(status_code=403, detail=str(exc)) from None
 
+    @app.get("/v1/sandboxes/{sandbox_id}/metrics", dependencies=[Depends(require_api_key)])
+    def sandbox_metrics(
+        sandbox_id: str,
+        tenant_id: str = Query(..., min_length=2, max_length=64),
+        user_id: str = Query(..., min_length=2, max_length=128),
+    ) -> dict[str, Any]:
+        try:
+            return service.get_metrics(
+                sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+
     @app.post(
         "/v1/sandboxes/{sandbox_id}/chaos",
         response_model=ChaosInjectResponse,
@@ -184,6 +219,8 @@ def create_orchestrator_app(
             raise HTTPException(status_code=404, detail=str(exc)) from None
         except SandboxAccessDeniedError as exc:
             raise HTTPException(status_code=403, detail=str(exc)) from None
+        except RuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from None
 
     @app.post(
         "/v1/sandboxes/{sandbox_id}/verify",
@@ -224,46 +261,114 @@ def create_orchestrator_app(
         reaped = service.reap_expired()
         return {"reaped": reaped, "activeSandboxes": service.active_count()}
 
+    @app.get("/v1/admin/sandboxes", dependencies=[Depends(require_api_key)])
+    def admin_list_sandboxes() -> dict[str, Any]:
+        active = service.list_all_active()
+        return {
+            "backend": runtime.backend_name,
+            "store": service.store_name,
+            "activeSandboxes": len(active),
+            "sandboxes": [s.model_dump() for s in active],
+        }
+
+    @app.delete(
+        "/v1/admin/sandboxes/{sandbox_id}",
+        response_model=SandboxSession,
+        dependencies=[Depends(require_api_key)],
+    )
+    def admin_kill_sandbox(sandbox_id: str) -> SandboxSession:
+        try:
+            return service.admin_force_terminate(sandbox_id=sandbox_id)
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+
     @app.websocket("/v1/sandboxes/{sandbox_id}/terminal")
     async def sandbox_terminal(
         websocket: WebSocket,
         sandbox_id: str,
         token: str = Query(default=""),
     ) -> None:
-        session = service.authenticate_terminal(sandbox_id=sandbox_id, token=token)
-        if session is None:
+        rec = service.authenticate_terminal_record(sandbox_id=sandbox_id, token=token)
+        if rec is None:
             await websocket.close(code=4401)
             return
 
         await websocket.accept()
 
+        # 1. Production Firecracker KVM MicroVM: private 6pn WireGuard WebSocket tunnel
+        if isinstance(runtime, FlyMachinesRuntime) and rec.fly_machine_id:
+            import websockets  # type: ignore[import-untyped]
+
+            vm_ws_url = (
+                f"{runtime.get_internal_ws_url(machine_id=rec.fly_machine_id, private_ip=rec.private_ip)}"
+                f"?token={urllib.parse.quote(token, safe='')}"
+            )
+            try:
+                async with websockets.connect(
+                    vm_ws_url,
+                    open_timeout=10,
+                    ping_interval=20,
+                    ping_timeout=20,
+                    max_size=2 * 1024 * 1024,
+                ) as vm_ws:
+
+                    async def _client_to_vm() -> None:
+                        while True:
+                            msg = await websocket.receive_text()
+                            await vm_ws.send(msg)
+
+                    async def _vm_to_client() -> None:
+                        async for msg in vm_ws:
+                            if isinstance(msg, bytes):
+                                await websocket.send_text(msg.decode("utf-8", errors="replace"))
+                            else:
+                                await websocket.send_text(msg)
+
+                    t1 = asyncio.create_task(_client_to_vm())
+                    t2 = asyncio.create_task(_vm_to_client())
+                    done, pending = await asyncio.wait(
+                        {t1, t2}, return_when=asyncio.FIRST_COMPLETED
+                    )
+                    for p in pending:
+                        p.cancel()
+                        with contextlib.suppress(asyncio.CancelledError, Exception):
+                            await p
+                    for d in done:
+                        with contextlib.suppress(WebSocketDisconnect, Exception):
+                            d.result()
+            except Exception as exc:
+                with contextlib.suppress(Exception):
+                    await websocket.send_text(
+                        f"\r\n\x1b[1;31m[crucible-firecracker] MicroVM terminal disconnected: {exc}\x1b[0m\r\n"
+                    )
+                    await websocket.close(code=1011)
+            return
+
+        # 2. Local Dev/CI Linux PTY Shell (with hardened rlimits + ping/pong heartbeat)
         get_ws = getattr(runtime, "get_workspace_dir", None)
         ws_dir: Path | None = (
-            get_ws(container_name=session.container_name) if callable(get_ws) else None
+            get_ws(container_name=rec.container_name) if callable(get_ws) else None
         )
-
-        # Real POSIX PTY shell for LinuxPtySandboxRuntime (production Firecracker MicroVM)
         if ws_dir is not None and ws_dir.exists():
             master_fd, slave_fd = pty.openpty()
 
             def _set_winsize(fd: int, cols: int, rows: int) -> None:
-                c = max(40, min(240, cols))
-                r = max(12, min(80, rows))
+                c = max(40, min(260, cols))
+                r = max(12, min(100, rows))
                 with contextlib.suppress(OSError):
                     fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack("HHHH", r, c, 0, 0))
 
-            _set_winsize(master_fd, 110, 28)
+            _set_winsize(master_fd, 120, 32)
 
-            # Strictly strip all orchestrator secrets from the sandbox child environment!
             clean_env = {
                 "PATH": f"{ws_dir / 'bin'}:/usr/local/bin:/usr/bin:/bin",
                 "HOME": str(ws_dir),
                 "TERM": "xterm-256color",
                 "LANG": "C.UTF-8",
-                "PS1": f"\\[\\e[1;92m\\]operator@{session.template_id}\\[\\e[0m\\]:\\[\\e[1;36m\\]\\w\\[\\e[0m\\]\\$ ",
+                "PS1": f"\\[\\e[1;92m\\]operator@{rec.template_id}\\[\\e[0m\\]:\\[\\e[1;36m\\]\\w\\[\\e[0m\\]\\$ ",
                 "SPARTAN_SANDBOX_ID": sandbox_id,
-                "SPARTAN_TEMPLATE": session.template_id,
-                "SPARTAN_MODULE": session.module,
+                "SPARTAN_TEMPLATE": rec.template_id,
+                "SPARTAN_MODULE": rec.module_id,
             }
 
             def _sandbox_preexec() -> None:
@@ -274,6 +379,9 @@ def create_orchestrator_app(
                     resource.setrlimit(resource.RLIMIT_NOFILE, (256, 256))
                 with contextlib.suppress(OSError, ValueError):
                     resource.setrlimit(resource.RLIMIT_FSIZE, (64 * 1024 * 1024, 64 * 1024 * 1024))
+                if sys.platform.startswith("linux"):
+                    with contextlib.suppress(OSError, ValueError):
+                        resource.setrlimit(resource.RLIMIT_NPROC, (128, 128))
 
             shell_bin = "/bin/bash" if os.path.exists("/bin/bash") else "/bin/sh"
             shell_args = [shell_bin, "--noprofile", "--norc", "-i"] if shell_bin.endswith("bash") else [shell_bin, "-i"]
@@ -291,27 +399,30 @@ def create_orchestrator_app(
             os.set_blocking(master_fd, False)
 
             loop = asyncio.get_running_loop()
-            out_queue: asyncio.Queue[bytes | None] = asyncio.Queue()
+            out_queue: asyncio.Queue[bytes | None] = asyncio.Queue(maxsize=256)
 
             def _on_pty_readable() -> None:
                 try:
                     chunk = os.read(master_fd, 4096)
                     if chunk:
-                        out_queue.put_nowait(chunk)
+                        with contextlib.suppress(asyncio.QueueFull):
+                            out_queue.put_nowait(chunk)
                     else:
-                        out_queue.put_nowait(None)
+                        with contextlib.suppress(asyncio.QueueFull):
+                            out_queue.put_nowait(None)
                 except BlockingIOError:
                     return
                 except OSError:
-                    out_queue.put_nowait(None)
+                    with contextlib.suppress(asyncio.QueueFull):
+                        out_queue.put_nowait(None)
 
             loop.add_reader(master_fd, _on_pty_readable)
 
             banner = (
                 f"\x1b[1;92m[crucible-linux-pty]\x1b[0m Attached to real Linux shell · "
-                f"{sandbox_id} ({session.template_id} · {session.module})\r\n"
+                f"{sandbox_id} ({rec.template_id} · {rec.module_id})\r\n"
                 f"\x1b[36mTip:\x1b[0m Run \x1b[1;33mcat README.md\x1b[0m, \x1b[1;33mls -la\x1b[0m, "
-                f"\x1b[1;33mcheck-sla\x1b[0m, or \x1b[1;33mhint\x1b[0m\r\n"
+                f"or \x1b[1;33mhint\x1b[0m\r\n"
             )
             await websocket.send_text(banner)
 
@@ -331,11 +442,14 @@ def create_orchestrator_app(
                         try:
                             parsed = json.loads(raw)
                             if isinstance(parsed, dict):
+                                if parsed.get("type") == "ping":
+                                    await websocket.send_text(json.dumps({"type": "pong", "ts": int(time.time())}))
+                                    continue
                                 if parsed.get("type") == "resize":
                                     _set_winsize(
                                         master_fd,
-                                        int(parsed.get("cols", 110)),
-                                        int(parsed.get("rows", 28)),
+                                        int(parsed.get("cols", 120)),
+                                        int(parsed.get("rows", 32)),
                                     )
                                     continue
                                 if parsed.get("type") == "input" and isinstance(parsed.get("data"), str):
@@ -364,9 +478,9 @@ def create_orchestrator_app(
                             os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
             return
 
-        # Deterministic memory-runtime fallback for CI unit tests only
+        # 3. Deterministic memory-runtime fallback for CI unit tests only
         await websocket.send_text(
-            f"[ws-pty] Attached to {sandbox_id} ({session.template_id}) · backend={runtime.backend_name}\r\n"
+            f"[ws-pty] Attached to {sandbox_id} ({rec.template_id}) · backend={runtime.backend_name}\r\n"
         )
         try:
             while True:

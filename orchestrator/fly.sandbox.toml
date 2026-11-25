@@ -1,0 +1,5 @@
+app = "crucible-sandboxes"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile.sandbox"

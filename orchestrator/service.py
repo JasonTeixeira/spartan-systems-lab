@@ -1,13 +1,13 @@
-"""Multi-tenant sandbox lifecycle service: quotas, IDOR guards, TTL janitor & receipts."""
+"""Stateless multi-tenant sandbox lifecycle service: quotas, IDOR guards, durable store, TTL janitor & receipts."""
 from __future__ import annotations
 
 import hmac
 import secrets
 import time
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+from orchestrator.grader import LAB_FAULTS
 from orchestrator.models import (
     LAB_TEMPLATES,
     TIER_QUOTAS,
@@ -17,10 +17,12 @@ from orchestrator.models import (
     VerifySandboxResponse,
 )
 from orchestrator.runtime import (
+    FlyMachinesRuntime,
     SandboxRuntime,
     create_terminal_token,
     security_profile_summary,
 )
+from orchestrator.store import InMemorySessionStore, SessionStore, StoredSandboxRecord
 from tools.war_room import ChaosFault, compute_receipt_sha256, select_blind_fault
 
 
@@ -36,13 +38,31 @@ class SandboxAccessDeniedError(Exception):
     pass
 
 
-@dataclass
-class _SandboxRecord:
-    session: SandboxSession
-    created_epoch: float
-    expires_epoch: int
-    secret_fault: ChaosFault | None = None
-    fault_started_epoch: float | None = None
+def _record_to_session(rec: StoredSandboxRecord, *, include_token: bool = False) -> SandboxSession:
+    return SandboxSession(
+        sandbox_id=rec.sandbox_id,
+        tenant_id=rec.tenant_id,
+        user_id=rec.user_id,
+        template_id=rec.template_id,  # type: ignore[arg-type]
+        module=rec.module_id,
+        tier=rec.tier,  # type: ignore[arg-type]
+        status=rec.status,  # type: ignore[arg-type]
+        backend=rec.backend,
+        fly_machine_id=rec.fly_machine_id,
+        region=rec.region,
+        container_name=rec.container_name,
+        network_name=rec.network_name,
+        cpu_limit=rec.cpu_limit,
+        memory_mb=rec.memory_mb,
+        pids_limit=rec.pids_limit,
+        created_at=datetime.fromtimestamp(rec.created_epoch, UTC).isoformat(),
+        expires_at=datetime.fromtimestamp(rec.expires_epoch, UTC).isoformat(),
+        terminal_ws_url=rec.terminal_ws_url,
+        terminal_token=rec.terminal_token if include_token else None,
+        blind_fault_armed=rec.blind_fault_armed,
+        blind_symptom=rec.blind_symptom,
+        security_profile=list(rec.security_profile),
+    )
 
 
 class SandboxOrchestratorService:
@@ -52,13 +72,18 @@ class SandboxOrchestratorService:
         runtime: SandboxRuntime,
         signing_secret: str,
         ws_base_url: str = "wss://sandbox.sageideas.dev/ws",
+        store: SessionStore | None = None,
     ) -> None:
         if len(signing_secret) < 16:
             raise ValueError("signing_secret must be at least 16 characters")
         self.runtime = runtime
         self._signing_secret = signing_secret
         self._ws_base_url = ws_base_url.rstrip("/")
-        self._records: dict[str, _SandboxRecord] = {}
+        self._store: SessionStore = store or InMemorySessionStore()
+
+    @property
+    def store_name(self) -> str:
+        return getattr(self._store, "store_name", "memory")
 
     def _now(self) -> float:
         return time.time()
@@ -66,54 +91,59 @@ class SandboxOrchestratorService:
     def reap_expired(self, now_epoch: float | None = None) -> list[str]:
         now = self._now() if now_epoch is None else now_epoch
         reaped: list[str] = []
-        for sid, rec in list(self._records.items()):
-            if rec.session.status == "running" and now >= rec.expires_epoch:
+        for rec in self._store.list_running():
+            if now >= rec.expires_epoch:
                 self.runtime.stop_sandbox(
-                    container_name=rec.session.container_name,
-                    network_name=rec.session.network_name,
+                    container_name=rec.container_name,
+                    network_name=rec.network_name,
+                    machine_id=rec.fly_machine_id,
                 )
-                rec.session.status = "expired"
-                rec.session.terminal_token = None
-                reaped.append(sid)
+                rec.status = "expired"
+                rec.terminal_token = None
+                self._store.upsert(rec)
+                reaped.append(rec.sandbox_id)
         return reaped
 
     def active_count(self) -> int:
         self.reap_expired()
-        return sum(1 for r in self._records.values() if r.session.status == "running")
+        return len(self._store.list_running())
 
-    def authenticate_terminal(self, *, sandbox_id: str, token: str) -> SandboxSession | None:
+    def authenticate_terminal_record(
+        self, *, sandbox_id: str, token: str
+    ) -> StoredSandboxRecord | None:
         self.reap_expired()
-        rec = self._records.get(sandbox_id)
+        rec = self._store.get(sandbox_id)
         if (
             rec is None
-            or rec.session.status != "running"
+            or rec.status != "running"
             or not token
-            or not rec.session.terminal_token
-            or not hmac.compare_digest(token, rec.session.terminal_token)
+            or not rec.terminal_token
+            or not hmac.compare_digest(token, rec.terminal_token)
         ):
             return None
-        return rec.session
+        return rec
+
+    def authenticate_terminal(self, *, sandbox_id: str, token: str) -> SandboxSession | None:
+        rec = self.authenticate_terminal_record(sandbox_id=sandbox_id, token=token)
+        return _record_to_session(rec, include_token=True) if rec is not None else None
 
     def list_user_sandboxes(self, *, tenant_id: str, user_id: str) -> list[SandboxSession]:
         self.reap_expired()
         return [
-            r.session.model_copy(update={"terminal_token": None})
-            for r in self._records.values()
-            if r.session.tenant_id == tenant_id
-            and r.session.user_id == user_id
-            and r.session.status == "running"
+            _record_to_session(r, include_token=False)
+            for r in self._store.list_running(tenant_id=tenant_id, user_id=user_id)
         ]
+
+    def list_all_active(self) -> list[SandboxSession]:
+        self.reap_expired()
+        return [_record_to_session(r, include_token=False) for r in self._store.list_running()]
 
     def provision(self, req: ProvisionRequest) -> SandboxSession:
         self.reap_expired()
         quota = TIER_QUOTAS[req.tier]
-        active_for_user = [
-            r
-            for r in self._records.values()
-            if r.session.tenant_id == req.tenant_id
-            and r.session.user_id == req.user_id
-            and r.session.status == "running"
-        ]
+        active_for_user = self._store.list_running(
+            tenant_id=req.tenant_id, user_id=req.user_id
+        )
         if len(active_for_user) >= quota.max_concurrent:
             raise QuotaExceededError(
                 f"Tier '{req.tier}' allows at most {quota.max_concurrent} concurrent "
@@ -127,7 +157,13 @@ class SandboxOrchestratorService:
         now_epoch = self._now()
         expires_epoch = int(now_epoch + quota.ttl_minutes * 60)
 
-        self.runtime.start_sandbox(
+        # Generate a single-use per-VM secret so ZERO global secrets ever enter any Firecracker MicroVM!
+        use_per_vm_secret = isinstance(self.runtime, FlyMachinesRuntime) and (
+            self.runtime.http_sender is None or self.runtime.vm_http_sender is not None
+        )
+        vm_secret = secrets.token_urlsafe(32) if use_per_vm_secret else None
+
+        start_res = self.runtime.start_sandbox(
             sandbox_id=sandbox_id,
             tenant_id=req.tenant_id,
             container_name=container_name,
@@ -135,10 +171,16 @@ class SandboxOrchestratorService:
             template=template,
             quota=quota,
             expires_epoch=expires_epoch,
+            vm_secret=vm_secret or "",
+            arm_blind_chaos=req.arm_blind_chaos,
         )
+        machine_id = start_res.machine_id if start_res else None
+        region = start_res.region if start_res else None
+        private_ip = start_res.private_ip if start_res else None
 
+        token_secret = vm_secret or self._signing_secret
         token = create_terminal_token(
-            secret=self._signing_secret,
+            secret=token_secret,
             sandbox_id=sandbox_id,
             tenant_id=req.tenant_id,
             user_id=req.user_id,
@@ -147,57 +189,75 @@ class SandboxOrchestratorService:
 
         fault: ChaosFault | None = None
         if req.arm_blind_chaos:
-            injector = getattr(self.runtime, "inject_fault", None)
-            if callable(injector):
-                real_fault = injector(container_name=container_name)
-                if real_fault is not None:
-                    fault = ChaosFault(
-                        id=real_fault.fault_id,
-                        category=template.module,
-                        symptom=real_fault.symptom,
-                        remediation_hint=real_fault.remediation_hint,
+            # If the runtime already armed chaos during boot (Firecracker / LinuxPty), record fault metadata
+            lab_fault = LAB_FAULTS.get(template.id)
+            if lab_fault is not None and self.runtime.backend_name in {"fly", "linux-pty"}:
+                fault = ChaosFault(
+                    id=lab_fault.fault_id,
+                    category=template.module,
+                    symptom=lab_fault.symptom,
+                    remediation_hint=lab_fault.remediation_hint,
+                )
+            else:
+                injector = getattr(self.runtime, "inject_fault", None)
+                if callable(injector):
+                    real_fault = injector(
+                        container_name=container_name,
+                        machine_id=machine_id,
+                        vm_secret=vm_secret,
                     )
+                    if real_fault is not None:
+                        fault = ChaosFault(
+                            id=real_fault.fault_id,
+                            category=template.module,
+                            symptom=real_fault.symptom,
+                            remediation_hint=real_fault.remediation_hint,
+                        )
             if fault is None:
                 fault = select_blind_fault()
 
-        session = SandboxSession(
+        rec = StoredSandboxRecord(
             sandbox_id=sandbox_id,
             tenant_id=req.tenant_id,
             user_id=req.user_id,
             template_id=req.template_id,
-            module=template.module,
+            module_id=template.module,
             tier=req.tier,
+            backend=self.runtime.backend_name,
             status="running",
             container_name=container_name,
             network_name=network_name,
+            fly_machine_id=machine_id,
+            private_ip=private_ip,
+            region=region,
+            vm_secret=vm_secret,
+            terminal_token=token,
+            terminal_ws_url=f"{self._ws_base_url}/{sandbox_id}",
             cpu_limit=quota.cpu_limit,
             memory_mb=quota.memory_mb,
             pids_limit=quota.pids_limit,
-            created_at=datetime.fromtimestamp(now_epoch, UTC).isoformat(),
-            expires_at=datetime.fromtimestamp(expires_epoch, UTC).isoformat(),
-            terminal_ws_url=f"{self._ws_base_url}/{sandbox_id}",
-            terminal_token=token,
             blind_fault_armed=fault is not None,
+            blind_fault_id=fault.id if fault else None,
             blind_symptom=fault.symptom if fault else None,
-            security_profile=security_profile_summary(template, quota),
-        )
-        self._records[sandbox_id] = _SandboxRecord(
-            session=session,
+            blind_remediation=fault.remediation_hint if fault else None,
+            fault_started_epoch=now_epoch if fault else None,
             created_epoch=now_epoch,
             expires_epoch=expires_epoch,
-            secret_fault=fault,
-            fault_started_epoch=now_epoch if fault else None,
+            security_profile=security_profile_summary(
+                template, quota, backend=self.runtime.backend_name
+            ),
         )
-        return session
+        self._store.upsert(rec)
+        return _record_to_session(rec, include_token=True)
 
     def _require_owned_record(
         self, *, sandbox_id: str, tenant_id: str, user_id: str
-    ) -> _SandboxRecord:
+    ) -> StoredSandboxRecord:
         self.reap_expired()
-        rec = self._records.get(sandbox_id)
+        rec = self._store.get(sandbox_id)
         if rec is None:
             raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' not found")
-        if rec.session.tenant_id != tenant_id or rec.session.user_id != user_id:
+        if rec.tenant_id != tenant_id or rec.user_id != user_id:
             raise SandboxAccessDeniedError("Cross-tenant or cross-user sandbox access denied")
         return rec
 
@@ -207,7 +267,33 @@ class SandboxOrchestratorService:
         rec = self._require_owned_record(
             sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
         )
-        return rec.session.model_copy(update={"terminal_token": None})
+        return _record_to_session(rec, include_token=False)
+
+    def get_metrics(
+        self, *, sandbox_id: str, tenant_id: str, user_id: str
+    ) -> dict[str, Any]:
+        rec = self._require_owned_record(
+            sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
+        )
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        getter = getattr(self.runtime, "get_metrics", None)
+        if callable(getter):
+            return getter(
+                container_name=rec.container_name,
+                machine_id=rec.fly_machine_id,
+                vm_secret=rec.vm_secret,
+                private_ip=rec.private_ip,
+            )
+        return {
+            "sandbox_id": rec.sandbox_id,
+            "template_id": rec.template_id,
+            "backend": rec.backend,
+            "real_daemons": False,
+            "daemons": {},
+            "ttl_remaining_seconds": max(0, int(rec.expires_epoch - self._now())),
+            "fault_armed": rec.blind_fault_armed,
+        }
 
     def inject_blind_fault(
         self,
@@ -220,26 +306,33 @@ class SandboxOrchestratorService:
         rec = self._require_owned_record(
             sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
         )
-        if rec.session.status != "running":
+        if rec.status != "running":
             raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
         fault: ChaosFault | None = None
         injector = getattr(self.runtime, "inject_fault", None)
         if callable(injector):
-            real_fault = injector(container_name=rec.session.container_name)
+            real_fault = injector(
+                container_name=rec.container_name,
+                machine_id=rec.fly_machine_id,
+                vm_secret=rec.vm_secret,
+                private_ip=rec.private_ip,
+            )
             if real_fault is not None:
                 fault = ChaosFault(
                     id=real_fault.fault_id,
-                    category=rec.session.module,
+                    category=rec.module_id,
                     symptom=real_fault.symptom,
                     remediation_hint=real_fault.remediation_hint,
                 )
         if fault is None:
             fault = select_blind_fault(seed=seed)
         now = self._now()
-        rec.secret_fault = fault
+        rec.blind_fault_armed = True
+        rec.blind_fault_id = fault.id
+        rec.blind_symptom = fault.symptom
+        rec.blind_remediation = fault.remediation_hint
         rec.fault_started_epoch = now
-        rec.session.blind_fault_armed = True
-        rec.session.blind_symptom = fault.symptom
+        self._store.upsert(rec)
         return ChaosInjectResponse(
             sandbox_id=sandbox_id,
             status="armed",
@@ -253,22 +346,25 @@ class SandboxOrchestratorService:
         rec = self._require_owned_record(
             sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
         )
-        if rec.session.status != "running":
+        if rec.status != "running":
             raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
 
         healthy, detail = self.runtime.exec_health_probe(
-            container_name=rec.session.container_name
+            container_name=rec.container_name,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
         )
         start_ts = rec.fault_started_epoch or rec.created_epoch
         elapsed = max(0.0, round(self._now() - start_ts, 2))
-        revealed = rec.secret_fault.id if (healthy and rec.secret_fault) else None
-        hint = rec.secret_fault.remediation_hint if (healthy and rec.secret_fault) else None
+        revealed = rec.blind_fault_id if (healthy and rec.blind_fault_id) else None
+        hint = rec.blind_remediation if (healthy and rec.blind_remediation) else None
 
         receipt: dict[str, Any] = {
             "schemaVersion": 1,
-            "module": rec.session.module,
+            "module": rec.module_id,
             "sandboxId": sandbox_id,
-            "templateId": rec.session.template_id,
+            "templateId": rec.template_id,
             "passed": healthy,
             "passedAt": datetime.now(UTC).isoformat(),
             "elapsedSeconds": elapsed,
@@ -284,10 +380,12 @@ class SandboxOrchestratorService:
         receipt["sha256"] = compute_receipt_sha256(receipt)
 
         if healthy:
-            rec.secret_fault = None
+            rec.blind_fault_armed = False
+            rec.blind_fault_id = None
+            rec.blind_symptom = None
+            rec.blind_remediation = None
             rec.fault_started_epoch = None
-            rec.session.blind_fault_armed = False
-            rec.session.blind_symptom = None
+            self._store.upsert(rec)
 
         return VerifySandboxResponse(
             sandbox_id=sandbox_id,
@@ -302,11 +400,28 @@ class SandboxOrchestratorService:
         rec = self._require_owned_record(
             sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
         )
-        if rec.session.status == "running":
+        if rec.status == "running":
             self.runtime.stop_sandbox(
-                container_name=rec.session.container_name,
-                network_name=rec.session.network_name,
+                container_name=rec.container_name,
+                network_name=rec.network_name,
+                machine_id=rec.fly_machine_id,
             )
-            rec.session.status = "terminated"
-            rec.session.terminal_token = None
-        return rec.session.model_copy(update={"terminal_token": None})
+            rec.status = "terminated"
+            rec.terminal_token = None
+            self._store.upsert(rec)
+        return _record_to_session(rec, include_token=False)
+
+    def admin_force_terminate(self, *, sandbox_id: str) -> SandboxSession:
+        rec = self._store.get(sandbox_id)
+        if rec is None:
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' not found")
+        if rec.status == "running":
+            self.runtime.stop_sandbox(
+                container_name=rec.container_name,
+                network_name=rec.network_name,
+                machine_id=rec.fly_machine_id,
+            )
+            rec.status = "terminated"
+            rec.terminal_token = None
+            self._store.upsert(rec)
+        return _record_to_session(rec, include_token=False)
