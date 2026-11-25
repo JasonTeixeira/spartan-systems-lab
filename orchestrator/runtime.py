@@ -394,7 +394,7 @@ class FlyMachinesRuntime:
     _machine_ids: dict[str, str] = field(default_factory=dict)
 
     def _request(
-        self, method: str, path: str, body: dict[str, Any] | None = None
+        self, method: str, path: str, body: dict[str, Any] | None = None, timeout: float = 35.0
     ) -> tuple[int, dict[str, Any]]:
         url = f"{self.api_base.rstrip('/')}{path}"
         if self.http_sender is not None:
@@ -413,12 +413,14 @@ class FlyMachinesRuntime:
             },
         )
         try:
-            with urllib.request.urlopen(req, timeout=20) as resp:  # noqa: S310
+            with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
                 raw = resp.read().decode("utf-8") or "{}"
                 return resp.status, json.loads(raw)
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
             raise RuntimeError(f"Fly Machines API {exc.code}: {detail}") from None
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            raise RuntimeError(f"Fly Machines API transport timeout: {exc}") from None
 
     def _vm_host(self, machine_id: str, private_ip: str | None = None) -> str:
         if private_ip and ":" in private_ip:
@@ -472,7 +474,7 @@ class FlyMachinesRuntime:
         if self.http_sender is None:
             wait_qs = f"state=started&timeout=25" + (f"&instance_id={instance_id}" if instance_id else "")
             try:
-                self._request("GET", f"/apps/{self.app_name}/machines/{machine_id}/wait?{wait_qs}")
+                self._request("GET", f"/apps/{self.app_name}/machines/{machine_id}/wait?{wait_qs}", timeout=30.0)
             except RuntimeError:
                 pass
         deadline = time.time() + timeout_s
