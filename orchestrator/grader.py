@@ -598,6 +598,7 @@ def _seed_lab1(root: Path, broken: bool) -> None:
             root / "bin" / "reload-pgbouncer",
             f"#!/usr/bin/env bash\n"
             f"set -e\n"
+            f"export PATH=\"/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin\"\n"
             f"if [ -f {root}/logs/pgbouncer.pid ]; then\n"
             f"  kill -HUP $(cat {root}/logs/pgbouncer.pid) && echo 'PgBouncer reloaded live (SIGHUP)'\n"
             f"else\n"
@@ -695,6 +696,7 @@ def _seed_lab2(root: Path, broken: bool) -> None:
             root / "bin" / "reload-nginx",
             f"#!/usr/bin/env bash\n"
             f"set -e\n"
+            f"export PATH=\"/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin\"\n"
             f"nginx -t -c {root}/nginx/nginx.conf\n"
             f"if [ -f {root}/logs/nginx.pid ]; then\n"
             f"  kill -HUP $(cat {root}/logs/nginx.pid) && echo 'NGINX reloaded cleanly (TLS 1.3 :8443)'\n"
