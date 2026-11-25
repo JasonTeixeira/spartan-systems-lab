@@ -9,6 +9,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -396,7 +397,139 @@ class FlyMachinesRuntime:
     backend_name: str = "fly"
     http_sender: FlyHttpSender | None = None
     vm_http_sender: VmHttpSender | None = None
+    warm_pool_size: int = 0
     _machine_ids: dict[str, str] = field(default_factory=dict)
+    _warm_lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
+
+    def _resolved_image(self, template_image: str = "") -> str:
+        return (
+            self.image_override
+            or os.environ.get("FLY_SANDBOX_IMAGE", "").strip()
+            or template_image
+            or "registry.fly.io/crucible-sandboxes:v4"
+        )
+
+    def _list_warm_machines(self, resolved_image: str) -> list[dict[str, Any]]:
+        if not self.api_token and self.http_sender is None:
+            return []
+        try:
+            status, resp = self._request("GET", f"/apps/{self.app_name}/machines", timeout=10.0)
+        except RuntimeError:
+            return []
+        if status != 200 or not isinstance(resp, list):
+            return []
+        warm: list[dict[str, Any]] = []
+        for m in resp:
+            if not isinstance(m, dict):
+                continue
+            cfg = m.get("config") or {}
+            meta = cfg.get("metadata") or {}
+            if (
+                meta.get("crucible_pool") == "warm"
+                and str(cfg.get("image", "")).strip() == resolved_image
+                and str(m.get("region", self.region)) == self.region
+                and str(m.get("state", "")) in {"stopped", "created"}
+            ):
+                warm.append(m)
+        return warm
+
+    def ensure_warm_pool(self, target_size: int | None = None) -> dict[str, Any]:
+        """Ensure `target_size` brand-new stopped (`skip_launch: true`) Firecracker VMs exist ($0/hr idle)."""
+        desired = self.warm_pool_size if target_size is None else max(0, min(5, int(target_size)))
+        resolved_image = self._resolved_image()
+        if desired <= 0:
+            return {"desired": 0, "ready": 0, "created": 0}
+        with self._warm_lock:
+            existing = self._list_warm_machines(resolved_image)
+            needed = max(0, desired - len(existing))
+            created = 0
+            for idx in range(needed):
+                warm_name = f"crucible-warm-{int(time.time())}-{idx}"
+                payload = {
+                    "name": warm_name,
+                    "region": self.region,
+                    "skip_launch": True,
+                    "config": {
+                        "image": resolved_image,
+                        "auto_destroy": True,
+                        "restart": {"policy": "no"},
+                        "guest": {"cpu_kind": "shared", "cpus": 1, "memory_mb": 1024},
+                        "env": {
+                            "SPARTAN_SANDBOX_ID": "sbx_warm_standby",
+                            "SPARTAN_TEMPLATE": "lab1-core-engine",
+                            "SPARTAN_MODULE": "M01",
+                            "SPARTAN_IDLE_TIMEOUT_SECONDS": "1200",
+                        },
+                        "metadata": {
+                            "crucible_pool": "warm",
+                            "crucible_image": resolved_image,
+                            "spartan_managed": "true",
+                        },
+                    },
+                }
+                try:
+                    st, resp = self._request("POST", f"/apps/{self.app_name}/machines", payload, timeout=40.0)
+                    if st < 400 and isinstance(resp, dict) and resp.get("id"):
+                        created += 1
+                except RuntimeError:
+                    break
+            return {"desired": desired, "ready": len(existing) + created, "created": created, "image": resolved_image}
+
+    def _replenish_warm_pool_async(self) -> None:
+        if self.warm_pool_size <= 0 or (self.http_sender is not None and self.vm_http_sender is None):
+            return
+        t = threading.Thread(target=self.ensure_warm_pool, daemon=True)
+        t.start()
+
+    def _try_claim_warm_machine(
+        self,
+        *,
+        resolved_image: str,
+        payload: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        """Atomically claim a never-started stopped Firecracker VM, inject fresh secrets/config & start it."""
+        if self.warm_pool_size <= 0:
+            return None
+        candidates = self._list_warm_machines(resolved_image)
+        if not candidates:
+            return None
+        for m in candidates:
+            mid = str(m.get("id", ""))
+            if not mid:
+                continue
+            cfg = dict(payload["config"])
+            meta = dict(cfg.get("metadata") or {})
+            meta["crucible_pool"] = "claimed"
+            cfg["metadata"] = meta
+            try:
+                # Update stopped warm machine config with brand-new per-user env & fresh VM_SESSION_SECRET
+                st, upd = self._request(
+                    "POST",
+                    f"/apps/{self.app_name}/machines/{mid}",
+                    {"region": self.region, "config": cfg},
+                    timeout=20.0,
+                )
+                if st >= 400 or not isinstance(upd, dict):
+                    continue
+                # Start the already-unpacked Firecracker MicroVM (<2-3s!)
+                st_start, _ = self._request(
+                    "POST",
+                    f"/apps/{self.app_name}/machines/{mid}/start",
+                    {},
+                    timeout=20.0,
+                )
+                if st_start >= 400:
+                    continue
+                return {
+                    "id": mid,
+                    "region": str(upd.get("region") or m.get("region") or self.region),
+                    "private_ip": upd.get("private_ip") or m.get("private_ip"),
+                    "instance_id": upd.get("instance_id") or m.get("instance_id"),
+                    "warm_claimed": True,
+                }
+            except RuntimeError:
+                continue
+        return None
 
     def _request(
         self, method: str, path: str, body: dict[str, Any] | None = None, timeout: float = 35.0
@@ -531,9 +664,16 @@ class FlyMachinesRuntime:
             arm_blind_chaos=arm_blind_chaos,
             scenario_id=scenario_id,
         )
-        status, resp = self._request("POST", f"/apps/{self.app_name}/machines", payload)
-        if status >= 400 or not isinstance(resp.get("id"), str):
-            raise RuntimeError(f"Failed to boot Fly Firecracker Machine ({status}): {resp}")
+        resp: dict[str, Any] | None = self._try_claim_warm_machine(
+            resolved_image=resolved_image,
+            payload=payload,
+        )
+        if resp is None:
+            status, cold_resp = self._request("POST", f"/apps/{self.app_name}/machines", payload)
+            if status >= 400 or not isinstance(cold_resp.get("id"), str):
+                raise RuntimeError(f"Failed to boot Fly Firecracker Machine ({status}): {cold_resp}")
+            resp = cold_resp
+        self._replenish_warm_pool_async()
         machine_id = str(resp["id"])
         actual_region = str(resp.get("region") or self.region)
         private_ip = str(resp["private_ip"]) if isinstance(resp.get("private_ip"), str) and resp.get("private_ip") else None

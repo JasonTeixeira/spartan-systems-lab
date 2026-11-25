@@ -132,3 +132,61 @@ def test_orchestrator_endpoints_scenarios_loadgen_and_project_runner(tmp_path: P
         headers=headers,
         params={"tenant_id": "spartan-academy", "user_id": "u_builder"},
     )
+
+
+def test_fly_warm_pool_claim_and_skip_launch() -> None:
+    from orchestrator.models import LAB_TEMPLATES, TIER_QUOTAS
+    from orchestrator.runtime import FlyMachinesRuntime
+
+    calls: list[tuple[str, str, dict | None]] = []
+
+    def fake_fly_api(method: str, path: str, body: dict | None):
+        calls.append((method, path, body))
+        if method == "GET" and path.endswith("/machines"):
+            return 200, [
+                {
+                    "id": "warm_m_01",
+                    "state": "stopped",
+                    "region": "iad",
+                    "private_ip": "fdaa::warm1",
+                    "config": {
+                        "image": "registry.fly.io/crucible-sandboxes:v4",
+                        "metadata": {"crucible_pool": "warm"},
+                    },
+                }
+            ]
+        if method == "POST" and path.endswith("/machines/warm_m_01"):
+            return 200, {"id": "warm_m_01", "region": "iad", "private_ip": "fdaa::warm1", "instance_id": "inst_1"}
+        if method == "POST" and path.endswith("/machines/warm_m_01/start"):
+            return 200, {"ok": True}
+        if method == "POST" and path.endswith("/machines"):
+            return 200, {"id": "warm_m_02", "region": "iad"}
+        return 200, {}
+
+    rt = FlyMachinesRuntime(
+        app_name="crucible-sandboxes",
+        api_token="tok_test",
+        region="iad",
+        image_override="registry.fly.io/crucible-sandboxes:v4",
+        warm_pool_size=2,
+        http_sender=fake_fly_api,
+    )
+    res = rt.start_sandbox(
+        sandbox_id="sbx_warmtest",
+        tenant_id="spartan-academy",
+        container_name="spartan-sbx_warmtest",
+        network_name="net-sbx_warmtest",
+        template=LAB_TEMPLATES["lab1-core-engine"],
+        quota=TIER_QUOTAS["pro"],
+        expires_epoch=9999999999,
+        vm_secret="fresh_ephemeral_secret",
+        arm_blind_chaos=True,
+    )
+    assert res.machine_id == "warm_m_01"
+    assert any(m == "POST" and p.endswith("/machines/warm_m_01/start") for m, p, _ in calls)
+    # Verify ensure_warm_pool creates replacement with skip_launch=True ($0 idle compute)
+    pool_res = rt.ensure_warm_pool(target_size=2)
+    assert pool_res["created"] == 1
+    create_call = next(b for m, p, b in calls if m == "POST" and p.endswith("/machines"))
+    assert create_call["skip_launch"] is True
+    assert create_call["config"]["metadata"]["crucible_pool"] == "warm"

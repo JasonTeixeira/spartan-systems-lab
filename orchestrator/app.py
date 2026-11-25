@@ -106,6 +106,7 @@ def create_orchestrator_app(
                 api_token=os.environ.get("FLY_API_TOKEN", "").strip(),
                 region=os.environ.get("FLY_SANDBOX_REGION", "iad").strip() or "iad",
                 image_override=os.environ.get("FLY_SANDBOX_IMAGE", "").strip(),
+                warm_pool_size=max(0, min(5, int(os.environ.get("FLY_WARM_POOL_SIZE", "0") or "0"))),
             )
         else:
             runtime = MemorySandboxRuntime()
@@ -383,6 +384,12 @@ def create_orchestrator_app(
     def reap_sandboxes() -> dict[str, Any]:
         reaped = service.reap_expired()
         return {"reaped": reaped, "activeSandboxes": service.active_count()}
+
+    @app.post("/v1/admin/warm-pool", dependencies=[Depends(require_api_key)])
+    def replenish_warm_pool(target_size: int | None = Query(default=None, ge=0, le=5)) -> dict[str, Any]:
+        if isinstance(runtime, FlyMachinesRuntime):
+            return runtime.ensure_warm_pool(target_size=target_size)
+        return {"desired": 0, "ready": 0, "created": 0, "backend": runtime.backend_name}
 
     @app.get("/v1/admin/sandboxes", dependencies=[Depends(require_api_key)])
     def admin_list_sandboxes() -> dict[str, Any]:
