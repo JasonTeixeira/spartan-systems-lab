@@ -490,7 +490,7 @@ class FlyMachinesRuntime:
         resolved_image: str,
         payload: dict[str, Any],
     ) -> dict[str, Any] | None:
-        """Atomically claim a never-started stopped Firecracker VM, inject fresh secrets/config & start it."""
+        """Atomically lease & claim a stopped Firecracker VM, inject fresh secrets/config & start it."""
         if self.warm_pool_size <= 0:
             return None
         candidates = self._list_warm_machines(resolved_image)
@@ -504,14 +504,30 @@ class FlyMachinesRuntime:
             meta = dict(cfg.get("metadata") or {})
             meta["crucible_pool"] = "claimed"
             cfg["metadata"] = meta
+            lease_nonce: str | None = None
             try:
-                # Update stopped warm machine config with brand-new per-user env & fresh VM_SESSION_SECRET.
+                # 1. Acquire Fly Machine Lease (required by Fly Machines API to update a stopped machine)
+                st_lease, lease_resp = self._request(
+                    "POST",
+                    f"/apps/{self.app_name}/machines/{mid}/lease",
+                    {"ttl": 30},
+                    timeout=10.0,
+                )
+                if st_lease < 400 and isinstance(lease_resp, dict):
+                    data_obj = lease_resp.get("data") if isinstance(lease_resp.get("data"), dict) else lease_resp
+                    raw_nonce = data_obj.get("nonce") if isinstance(data_obj, dict) else None
+                    if isinstance(raw_nonce, str) and raw_nonce:
+                        lease_nonce = raw_nonce
+                extra_headers = {"fly-machine-lease-nonce": lease_nonce} if lease_nonce else None
+
+                # 2. Update stopped warm machine config with brand-new per-user env & fresh VM_SESSION_SECRET.
                 # Note: Fly Machines API `POST /machines/{id}` (without skip_launch) atomically updates AND launches!
                 st, upd = self._request(
                     "POST",
                     f"/apps/{self.app_name}/machines/{mid}",
                     {"config": cfg},
                     timeout=25.0,
+                    extra_headers=extra_headers,
                 )
                 if st >= 400 or not isinstance(upd, dict):
                     continue
@@ -521,6 +537,7 @@ class FlyMachinesRuntime:
                         f"/apps/{self.app_name}/machines/{mid}/start",
                         {},
                         timeout=20.0,
+                        extra_headers=extra_headers,
                     )
                     if st_start >= 400:
                         continue
@@ -533,10 +550,27 @@ class FlyMachinesRuntime:
                 }
             except RuntimeError:
                 continue
+            finally:
+                if lease_nonce:
+                    try:
+                        self._request(
+                            "DELETE",
+                            f"/apps/{self.app_name}/machines/{mid}/lease",
+                            None,
+                            timeout=5.0,
+                            extra_headers={"fly-machine-lease-nonce": lease_nonce},
+                        )
+                    except RuntimeError:
+                        pass
         return None
 
     def _request(
-        self, method: str, path: str, body: dict[str, Any] | None = None, timeout: float = 35.0
+        self,
+        method: str,
+        path: str,
+        body: dict[str, Any] | None = None,
+        timeout: float = 35.0,
+        extra_headers: dict[str, str] | None = None,
     ) -> tuple[int, dict[str, Any]]:
         url = f"{self.api_base.rstrip('/')}{path}"
         if self.http_sender is not None:
@@ -544,15 +578,18 @@ class FlyMachinesRuntime:
         if not self.app_name or not self.api_token:
             raise RuntimeError("FLY_SANDBOX_APP_NAME and FLY_API_TOKEN are required for fly")
         data = json.dumps(body).encode("utf-8") if body is not None else None
+        headers = {
+            "Authorization": f"Bearer {self.api_token}",
+            "Content-Type": "application/json",
+            "User-Agent": "crucible-sandbox-orchestrator/2.0",
+        }
+        if extra_headers:
+            headers.update(extra_headers)
         req = urllib.request.Request(
             url,
             data=data,
             method=method,
-            headers={
-                "Authorization": f"Bearer {self.api_token}",
-                "Content-Type": "application/json",
-                "User-Agent": "crucible-sandbox-orchestrator/2.0",
-            },
+            headers=headers,
         )
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310

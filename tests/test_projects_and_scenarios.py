@@ -155,6 +155,10 @@ def test_fly_warm_pool_claim_and_skip_launch() -> None:
                     },
                 }
             ]
+        if method == "POST" and path.endswith("/machines/warm_m_01/lease"):
+            return 200, {"status": "ok", "data": {"nonce": "lease_nonce_xyz"}}
+        if method == "DELETE" and path.endswith("/machines/warm_m_01/lease"):
+            return 200, {"status": "ok"}
         if method == "POST" and path.endswith("/machines/warm_m_01"):
             return 200, {"id": "warm_m_01", "state": "starting", "region": "iad", "private_ip": "fdaa::warm1", "instance_id": "inst_1"}
         if method == "POST" and path.endswith("/machines/warm_m_01/start"):
@@ -183,7 +187,9 @@ def test_fly_warm_pool_claim_and_skip_launch() -> None:
         arm_blind_chaos=True,
     )
     assert res.machine_id == "warm_m_01"
+    assert any(m == "POST" and p.endswith("/machines/warm_m_01/lease") for m, p, _ in calls)
     assert any(m == "POST" and p.endswith("/machines/warm_m_01") for m, p, _ in calls)
+    assert any(m == "DELETE" and p.endswith("/machines/warm_m_01/lease") for m, p, _ in calls)
     # Verify ensure_warm_pool creates replacement with skip_launch=True ($0 idle compute)
     pool_res = rt.ensure_warm_pool(target_size=2)
     assert pool_res["created"] == 1
