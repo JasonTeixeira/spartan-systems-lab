@@ -99,7 +99,17 @@ def test_orchestrator_endpoints_scenarios_loadgen_and_project_runner(tmp_path: P
     )
     assert idor.status_code == 403
 
-    # 4. Build-From-Scratch project scaffold + test via orchestrator API
+    # 4. Live Prometheus scrape endpoint
+    prom_res = client.get(
+        f"/v1/sandboxes/{sid}/metrics/prometheus",
+        headers=headers,
+        params={"tenant_id": "spartan-academy", "user_id": "u_builder"},
+    )
+    assert prom_res.status_code == 200
+    assert "# HELP crucible_sla_latency_ms" in prom_res.text
+    assert "# TYPE crucible_sla_latency_ms gauge" in prom_res.text
+
+    # 5. Build-From-Scratch project scaffold + test via orchestrator API
     scaf = client.post(
         f"/v1/sandboxes/{sid}/project",
         headers=headers,

@@ -38,7 +38,13 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
+
+try:
+    import psycopg  # type: ignore[import-untyped]
+except Exception:  # pragma: no cover
+    psycopg = None
 
 try:
     from grader import (  # type: ignore[import-not-found]
@@ -295,6 +301,126 @@ def internal_health() -> dict[str, Any]:
     }
 
 
+def _collect_live_prometheus_scrape(
+    mem_used_mb: int,
+    mem_total_mb: int,
+    daemons: dict[str, bool],
+    telemetry: dict[str, Any],
+) -> tuple[dict[str, float | int], str]:
+    """Scrape real live Postgres, PgBouncer, NGINX & Linux kernel counters inside this MicroVM."""
+    m: dict[str, float | int] = {
+        "crucible_vm_memory_used_mb": mem_used_mb,
+        "crucible_vm_memory_total_mb": mem_total_mb,
+        "crucible_vm_uptime_seconds": round(time.time() - BOOT_EPOCH, 1),
+        "crucible_sla_latency_ms": float(telemetry.get("latency_ms", 0.0)),
+        "crucible_sla_checks_passing": int(telemetry.get("checks_passing", 0)),
+        "crucible_sla_checks_total": int(telemetry.get("checks_total", 0)),
+        "crucible_loadgen_rps": float(_loadgen.get("actual_rps", 0.0)),
+        "crucible_loadgen_error_rate_pct": float(_loadgen.get("error_rate_pct", 0.0)),
+        "crucible_loadgen_p99_ms": float(_loadgen.get("p99_ms", 0.0)),
+        "linux_loadavg_1m": 0.0,
+        "linux_open_fds": 0,
+        "pg_active_connections": 0,
+        "pg_waiting_locks": 0,
+        "pg_orders_seq_scans": 0,
+        "pg_orders_idx_scans": 0,
+        "pg_orders_dead_tuples": 0,
+        "pg_orders_live_tuples": 0,
+        "pgbouncer_cl_active": 0,
+        "pgbouncer_cl_waiting": 0,
+        "pgbouncer_sv_active": 0,
+        "pgbouncer_sv_idle": 0,
+        "nginx_up": 1 if daemons.get("nginx") else 0,
+        "postgres_up": 1 if daemons.get("postgres") else 0,
+        "pgbouncer_up": 1 if daemons.get("pgbouncer") else 0,
+        "redis_up": 1 if daemons.get("redis") else 0,
+    }
+
+    with contextlib.suppress(OSError, ValueError):
+        load_parts = Path("/proc/loadavg").read_text(encoding="utf-8").split()
+        if load_parts:
+            m["linux_loadavg_1m"] = round(float(load_parts[0]), 2)
+    with contextlib.suppress(OSError, ValueError):
+        fd_parts = Path("/proc/sys/fs/file-nr").read_text(encoding="utf-8").split()
+        if fd_parts and fd_parts[0].isdigit():
+            m["linux_open_fds"] = int(fd_parts[0])
+
+    if has_real_postgres() and psycopg is not None:
+        with contextlib.suppress(Exception):
+            with psycopg.connect(
+                "host=127.0.0.1 port=5432 user=operator dbname=orders",
+                connect_timeout=1,
+            ) as conn:
+                act = conn.execute(
+                    "SELECT count(*) FILTER (WHERE state = 'active'), "
+                    "count(*) FILTER (WHERE wait_event_type = 'Lock') "
+                    "FROM pg_stat_activity WHERE datname = 'orders'"
+                ).fetchone()
+                if act:
+                    m["pg_active_connections"] = int(act[0] or 0)
+                    m["pg_waiting_locks"] = int(act[1] or 0)
+                st = conn.execute(
+                    "SELECT coalesce(seq_scan,0), coalesce(idx_scan,0), "
+                    "coalesce(n_live_tup,0), coalesce(n_dead_tup,0) "
+                    "FROM pg_stat_user_tables WHERE relname = 'orders'"
+                ).fetchone()
+                if st:
+                    m["pg_orders_seq_scans"] = int(st[0] or 0)
+                    m["pg_orders_idx_scans"] = int(st[1] or 0)
+                    m["pg_orders_live_tuples"] = int(st[2] or 0)
+                    m["pg_orders_dead_tuples"] = int(st[3] or 0)
+
+        with contextlib.suppress(Exception):
+            with psycopg.connect(
+                "host=127.0.0.1 port=6432 user=operator dbname=pgbouncer",
+                autocommit=True,
+                connect_timeout=1,
+            ) as pgb:
+                rows = pgb.execute("SHOW POOLS").fetchall()
+                for row in rows:
+                    if str(row[0]).strip() == "orders":
+                        m["pgbouncer_cl_active"] = int(row[2] or 0)
+                        m["pgbouncer_cl_waiting"] = int(row[3] or 0)
+                        m["pgbouncer_sv_active"] = int(row[4] or 0)
+                        m["pgbouncer_sv_idle"] = int(row[5] or 0)
+                        break
+
+    labels = f'sandbox_id="{SANDBOX_ID}",template="{TEMPLATE_ID}",module="{MODULE_ID}"'
+    lines = [
+        "# HELP crucible_vm_memory_used_mb Live Firecracker KVM memory usage in MB",
+        "# TYPE crucible_vm_memory_used_mb gauge",
+        f"crucible_vm_memory_used_mb{{{labels}}} {m['crucible_vm_memory_used_mb']}",
+        "# HELP linux_loadavg_1m Kernel 1-minute load average inside Firecracker VM",
+        "# TYPE linux_loadavg_1m gauge",
+        f"linux_loadavg_1m{{{labels}}} {m['linux_loadavg_1m']}",
+        "# HELP linux_open_fds Allocated kernel file descriptors",
+        "# TYPE linux_open_fds gauge",
+        f"linux_open_fds{{{labels}}} {m['linux_open_fds']}",
+        "# HELP pg_orders_seq_scans Cumulative PostgreSQL sequential scans on orders table",
+        "# TYPE pg_orders_seq_scans counter",
+        f"pg_orders_seq_scans{{{labels}}} {m['pg_orders_seq_scans']}",
+        "# HELP pg_orders_idx_scans Cumulative PostgreSQL index scans on orders table",
+        "# TYPE pg_orders_idx_scans counter",
+        f"pg_orders_idx_scans{{{labels}}} {m['pg_orders_idx_scans']}",
+        "# HELP pg_orders_dead_tuples PostgreSQL MVCC dead tuples awaiting VACUUM on orders",
+        "# TYPE pg_orders_dead_tuples gauge",
+        f"pg_orders_dead_tuples{{{labels}}} {m['pg_orders_dead_tuples']}",
+        "# HELP pg_waiting_locks Active PostgreSQL queries blocked on Lock wait events",
+        "# TYPE pg_waiting_locks gauge",
+        f"pg_waiting_locks{{{labels}}} {m['pg_waiting_locks']}",
+        "# HELP pgbouncer_cl_waiting Client connections waiting in PgBouncer pool queue",
+        "# TYPE pgbouncer_cl_waiting gauge",
+        f"pgbouncer_cl_waiting{{{labels}}} {m['pgbouncer_cl_waiting']}",
+        "# HELP pgbouncer_sv_active Active PgBouncer server backend connections",
+        "# TYPE pgbouncer_sv_active gauge",
+        f"pgbouncer_sv_active{{{labels}}} {m['pgbouncer_sv_active']}",
+        "# HELP crucible_sla_latency_ms End-to-end SLA probe latency in milliseconds",
+        "# TYPE crucible_sla_latency_ms gauge",
+        f"crucible_sla_latency_ms{{{labels}}} {m['crucible_sla_latency_ms']}",
+    ]
+    return m, "\n".join(lines) + "\n"
+
+
 @app.get("/internal/metrics", dependencies=[Depends(_require_vm_secret)])
 def internal_metrics() -> dict[str, Any]:
     _state["last_activity"] = time.time()
@@ -310,14 +436,16 @@ def internal_metrics() -> dict[str, Any]:
         avail = info.get("MemAvailable", info.get("MemFree", 0)) // 1024
         mem_used_mb = max(0, mem_total_mb - avail)
 
+    daemons = collect_live_daemons()
     telemetry = probe_live_telemetry(WORKSPACE_DIR, TEMPLATE_ID)
+    prom_map, prom_text = _collect_live_prometheus_scrape(mem_used_mb, mem_total_mb, daemons, telemetry)
     return {
         "sandbox_id": SANDBOX_ID,
         "template_id": TEMPLATE_ID,
         "module": MODULE_ID,
         "backend": "fly-firecracker",
         "real_daemons": has_real_postgres() or has_real_nginx(),
-        "daemons": collect_live_daemons(),
+        "daemons": daemons,
         "uptime_seconds": round(time.time() - BOOT_EPOCH, 1),
         "ttl_remaining_seconds": max(0, int(EXPIRES_EPOCH - time.time())),
         "active_terminals": _state["active_ws"],
@@ -327,7 +455,18 @@ def internal_metrics() -> dict[str, Any]:
         "active_scenario_id": _state.get("active_scenario_id"),
         "loadgen": _loadgen_snapshot(),
         "telemetry": telemetry,
+        "prometheus": prom_map,
+        "prometheus_text": prom_text,
     }
+
+
+@app.get("/internal/metrics/prometheus", dependencies=[Depends(_require_vm_secret)])
+def internal_metrics_prometheus() -> PlainTextResponse:
+    snap = internal_metrics()
+    return PlainTextResponse(
+        content=str(snap.get("prometheus_text", "")),
+        media_type="text/plain; version=0.0.4; charset=utf-8",
+    )
 
 
 @app.get("/internal/files", dependencies=[Depends(_require_vm_secret)])

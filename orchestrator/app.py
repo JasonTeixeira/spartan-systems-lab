@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
 from orchestrator.build_projects import list_build_projects
@@ -229,6 +230,33 @@ def create_orchestrator_app(
             raise HTTPException(status_code=404, detail=str(exc)) from None
         except SandboxAccessDeniedError as exc:
             raise HTTPException(status_code=403, detail=str(exc)) from None
+
+    @app.get("/v1/sandboxes/{sandbox_id}/metrics/prometheus", dependencies=[Depends(require_api_key)])
+    def sandbox_metrics_prometheus(
+        sandbox_id: str,
+        tenant_id: str = Query(..., min_length=2, max_length=64),
+        user_id: str = Query(..., min_length=2, max_length=128),
+    ) -> PlainTextResponse:
+        try:
+            snap = service.get_metrics(
+                sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        prom_text = snap.get("prometheus_text")
+        if not isinstance(prom_text, str) or not prom_text.strip():
+            tel = snap.get("telemetry") if isinstance(snap.get("telemetry"), dict) else {}
+            prom_text = (
+                "# HELP crucible_sla_latency_ms End-to-end SLA probe latency in milliseconds\n"
+                "# TYPE crucible_sla_latency_ms gauge\n"
+                f'crucible_sla_latency_ms{{sandbox_id="{sandbox_id}"}} {tel.get("latency_ms", 0)}\n'
+            )
+        return PlainTextResponse(
+            content=prom_text,
+            media_type="text/plain; version=0.0.4; charset=utf-8",
+        )
 
     @app.get("/v1/sandboxes/{sandbox_id}/files", dependencies=[Depends(require_api_key)])
     def list_sandbox_files(
