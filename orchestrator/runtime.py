@@ -522,22 +522,42 @@ class FlyMachinesRuntime:
                 extra_headers = {"fly-machine-lease-nonce": lease_nonce} if lease_nonce else None
 
                 # 2. Update stopped warm machine config with brand-new per-user env & fresh VM_SESSION_SECRET.
-                # Note: Fly Machines API `POST /machines/{id}` (without skip_launch) atomically updates AND boots!
-                # Calling `/start` immediately after triggers HTTP 412 ("machine getting replaced") because Fly is already starting it.
+                # Pass skip_launch=True, wait for the config replacement to reach `stopped` (eliminating HTTP 412),
+                # then issue `/start` so Fly boots the pre-pulled Firecracker MicroVM cleanly in-place!
                 st, upd = self._request(
                     "POST",
                     f"/apps/{self.app_name}/machines/{mid}",
-                    {"config": cfg},
+                    {"config": cfg, "skip_launch": True},
                     timeout=25.0,
                     extra_headers=extra_headers,
                 )
                 if st >= 400 or not isinstance(upd, dict):
                     continue
+                new_inst = upd.get("instance_id") or m.get("instance_id")
+                if self.http_sender is None and new_inst:
+                    try:
+                        self._request(
+                            "GET",
+                            f"/apps/{self.app_name}/machines/{mid}/wait?state=stopped&instance_id={new_inst}&timeout=15",
+                            None,
+                            timeout=18.0,
+                        )
+                    except RuntimeError:
+                        pass
+                st_start, _ = self._request(
+                    "POST",
+                    f"/apps/{self.app_name}/machines/{mid}/start",
+                    None,
+                    timeout=20.0,
+                    extra_headers=extra_headers,
+                )
+                if st_start >= 400:
+                    continue
                 return {
                     "id": mid,
                     "region": str(upd.get("region") or m.get("region") or self.region),
                     "private_ip": upd.get("private_ip") or m.get("private_ip"),
-                    "instance_id": upd.get("instance_id") or m.get("instance_id"),
+                    "instance_id": new_inst,
                     "warm_claimed": True,
                 }
             except RuntimeError:
