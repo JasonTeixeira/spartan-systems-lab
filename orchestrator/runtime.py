@@ -505,24 +505,25 @@ class FlyMachinesRuntime:
             meta["crucible_pool"] = "claimed"
             cfg["metadata"] = meta
             try:
-                # Update stopped warm machine config with brand-new per-user env & fresh VM_SESSION_SECRET
+                # Update stopped warm machine config with brand-new per-user env & fresh VM_SESSION_SECRET.
+                # Note: Fly Machines API `POST /machines/{id}` (without skip_launch) atomically updates AND launches!
                 st, upd = self._request(
                     "POST",
                     f"/apps/{self.app_name}/machines/{mid}",
-                    {"region": self.region, "config": cfg},
-                    timeout=20.0,
+                    {"config": cfg},
+                    timeout=25.0,
                 )
                 if st >= 400 or not isinstance(upd, dict):
                     continue
-                # Start the already-unpacked Firecracker MicroVM (<2-3s!)
-                st_start, _ = self._request(
-                    "POST",
-                    f"/apps/{self.app_name}/machines/{mid}/start",
-                    {},
-                    timeout=20.0,
-                )
-                if st_start >= 400:
-                    continue
+                if str(upd.get("state", "")) in {"stopped", "created"}:
+                    st_start, _ = self._request(
+                        "POST",
+                        f"/apps/{self.app_name}/machines/{mid}/start",
+                        {},
+                        timeout=20.0,
+                    )
+                    if st_start >= 400:
+                        continue
                 return {
                     "id": mid,
                     "region": str(upd.get("region") or m.get("region") or self.region),
