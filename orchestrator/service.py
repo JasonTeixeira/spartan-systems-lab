@@ -7,7 +7,7 @@ import time
 from datetime import UTC, datetime
 from typing import Any
 
-from orchestrator.grader import LAB_FAULTS
+from orchestrator.grader import LAB_FAULTS, get_scenario_spec
 from orchestrator.models import (
     LAB_TEMPLATES,
     TIER_QUOTAS,
@@ -163,17 +163,20 @@ class SandboxOrchestratorService:
         )
         vm_secret = secrets.token_urlsafe(32) if use_per_vm_secret else None
 
-        start_res = self.runtime.start_sandbox(
-            sandbox_id=sandbox_id,
-            tenant_id=req.tenant_id,
-            container_name=container_name,
-            network_name=network_name,
-            template=template,
-            quota=quota,
-            expires_epoch=expires_epoch,
-            vm_secret=vm_secret or "",
-            arm_blind_chaos=req.arm_blind_chaos,
-        )
+        start_kwargs: dict[str, Any] = {
+            "sandbox_id": sandbox_id,
+            "tenant_id": req.tenant_id,
+            "container_name": container_name,
+            "network_name": network_name,
+            "template": template,
+            "quota": quota,
+            "expires_epoch": expires_epoch,
+            "vm_secret": vm_secret or "",
+            "arm_blind_chaos": req.arm_blind_chaos,
+        }
+        if req.scenario_id and self.runtime.backend_name in {"fly", "linux-pty"}:
+            start_kwargs["scenario_id"] = req.scenario_id
+        start_res = self.runtime.start_sandbox(**start_kwargs)
         machine_id = start_res.machine_id if start_res else None
         region = start_res.region if start_res else None
         private_ip = start_res.private_ip if start_res else None
@@ -190,13 +193,13 @@ class SandboxOrchestratorService:
         fault: ChaosFault | None = None
         if req.arm_blind_chaos:
             # If the runtime already armed chaos during boot (Firecracker / LinuxPty), record fault metadata
-            lab_fault = LAB_FAULTS.get(template.id)
-            if lab_fault is not None and self.runtime.backend_name in {"fly", "linux-pty"}:
+            spec = get_scenario_spec(template.id, scenario_id=req.scenario_id)
+            if self.runtime.backend_name in {"fly", "linux-pty"}:
                 fault = ChaosFault(
-                    id=lab_fault.fault_id,
+                    id=spec.scenario_id,
                     category=template.module,
-                    symptom=lab_fault.symptom,
-                    remediation_hint=lab_fault.remediation_hint,
+                    symptom=spec.symptom,
+                    remediation_hint=spec.remediation_hint,
                 )
             else:
                 injector = getattr(self.runtime, "inject_fault", None)
@@ -302,6 +305,7 @@ class SandboxOrchestratorService:
         tenant_id: str,
         user_id: str,
         seed: int | None = None,
+        scenario_id: str | None = None,
     ) -> ChaosInjectResponse:
         rec = self._require_owned_record(
             sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
@@ -316,6 +320,8 @@ class SandboxOrchestratorService:
                 machine_id=rec.fly_machine_id,
                 vm_secret=rec.vm_secret,
                 private_ip=rec.private_ip,
+                scenario_id=scenario_id,
+                seed=seed,
             )
             if real_fault is not None:
                 fault = ChaosFault(
@@ -338,6 +344,58 @@ class SandboxOrchestratorService:
             status="armed",
             symptom=fault.symptom,
             started_at=datetime.fromtimestamp(now, UTC).isoformat(),
+        )
+
+    def control_loadgen(
+        self,
+        *,
+        sandbox_id: str,
+        tenant_id: str,
+        user_id: str,
+        enabled: bool,
+        rps: int = 50,
+        duration_s: int = 60,
+    ) -> dict[str, Any]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "control_loadgen", None)
+        if not callable(fn):
+            return {"ok": True, "loadgen": {"active": False, "target_rps": 0}}
+        return fn(
+            container_name=rec.container_name,
+            enabled=enabled,
+            rps=rps,
+            duration_s=duration_s,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
+        )
+
+    def run_project_action(
+        self,
+        *,
+        sandbox_id: str,
+        tenant_id: str,
+        user_id: str,
+        action: str,
+        project_id: str,
+        use_reference: bool = False,
+    ) -> dict[str, Any]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "run_project_action", None)
+        if not callable(fn):
+            raise ValueError("Project runner not supported by current backend")
+        return fn(
+            container_name=rec.container_name,
+            action=action,
+            project_id=project_id,
+            use_reference=use_reference,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
         )
 
     def list_files(self, *, sandbox_id: str, tenant_id: str, user_id: str) -> list[dict[str, Any]]:

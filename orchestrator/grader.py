@@ -35,9 +35,23 @@ except Exception:  # pragma: no cover
 
 
 try:
+    from build_projects import (  # type: ignore[import-not-found]
+        list_build_projects,
+        run_project_stage_tests,
+        scaffold_project_workspace,
+    )
+except ImportError:
+    from orchestrator.build_projects import (
+        list_build_projects,
+        run_project_stage_tests,
+        scaffold_project_workspace,
+    )
+
+try:
     from scenarios_expanded import (  # type: ignore[import-not-found]
         LAB_SCENARIO_CATALOG,
         get_scenario_spec,
+        list_all_scenarios,
         seed_lab7,
         seed_lab8,
         seed_lab9,
@@ -51,6 +65,7 @@ except ImportError:
     from orchestrator.scenarios_expanded import (
         LAB_SCENARIO_CATALOG,
         get_scenario_spec,
+        list_all_scenarios,
         seed_lab7,
         seed_lab8,
         seed_lab9,
@@ -939,9 +954,64 @@ def provision_workspace(
     _chown_tree(root)
 
 
-def arm_scenario_fault(root: Path, template_id: str, sandbox_id: str) -> RealLabFault:
+def arm_scenario_fault(
+    root: Path,
+    template_id: str,
+    sandbox_id: str,
+    scenario_id: str | None = None,
+    seed: int | None = None,
+) -> RealLabFault:
+    spec = get_scenario_spec(template_id, scenario_id=scenario_id, seed=seed)
     provision_workspace(root, template_id, sandbox_id, arm_fault=True)
-    return LAB_FAULTS[template_id]
+    # Apply scenario-specific secondary fault configs when a specialized scenario variant is chosen
+    if spec.scenario_id == "pgbouncer_session_mode_starvation":
+        pgb = root / "config" / "pgbouncer.ini"
+        if pgb.exists():
+            txt = pgb.read_text(encoding="utf-8")
+            txt = txt.replace("pool_mode = transaction", "pool_mode = session")
+            txt = txt.replace("max_client_conn = 500", "max_client_conn = 12")
+            pgb.write_text(txt, encoding="utf-8")
+    elif spec.scenario_id == "redis_maxmemory_noeviction_oom":
+        (root / "config").mkdir(parents=True, exist_ok=True)
+        (root / "config" / "redis.conf").write_text(
+            "maxmemory 32mb\nmaxmemory-policy noeviction\n",
+            encoding="utf-8",
+        )
+    elif spec.scenario_id == "pg_blocking_lock_storm":
+        (root / "config").mkdir(parents=True, exist_ok=True)
+        (root / "config" / "postgres-guard.conf").write_text(
+            "# BROKEN: Missing idle_in_transaction_session_timeout & lock_timeout\n"
+            "idle_in_transaction_session_timeout = 0\n"
+            "lock_timeout = 0\n",
+            encoding="utf-8",
+        )
+    elif spec.scenario_id in {"nginx_weak_tls_and_missing_hsts", "nginx_413_body_and_worker_limit"}:
+        (root / "nginx").mkdir(parents=True, exist_ok=True)
+        (root / "nginx" / "security.conf").write_text(
+            "ssl_protocols TLSv1 TLSv1.1 TLSv1.2;\nclient_max_body_size 1k;\n",
+            encoding="utf-8",
+        )
+    (root / "README.md").write_text(
+        f"# CRUCIBLE LIVE LINUX WAR-ROOM · {template_id}\n"
+        f"Sandbox ID: {sandbox_id}\n"
+        f"Active Scenario: {spec.title} ({spec.difficulty})\n\n"
+        f"## Incident Alert\n{spec.symptom}\n",
+        encoding="utf-8",
+    )
+    _chown_tree(root)
+    return RealLabFault(
+        fault_id=spec.scenario_id,
+        symptom=spec.symptom,
+        remediation_hint=spec.remediation_hint,
+    )
+
+
+def scaffold_workspace_project(root: Path, project_id: str, *, use_reference: bool = False) -> dict[str, Any]:
+    return scaffold_project_workspace(root, project_id, use_reference=use_reference)
+
+
+def test_workspace_project(root: Path, project_id: str) -> dict[str, Any]:
+    return run_project_stage_tests(root, project_id, _scrubbed_subprocess_env, _unprivileged_preexec)
 
 
 # ---------------------------------------------------------------------------

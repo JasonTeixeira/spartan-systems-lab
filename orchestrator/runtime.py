@@ -25,6 +25,8 @@ from orchestrator.grader import (
     provision_workspace,
     read_workspace_file,
     reload_lab_daemon,
+    scaffold_workspace_project,
+    test_workspace_project,
     verify_workspace_checks,
     verify_workspace_sla,
     write_workspace_file,
@@ -336,6 +338,7 @@ def build_fly_machine_payload(
     image_override: str | None = None,
     vm_secret: str = "",
     arm_blind_chaos: bool = False,
+    scenario_id: str | None = None,
 ) -> dict[str, Any]:
     """Build a hardened Fly Machines KVM Firecracker MicroVM launch payload (zero public IP)."""
     cpus = max(1, int(round(quota.cpu_limit)))
@@ -349,6 +352,8 @@ def build_fly_machine_payload(
         "SPARTAN_ARM_CHAOS": "1" if arm_blind_chaos else "0",
         "SPARTAN_IDLE_TIMEOUT_SECONDS": "1200",
     }
+    if scenario_id:
+        env["SPARTAN_SCENARIO_ID"] = scenario_id
     if vm_secret:
         env["VM_SESSION_SECRET"] = vm_secret
     return {
@@ -505,6 +510,7 @@ class FlyMachinesRuntime:
         expires_epoch: int,
         vm_secret: str = "",
         arm_blind_chaos: bool = False,
+        scenario_id: str | None = None,
     ) -> StartSandboxResult:
         _ = network_name  # Fly provides hardware KVM + private 6pn WireGuard per MicroVM
         resolved_image = (
@@ -523,6 +529,7 @@ class FlyMachinesRuntime:
             image_override=resolved_image,
             vm_secret=vm_secret,
             arm_blind_chaos=arm_blind_chaos,
+            scenario_id=scenario_id,
         )
         status, resp = self._request("POST", f"/apps/{self.app_name}/machines", payload)
         if status >= 400 or not isinstance(resp.get("id"), str):
@@ -551,17 +558,24 @@ class FlyMachinesRuntime:
         machine_id: str | None = None,
         vm_secret: str | None = None,
         private_ip: str | None = None,
+        scenario_id: str | None = None,
+        seed: int | None = None,
     ) -> RealLabFault | None:
         mid = machine_id or self._machine_ids.get(container_name)
         if not mid or (self.http_sender is not None and self.vm_http_sender is None):
             return None
+        body: dict[str, Any] = {}
+        if scenario_id:
+            body["scenario_id"] = scenario_id
+        if seed is not None:
+            body["seed"] = seed
         status, resp = self._vm_request(
             machine_id=mid,
             private_ip=private_ip,
             method="POST",
             path="/internal/chaos",
             vm_secret=vm_secret,
-            body={},
+            body=body,
             timeout=15.0,
         )
         if status != 200 or not isinstance(resp.get("fault_id"), str):
@@ -571,6 +585,61 @@ class FlyMachinesRuntime:
             symptom=str(resp.get("symptom", "")),
             remediation_hint=str(resp.get("remediation_hint", "")),
         )
+
+    def control_loadgen(
+        self,
+        *,
+        container_name: str,
+        enabled: bool,
+        rps: int = 50,
+        duration_s: int = 60,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            raise RuntimeError("VM not tracked")
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="POST",
+            path="/internal/loadgen",
+            vm_secret=vm_secret,
+            body={"enabled": enabled, "rps": rps, "duration_s": duration_s},
+            timeout=10.0,
+        )
+        if status != 200:
+            raise RuntimeError(f"Loadgen control failed ({status}): {resp}")
+        return resp
+
+    def run_project_action(
+        self,
+        *,
+        container_name: str,
+        action: str,
+        project_id: str,
+        use_reference: bool = False,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            raise RuntimeError("VM not tracked")
+        path = "/internal/project/scaffold" if action == "scaffold" else "/internal/project/test"
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="POST",
+            path=path,
+            vm_secret=vm_secret,
+            body={"project_id": project_id, "use_reference": use_reference},
+            timeout=20.0,
+        )
+        if status >= 400:
+            raise ValueError(str(resp.get("detail") or resp.get("error") or f"Project action failed ({status})"))
+        return resp
 
     def get_metrics(
         self,
@@ -758,12 +827,16 @@ class LinuxPtySandboxRuntime:
         expires_epoch: int,
         vm_secret: str = "",
         arm_blind_chaos: bool = False,
+        scenario_id: str | None = None,
     ) -> StartSandboxResult:
         _ = (tenant_id, network_name, quota, expires_epoch, vm_secret)
         ws_dir = self.base_dir / sandbox_id
         if ws_dir.exists():
             shutil.rmtree(ws_dir, ignore_errors=True)
-        provision_workspace(ws_dir, template.id, sandbox_id, arm_fault=arm_blind_chaos)
+        if arm_blind_chaos:
+            arm_scenario_fault(ws_dir, template.id, sandbox_id, scenario_id=scenario_id)
+        else:
+            provision_workspace(ws_dir, template.id, sandbox_id, arm_fault=False)
         self._workspaces[container_name] = (ws_dir, template.id, sandbox_id)
         return StartSandboxResult()
 
@@ -774,13 +847,63 @@ class LinuxPtySandboxRuntime:
         machine_id: str | None = None,
         vm_secret: str | None = None,
         private_ip: str | None = None,
+        scenario_id: str | None = None,
+        seed: int | None = None,
     ) -> RealLabFault | None:
         _ = (machine_id, vm_secret, private_ip)
         entry = self._workspaces.get(container_name)
         if not entry:
             return None
         ws_dir, template_id, sandbox_id = entry
-        return arm_scenario_fault(ws_dir, template_id, sandbox_id)
+        return arm_scenario_fault(ws_dir, template_id, sandbox_id, scenario_id=scenario_id, seed=seed)
+
+    def control_loadgen(
+        self,
+        *,
+        container_name: str,
+        enabled: bool,
+        rps: int = 50,
+        duration_s: int = 60,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        _ = (container_name, duration_s, machine_id, vm_secret, private_ip)
+        return {
+            "ok": True,
+            "loadgen": {
+                "active": bool(enabled),
+                "target_rps": rps if enabled else 0,
+                "actual_rps": float(rps) if enabled else 0.0,
+                "total_requests": 0,
+                "error_count": 0,
+                "error_rate_pct": 0.0,
+                "p50_ms": 4.2,
+                "p95_ms": 9.8,
+                "p99_ms": 14.5,
+                "remaining_s": duration_s if enabled else 0,
+            },
+        }
+
+    def run_project_action(
+        self,
+        *,
+        container_name: str,
+        action: str,
+        project_id: str,
+        use_reference: bool = False,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        _ = (machine_id, vm_secret, private_ip)
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            raise ValueError("sandbox workspace not found")
+        ws_dir = entry[0]
+        if action == "scaffold":
+            return scaffold_workspace_project(ws_dir, project_id, use_reference=use_reference)
+        return test_workspace_project(ws_dir, project_id)
 
     def get_workspace_dir(self, *, container_name: str) -> Path | None:
         entry = self._workspaces.get(container_name)

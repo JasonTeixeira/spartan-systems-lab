@@ -27,10 +27,13 @@ import pty
 import pwd
 import resource
 import signal
+import ssl
 import struct
 import subprocess
 import termios
 import time
+import urllib.request
+from collections import deque
 from pathlib import Path
 from typing import Any
 
@@ -48,6 +51,8 @@ try:
         provision_workspace,
         read_workspace_file,
         reload_lab_daemon,
+        scaffold_workspace_project,
+        test_workspace_project,
         verify_workspace_checks,
         write_workspace_file,
     )
@@ -62,6 +67,8 @@ except ImportError:
         provision_workspace,
         read_workspace_file,
         reload_lab_daemon,
+        scaffold_workspace_project,
+        test_workspace_project,
         verify_workspace_checks,
         write_workspace_file,
     )
@@ -73,6 +80,7 @@ VM_SECRET = os.environ.get("VM_SESSION_SECRET", "").strip()
 EXPIRES_EPOCH = int(os.environ.get("SPARTAN_EXPIRES_AT", str(int(time.time()) + 3600)))
 IDLE_TIMEOUT_SECONDS = int(os.environ.get("SPARTAN_IDLE_TIMEOUT_SECONDS", "1200"))
 ARM_INITIAL_FAULT = os.environ.get("SPARTAN_ARM_CHAOS", "0").strip().lower() in {"1", "true", "yes"}
+INITIAL_SCENARIO_ID = os.environ.get("SPARTAN_SCENARIO_ID", "").strip() or None
 WORKSPACE_DIR = Path(os.environ.get("SPARTAN_WORKSPACE_DIR", "/home/operator"))
 BOOT_EPOCH = time.time()
 
@@ -81,6 +89,22 @@ _state: dict[str, Any] = {
     "active_ws": 0,
     "last_activity": time.time(),
     "fault_armed": ARM_INITIAL_FAULT,
+    "active_scenario_id": INITIAL_SCENARIO_ID,
+}
+
+_loadgen: dict[str, Any] = {
+    "active": False,
+    "target_rps": 0,
+    "actual_rps": 0.0,
+    "total_requests": 0,
+    "error_count": 0,
+    "error_rate_pct": 0.0,
+    "p50_ms": 0.0,
+    "p95_ms": 0.0,
+    "p99_ms": 0.0,
+    "started_at": 0.0,
+    "stop_at": 0.0,
+    "task": None,
 }
 
 
@@ -88,6 +112,22 @@ class WriteFileRequest(BaseModel):
     path: str = Field(..., min_length=1, max_length=200)
     content: str = Field(..., max_length=262144)
     reload: bool = False
+
+
+class ChaosBody(BaseModel):
+    scenario_id: str | None = Field(default=None, max_length=80)
+    seed: int | None = None
+
+
+class LoadgenBody(BaseModel):
+    enabled: bool = True
+    rps: int = Field(default=50, ge=1, le=50)
+    duration_s: int = Field(default=60, ge=5, le=90)
+
+
+class ProjectActionBody(BaseModel):
+    project_id: str = Field(..., min_length=3, max_length=64)
+    use_reference: bool = False
 
 
 def _verify_token(token: str) -> dict[str, Any] | None:
@@ -130,8 +170,97 @@ def _try_harden_proc() -> None:
 
 def _bootstrap_lab() -> None:
     _try_harden_proc()
-    provision_workspace(WORKSPACE_DIR, TEMPLATE_ID, SANDBOX_ID, arm_fault=ARM_INITIAL_FAULT)
+    if ARM_INITIAL_FAULT:
+        fault = arm_scenario_fault(
+            WORKSPACE_DIR,
+            TEMPLATE_ID,
+            SANDBOX_ID,
+            scenario_id=INITIAL_SCENARIO_ID,
+        )
+        _state["active_scenario_id"] = fault.fault_id
+    else:
+        provision_workspace(WORKSPACE_DIR, TEMPLATE_ID, SANDBOX_ID, arm_fault=False)
     _state["ready"] = True
+
+
+def _single_load_probe() -> tuple[bool, float]:
+    """Execute one real request against the active local daemon inside this MicroVM."""
+    t0 = time.perf_counter()
+    try:
+        if TEMPLATE_ID in {"lab2-linux-tls"} and has_real_nginx():
+            ctx = ssl._create_unverified_context()
+            with urllib.request.urlopen("https://127.0.0.1:8443/health", timeout=1.5, context=ctx) as resp:
+                ok = resp.status == 200
+            return ok, round((time.perf_counter() - t0) * 1000.0, 2)
+        if TEMPLATE_ID in {"lab1-core-engine", "lab11-p0-capstone"} and has_real_postgres():
+            with urllib.request.urlopen("http://127.0.0.1:8000/api/orders?tenant_id=tenant_07", timeout=1.5) as resp:
+                ok = resp.status == 200
+            return ok, round((time.perf_counter() - t0) * 1000.0, 2)
+        # Pure-code labs: fast SLA check burst
+        ok, _, _ = verify_workspace_checks(WORKSPACE_DIR, TEMPLATE_ID)
+        return ok, round((time.perf_counter() - t0) * 1000.0, 2)
+    except Exception:
+        return False, round((time.perf_counter() - t0) * 1000.0, 2)
+
+
+def _loadgen_snapshot() -> dict[str, Any]:
+    return {
+        "active": bool(_loadgen["active"]),
+        "target_rps": int(_loadgen["target_rps"]),
+        "actual_rps": float(_loadgen["actual_rps"]),
+        "total_requests": int(_loadgen["total_requests"]),
+        "error_count": int(_loadgen["error_count"]),
+        "error_rate_pct": float(_loadgen["error_rate_pct"]),
+        "p50_ms": float(_loadgen["p50_ms"]),
+        "p95_ms": float(_loadgen["p95_ms"]),
+        "p99_ms": float(_loadgen["p99_ms"]),
+        "remaining_s": max(0, int(_loadgen["stop_at"] - time.time())) if _loadgen["active"] else 0,
+    }
+
+
+async def _run_loadgen_loop(target_rps: int, duration_s: int) -> None:
+    loop = asyncio.get_running_loop()
+    samples: deque[float] = deque(maxlen=250)
+    _loadgen["active"] = True
+    _loadgen["target_rps"] = target_rps
+    _loadgen["total_requests"] = 0
+    _loadgen["error_count"] = 0
+    _loadgen["started_at"] = time.time()
+    _loadgen["stop_at"] = _loadgen["started_at"] + duration_s
+    concurrency = max(2, min(10, target_rps // 5))
+    try:
+        while _loadgen["active"] and time.time() < _loadgen["stop_at"]:
+            tick_start = time.perf_counter()
+            batch = await asyncio.gather(
+                *[loop.run_in_executor(None, _single_load_probe) for _ in range(concurrency)],
+                return_exceptions=True,
+            )
+            for item in batch:
+                _loadgen["total_requests"] += 1
+                if isinstance(item, tuple):
+                    ok, ms = item
+                    samples.append(ms)
+                    if not ok:
+                        _loadgen["error_count"] += 1
+                else:
+                    _loadgen["error_count"] += 1
+            elapsed = max(0.1, time.time() - _loadgen["started_at"])
+            _loadgen["actual_rps"] = round(_loadgen["total_requests"] / elapsed, 1)
+            _loadgen["error_rate_pct"] = round(
+                (_loadgen["error_count"] / max(1, _loadgen["total_requests"])) * 100.0, 1
+            )
+            if samples:
+                ordered = sorted(samples)
+                n = len(ordered)
+                _loadgen["p50_ms"] = ordered[int(n * 0.50)]
+                _loadgen["p95_ms"] = ordered[min(n - 1, int(n * 0.95))]
+                _loadgen["p99_ms"] = ordered[min(n - 1, int(n * 0.99))]
+            # Pace batches cleanly to respect target_rps without pegging CPU
+            target_batch_s = concurrency / max(1.0, float(target_rps))
+            sleep_s = max(0.05, target_batch_s - (time.perf_counter() - tick_start))
+            await asyncio.sleep(sleep_s)
+    finally:
+        _loadgen["active"] = False
 
 
 async def _idle_and_ttl_reaper() -> None:
@@ -195,6 +324,8 @@ def internal_metrics() -> dict[str, Any]:
         "memory_used_mb": mem_used_mb,
         "memory_total_mb": mem_total_mb,
         "fault_armed": _state["fault_armed"],
+        "active_scenario_id": _state.get("active_scenario_id"),
+        "loadgen": _loadgen_snapshot(),
         "telemetry": telemetry,
     }
 
@@ -229,15 +360,59 @@ def internal_write_file(req: WriteFileRequest) -> dict[str, Any]:
 
 
 @app.post("/internal/chaos", dependencies=[Depends(_require_vm_secret)])
-def internal_chaos() -> dict[str, Any]:
+def internal_chaos(body: ChaosBody | None = None) -> dict[str, Any]:
     _state["last_activity"] = time.time()
-    fault = arm_scenario_fault(WORKSPACE_DIR, TEMPLATE_ID, SANDBOX_ID)
+    fault = arm_scenario_fault(
+        WORKSPACE_DIR,
+        TEMPLATE_ID,
+        SANDBOX_ID,
+        scenario_id=body.scenario_id if body else None,
+        seed=body.seed if body else None,
+    )
     _state["fault_armed"] = True
+    _state["active_scenario_id"] = fault.fault_id
     return {
         "fault_id": fault.fault_id,
         "symptom": fault.symptom,
         "remediation_hint": fault.remediation_hint,
     }
+
+
+@app.post("/internal/loadgen", dependencies=[Depends(_require_vm_secret)])
+async def internal_loadgen(body: LoadgenBody) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    existing = _loadgen.get("task")
+    if existing is not None and not existing.done():
+        _loadgen["active"] = False
+        existing.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await existing
+    if body.enabled:
+        _loadgen["task"] = asyncio.create_task(_run_loadgen_loop(body.rps, body.duration_s))
+        await asyncio.sleep(0.05)
+    return {"ok": True, "loadgen": _loadgen_snapshot()}
+
+
+@app.post("/internal/project/scaffold", dependencies=[Depends(_require_vm_secret)])
+def internal_project_scaffold(body: ProjectActionBody) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    try:
+        return scaffold_workspace_project(
+            WORKSPACE_DIR,
+            body.project_id,
+            use_reference=body.use_reference,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+
+
+@app.post("/internal/project/test", dependencies=[Depends(_require_vm_secret)])
+def internal_project_test(body: ProjectActionBody) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    try:
+        return test_workspace_project(WORKSPACE_DIR, body.project_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
 
 
 @app.post("/internal/verify", dependencies=[Depends(_require_vm_secret)])

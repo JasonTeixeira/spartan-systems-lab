@@ -11,14 +11,16 @@ and Lab 2 (Weak TLS 1.0 + Missing HSTS, NGINX 413 + Worker Limit).
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import random
 import re
 import subprocess
 import sys
 import time
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
@@ -132,6 +134,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             symptom="P1 SECURITY ALERT: Small enterprise tenant receives 0 recall while red-team probe flags cross-tenant leakage risk. Fix rag/retriever.py and mcp/policy.json.",
             remediation_hint="Pre-filter docs strictly by tenant_id BEFORE top_k slicing in rag/retriever.py, and cap max_usd <= 2.00, max_steps <= 12, require_approval_for_writes=true in mcp/policy.json.",
         ),
+        ScenarioSpec(
+            scenario_id="mcp_unbounded_agent_spend_loop",
+            template_id="lab4-rag-acl",
+            title="Runaway MCP Agent Tool Loop & Budget Exhaustion",
+            difficulty="L6",
+            symptom="P1 FINOPS ALERT: Autonomous RAG agent burned $140 in 4 minutes on an unbounded tool retry loop without write approvals. Lock down mcp/policy.json & rag/retriever.py.",
+            remediation_hint="Set max_usd <= 2.00, max_steps <= 12, require_approval_for_writes=true in mcp/policy.json and preserve pre-filter tenant ACLs in rag/retriever.py.",
+        ),
     ],
     "lab5-raft-internals": [
         ScenarioSpec(
@@ -141,6 +151,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             difficulty="L6",
             symptom="P1 DATA INTEGRITY ALERT: Partitioned stale Raft leader (term 14) overwrote committed term 15 state. Fix monotonic fencing in raft/storage_guard.py.",
             remediation_hint="Reject writes whenever fencing_token < self.high_water_token in FencedStorage.write() so stale zombie leaders fail closed.",
+        ),
+        ScenarioSpec(
+            scenario_id="raft_gc_pause_stale_lease",
+            template_id="lab5-raft-internals",
+            title="15s GC-Pause Stale Leader Lease Clobber",
+            difficulty="L7",
+            symptom="P1 DATA INTEGRITY ALERT: Old leader paused 15s in stop-the-world GC, woke up, and clobbered ledger rows written by term 16. Enforce monotonic fencing in raft/storage_guard.py.",
+            remediation_hint="Check fencing_token < self.high_water_token at the storage boundary before mutating state in raft/storage_guard.py.",
         ),
     ],
     "lab6-k8s-ebpf": [
@@ -152,6 +170,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             symptom="P1 ALERT: API pods cannot reach PgBouncer :6432 after Cilium policy rollout and AZ node drain is stalled. Fix k8s/networkpolicy.yaml and k8s/pdb.yaml.",
             remediation_hint="Allow TCP egress port 6432 in k8s/networkpolicy.yaml and change k8s/pdb.yaml minAvailable from 100% to <= 80% (or maxUnavailable: 1).",
         ),
+        ScenarioSpec(
+            scenario_id="cilium_dns53_egress_blackhole",
+            template_id="lab6-k8s-ebpf",
+            title="Zero-Trust Egress Blocking CoreDNS :53 + DB :6432",
+            difficulty="L6",
+            symptom="P1 ALERT: Default-deny NetworkPolicy dropped internal service discovery & PgBouncer egress while PDB minAvailable=100% froze rollout. Fix k8s/networkpolicy.yaml & k8s/pdb.yaml.",
+            remediation_hint="Permit TCP:6432 and UDP/TCP:53 in k8s/networkpolicy.yaml and set safe drain budget in k8s/pdb.yaml.",
+        ),
     ],
     "lab7-linux-sre": [
         ScenarioSpec(
@@ -161,6 +187,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             difficulty="L5",
             symptom="P1 SRE ALERT: Worker daemon fails with 'Too many open files' + stale lockfile blocking restart while payments.internal resolves to blackhole 127.0.0.99.",
             remediation_hint="Raise nofile >= 65535 in config/limits.conf, remove stale run/worker.lock, and point payments.internal to 127.0.0.1 in config/hosts.override.",
+        ),
+        ScenarioSpec(
+            scenario_id="linux_emfile_accept_storm",
+            template_id="lab7-linux-sre",
+            title="EMFILE Accept-Loop Collapse + Orphaned PID Lock",
+            difficulty="L6",
+            symptom="P1 SRE ALERT: Edge worker dropped into EMFILE accept loop under burst traffic and refuses restart due to orphaned PID 99999 lockfile. Fix config/limits.conf, run/worker.lock & config/hosts.override.",
+            remediation_hint="Set nofile >= 65535, delete run/worker.lock, and restore payments.internal -> 127.0.0.1.",
         ),
     ],
     "lab8-scale-api": [
@@ -172,6 +206,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             symptom="P1 FINTECH ALERT: Burst bots bypassed API rate limits and retried webhooks double-charged customer balances! Fix api/rate_limiter.py and api/ledger.py.",
             remediation_hint="Enforce per-key sliding-window max_requests in api/rate_limiter.py and deduplicate transactions by idempotency_key in api/ledger.py.",
         ),
+        ScenarioSpec(
+            scenario_id="hot_tenant_boundary_burst_and_retry",
+            template_id="lab8-scale-api",
+            title="Hot-Tenant 2x Window Burst + Webhook Retry Storm",
+            difficulty="L6",
+            symptom="P1 FINTECH ALERT: Enterprise tenant spiked 2x rate quota across minute boundaries while Stripe webhook retries double-debited wallets. Fix api/rate_limiter.py and api/ledger.py.",
+            remediation_hint="Prune timestamps older than now - window_s per key in api/rate_limiter.py and return cached receipt for duplicate idempotency_key in api/ledger.py.",
+        ),
     ],
     "lab9-iac-iam": [
         ScenarioSpec(
@@ -181,6 +223,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             difficulty="L6",
             symptom="P1 SECOPS ALERT: Production CI role has Action:'*' / Resource:'*' privilege escalation and Terraform S3 backend lacks encryption & DynamoDB state locking!",
             remediation_hint="Remove wildcard '*' actions/resources in iam/policy.json (scope to least-privilege s3:GetObject/PutObject) and enable encrypt = true + dynamodb_table in terraform/backend.tf.",
+        ),
+        ScenarioSpec(
+            scenario_id="tf_concurrent_state_corruption_and_passrole",
+            template_id="lab9-iac-iam",
+            title="Concurrent Terraform Apply Corruption + Wildcard IAM",
+            difficulty="L6",
+            symptom="P1 SECOPS ALERT: Two CI runs raced on unlocked S3 state while over-privileged role exposes cross-tenant buckets. Harden terraform/backend.tf and iam/policy.json.",
+            remediation_hint="Enable encrypt = true + dynamodb_table state lock in terraform/backend.tf and replace '*' in iam/policy.json with scoped bucket ARN & least-privilege actions.",
         ),
     ],
     "lab10-ai-gpu-mcp": [
@@ -192,6 +242,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             symptom="P1 AI-SEC ALERT: Red-team prompt tricked MCP fetch tool into reading http://169.254.169.254/latest/meta-data while H100 vLLM pods crash with CUDA OOM!",
             remediation_hint="Block private/loopback/link-local IPs & non-HTTPS schemes in mcp/url_guard.py, and set gpu_memory_utilization <= 0.90 + enable_prefix_caching: true in vllm/serve.yaml.",
         ),
+        ScenarioSpec(
+            scenario_id="vllm_prefix_cache_bust_and_rfc1918_pivot",
+            template_id="lab10-ai-gpu-mcp",
+            title="vLLM Prefix Cache Disabled (5x TTFT) + RFC1918 SSRF",
+            difficulty="L7",
+            symptom="P1 AI-INFRA ALERT: H100 TTFT jumped 5x with prefix caching off & OOM crashes while MCP tool allows internal 10.0.0.x scanning. Fix mcp/url_guard.py and vllm/serve.yaml.",
+            remediation_hint="Enforce HTTPS-only public IP check in mcp/url_guard.py and set enable_prefix_caching: true with gpu_memory_utilization <= 0.90 in vllm/serve.yaml.",
+        ),
     ],
     "lab11-p0-capstone": [
         ScenarioSpec(
@@ -202,6 +260,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             symptom="SEV-0 INCIDENT COMMAND: Three simultaneous production failures! Edge NGINX TLS :8443 throwing 502s (keepalive race), PgBouncer :6432 pool starved (pool=2), AND Postgres 16 orders table doing full Seq Scans!",
             remediation_hint="Fix ALL THREE live layers: (1) CREATE INDEX idx_orders_tenant_created ON orders(tenant_id, created_at DESC), (2) set default_pool_size >= 25 in config/pgbouncer.ini & reload-pgbouncer, (3) set keepalive_timeout <= 55s in nginx/upstream.conf & reload-nginx.",
         ),
+        ScenarioSpec(
+            scenario_id="principal_black_friday_cascade_p0",
+            template_id="lab11-p0-capstone",
+            title="PRINCIPAL SEV-0: Black Friday Edge-to-Disk Cascading Collapse",
+            difficulty="L7",
+            symptom="SEV-0 BLACK FRIDAY BRIDGE: 10x traffic surge exposed unindexed Postgres orders scan, starved PgBouncer pool, AND NGINX keepalive 502 resets simultaneously. Stabilize all 3 layers!",
+            remediation_hint="Triage bottom-up: index Postgres orders(tenant_id, created_at DESC), raise PgBouncer default_pool_size >= 25 + reload-pgbouncer, lower NGINX keepalive_timeout <= 55s + reload-nginx + add K8s preStop.",
+        ),
     ],
 }
 
@@ -210,8 +276,22 @@ def _chk(cid: str, label: str, passed: bool, detail: str) -> dict[str, Any]:
     return {"id": cid, "label": label, "passed": passed, "status": "pass" if passed else "fail", "detail": detail}
 
 
-def get_scenario_spec(template_id: str, scenario_id: str | None = None) -> ScenarioSpec:
+def list_all_scenarios() -> dict[str, list[dict[str, Any]]]:
+    return {
+        tpl_id: [asdict(s) for s in specs]
+        for tpl_id, specs in LAB_SCENARIO_CATALOG.items()
+    }
+
+
+def get_scenario_spec(
+    template_id: str,
+    scenario_id: str | None = None,
+    seed: int | None = None,
+) -> ScenarioSpec:
     items = LAB_SCENARIO_CATALOG.get(template_id) or LAB_SCENARIO_CATALOG["lab1-core-engine"]
+    if scenario_id and scenario_id.lower() == "random":
+        rng = random.Random(seed) if seed is not None else random.SystemRandom()
+        return rng.choice(items)
     if scenario_id:
         for s in items:
             if s.scenario_id == scenario_id:

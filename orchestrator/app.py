@@ -23,6 +23,8 @@ from typing import Any
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
+from orchestrator.build_projects import list_build_projects
+from orchestrator.grader import list_all_scenarios
 from orchestrator.models import (
     LAB_TEMPLATES,
     TIER_QUOTAS,
@@ -55,6 +57,22 @@ class SandboxWriteFileBody(BaseModel):
     path: str = Field(..., min_length=1, max_length=200)
     content: str = Field(..., max_length=262144)
     reload: bool = False
+
+
+class SandboxLoadgenBody(BaseModel):
+    tenant_id: str = Field(..., min_length=2, max_length=64)
+    user_id: str = Field(..., min_length=2, max_length=128)
+    enabled: bool = True
+    rps: int = Field(default=50, ge=1, le=50)
+    duration_s: int = Field(default=60, ge=5, le=90)
+
+
+class SandboxProjectBody(BaseModel):
+    tenant_id: str = Field(..., min_length=2, max_length=64)
+    user_id: str = Field(..., min_length=2, max_length=128)
+    action: str = Field(..., pattern=r"^(scaffold|test)$")
+    project_id: str = Field(..., min_length=3, max_length=64)
+    use_reference: bool = False
 
 
 def create_orchestrator_app(
@@ -261,6 +279,13 @@ def create_orchestrator_app(
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from None
 
+    @app.get("/v1/scenarios", dependencies=[Depends(require_api_key)])
+    def list_scenarios_and_projects() -> dict[str, Any]:
+        return {
+            "scenarios": list_all_scenarios(),
+            "projects": list_build_projects(),
+        }
+
     @app.post(
         "/v1/sandboxes/{sandbox_id}/chaos",
         response_model=ChaosInjectResponse,
@@ -273,11 +298,50 @@ def create_orchestrator_app(
                 tenant_id=req.tenant_id,
                 user_id=req.user_id,
                 seed=req.seed,
+                scenario_id=req.scenario_id,
             )
         except SandboxNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from None
         except SandboxAccessDeniedError as exc:
             raise HTTPException(status_code=403, detail=str(exc)) from None
+        except RuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from None
+
+    @app.post("/v1/sandboxes/{sandbox_id}/loadgen", dependencies=[Depends(require_api_key)])
+    def sandbox_loadgen(sandbox_id: str, req: SandboxLoadgenBody) -> dict[str, Any]:
+        try:
+            return service.control_loadgen(
+                sandbox_id=sandbox_id,
+                tenant_id=req.tenant_id,
+                user_id=req.user_id,
+                enabled=req.enabled,
+                rps=req.rps,
+                duration_s=req.duration_s,
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        except RuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from None
+
+    @app.post("/v1/sandboxes/{sandbox_id}/project", dependencies=[Depends(require_api_key)])
+    def sandbox_project_action(sandbox_id: str, req: SandboxProjectBody) -> dict[str, Any]:
+        try:
+            return service.run_project_action(
+                sandbox_id=sandbox_id,
+                tenant_id=req.tenant_id,
+                user_id=req.user_id,
+                action=req.action,
+                project_id=req.project_id,
+                use_reference=req.use_reference,
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from None
         except RuntimeError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from None
 
