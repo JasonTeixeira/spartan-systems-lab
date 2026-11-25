@@ -454,7 +454,7 @@ class FlyMachinesRuntime:
                     "skip_launch": True,
                     "config": {
                         "image": resolved_image,
-                        "auto_destroy": True,
+                        "auto_destroy": False,
                         "restart": {"policy": "no"},
                         "guest": {"cpu_kind": "shared", "cpus": 1, "memory_mb": 1024},
                         "env": {
@@ -501,6 +501,7 @@ class FlyMachinesRuntime:
             if not mid:
                 continue
             cfg = dict(payload["config"])
+            cfg["auto_destroy"] = False
             meta = dict(cfg.get("metadata") or {})
             meta["crucible_pool"] = "claimed"
             cfg["metadata"] = meta

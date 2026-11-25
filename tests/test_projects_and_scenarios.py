@@ -195,4 +195,5 @@ def test_fly_warm_pool_claim_and_skip_launch() -> None:
     assert pool_res["created"] == 1
     create_call = next(b for m, p, b in calls if m == "POST" and p.endswith("/machines"))
     assert create_call["skip_launch"] is True
+    assert create_call["config"]["auto_destroy"] is False
     assert create_call["config"]["metadata"]["crucible_pool"] == "warm"
