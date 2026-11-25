@@ -340,6 +340,63 @@ class SandboxOrchestratorService:
             started_at=datetime.fromtimestamp(now, UTC).isoformat(),
         )
 
+    def list_files(self, *, sandbox_id: str, tenant_id: str, user_id: str) -> list[dict[str, Any]]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "list_files", None)
+        if not callable(fn):
+            return []
+        return fn(
+            container_name=rec.container_name,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
+        )
+
+    def read_file(
+        self, *, sandbox_id: str, tenant_id: str, user_id: str, path: str
+    ) -> dict[str, Any]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "read_file", None)
+        if not callable(fn):
+            raise FileNotFoundError("File editor not supported by current backend")
+        return fn(
+            container_name=rec.container_name,
+            path=path,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
+        )
+
+    def write_file(
+        self,
+        *,
+        sandbox_id: str,
+        tenant_id: str,
+        user_id: str,
+        path: str,
+        content: str,
+        reload: bool = False,
+    ) -> dict[str, Any]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "write_file", None)
+        if not callable(fn):
+            raise ValueError("File editor not supported by current backend")
+        return fn(
+            container_name=rec.container_name,
+            path=path,
+            content=content,
+            reload=reload,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
+        )
+
     def verify_and_issue_receipt(
         self, *, sandbox_id: str, tenant_id: str, user_id: str
     ) -> VerifySandboxResponse:
@@ -349,16 +406,44 @@ class SandboxOrchestratorService:
         if rec.status != "running":
             raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
 
-        healthy, detail = self.runtime.exec_health_probe(
-            container_name=rec.container_name,
-            machine_id=rec.fly_machine_id,
-            vm_secret=rec.vm_secret,
-            private_ip=rec.private_ip,
-        )
+        probe_checks = getattr(self.runtime, "exec_health_probe_checks", None)
+        granular_checks: list[dict[str, Any]] = []
+        if callable(probe_checks):
+            healthy, detail, granular_checks = probe_checks(
+                container_name=rec.container_name,
+                machine_id=rec.fly_machine_id,
+                vm_secret=rec.vm_secret,
+                private_ip=rec.private_ip,
+            )
+        else:
+            healthy, detail = self.runtime.exec_health_probe(
+                container_name=rec.container_name,
+                machine_id=rec.fly_machine_id,
+                vm_secret=rec.vm_secret,
+                private_ip=rec.private_ip,
+            )
+
         start_ts = rec.fault_started_epoch or rec.created_epoch
         elapsed = max(0.0, round(self._now() - start_ts, 2))
         revealed = rec.blind_fault_id if (healthy and rec.blind_fault_id) else None
         hint = rec.blind_remediation if (healthy and rec.blind_remediation) else None
+
+        checks_payload: list[dict[str, Any]] = [
+            {
+                "name": "sandbox_sla_probe",
+                "status": "pass" if healthy else "fail",
+                "detail": detail,
+            }
+        ]
+        for gc in granular_checks:
+            checks_payload.append(
+                {
+                    "name": str(gc.get("id") or gc.get("label") or "check"),
+                    "label": str(gc.get("label") or gc.get("id") or "Check"),
+                    "status": "pass" if gc.get("passed") else "fail",
+                    "detail": str(gc.get("detail") or ""),
+                }
+            )
 
         receipt: dict[str, Any] = {
             "schemaVersion": 1,
@@ -368,13 +453,7 @@ class SandboxOrchestratorService:
             "passed": healthy,
             "passedAt": datetime.now(UTC).isoformat(),
             "elapsedSeconds": elapsed,
-            "checks": [
-                {
-                    "name": "sandbox_sla_probe",
-                    "status": "pass" if healthy else "fail",
-                    "detail": detail,
-                }
-            ],
+            "checks": checks_payload,
             "verifiedSkillIds": [],
         }
         receipt["sha256"] = compute_receipt_sha256(receipt)

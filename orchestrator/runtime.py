@@ -20,8 +20,14 @@ from typing import Any, Protocol
 from orchestrator.grader import (
     RealLabFault,
     arm_scenario_fault,
+    list_editable_files,
+    probe_live_telemetry,
     provision_workspace,
+    read_workspace_file,
+    reload_lab_daemon,
+    verify_workspace_checks,
     verify_workspace_sla,
+    write_workspace_file,
 )
 from orchestrator.models import LabTemplateSpec, TierQuota
 
@@ -585,6 +591,106 @@ class FlyMachinesRuntime:
         )
         return resp if status == 200 else {"status": "unreachable", "error": resp.get("error")}
 
+    def list_files(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> list[dict[str, Any]]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            return []
+        status, resp = self._vm_request(
+            machine_id=mid, private_ip=private_ip, method="GET", path="/internal/files", vm_secret=vm_secret, timeout=8.0
+        )
+        return list(resp.get("files", [])) if status == 200 else []
+
+    def read_file(
+        self,
+        *,
+        container_name: str,
+        path: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        import urllib.parse
+
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            raise FileNotFoundError("VM not tracked")
+        qs = urllib.parse.urlencode({"path": path})
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="GET",
+            path=f"/internal/files/read?{qs}",
+            vm_secret=vm_secret,
+            timeout=8.0,
+        )
+        if status == 404:
+            raise FileNotFoundError(str(resp.get("detail") or resp.get("error") or "File not found"))
+        if status >= 400:
+            raise ValueError(str(resp.get("detail") or resp.get("error") or f"Read failed ({status})"))
+        return resp
+
+    def write_file(
+        self,
+        *,
+        container_name: str,
+        path: str,
+        content: str,
+        reload: bool = False,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            raise ValueError("VM not tracked")
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="PUT",
+            path="/internal/files/write",
+            vm_secret=vm_secret,
+            body={"path": path, "content": content, "reload": reload},
+            timeout=15.0,
+        )
+        if status >= 400:
+            raise ValueError(str(resp.get("detail") or resp.get("error") or f"Write failed ({status})"))
+        return resp
+
+    def exec_health_probe_checks(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> tuple[bool, str, list[dict[str, Any]]]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            return False, "fly machine not tracked", []
+        if self.http_sender is not None and self.vm_http_sender is None:
+            ok, detail = self.exec_health_probe(container_name=container_name, machine_id=mid)
+            return ok, detail, []
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="POST",
+            path="/internal/verify",
+            vm_secret=vm_secret,
+            body={},
+            timeout=20.0,
+        )
+        if status != 200:
+            return False, f"Firecracker grader unreachable ({status}): {resp.get('error', 'unknown')}", []
+        checks = resp.get("checks")
+        return bool(resp.get("passed", False)), str(resp.get("detail", "verified")), checks if isinstance(checks, list) else []
+
     def stop_sandbox(
         self, *, container_name: str, network_name: str, machine_id: str | None = None
     ) -> None:
@@ -700,3 +806,87 @@ class LinuxPtySandboxRuntime:
             return False, "sandbox workspace not found"
         ws_dir, template_id, _ = entry
         return verify_workspace_sla(ws_dir, template_id)
+
+    def exec_health_probe_checks(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> tuple[bool, str, list[dict[str, Any]]]:
+        _ = (machine_id, vm_secret, private_ip)
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            return False, "sandbox workspace not found", []
+        ws_dir, template_id, _ = entry
+        return verify_workspace_checks(ws_dir, template_id)
+
+    def get_metrics(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        _ = (machine_id, vm_secret, private_ip)
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            return {"status": "missing"}
+        ws_dir, template_id, sid = entry
+        return {
+            "sandbox_id": sid,
+            "template_id": template_id,
+            "backend": "linux-pty",
+            "real_daemons": False,
+            "daemons": {},
+            "telemetry": probe_live_telemetry(ws_dir, template_id),
+        }
+
+    def list_files(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> list[dict[str, Any]]:
+        _ = (machine_id, vm_secret, private_ip)
+        entry = self._workspaces.get(container_name)
+        return list_editable_files(entry[0]) if entry else []
+
+    def read_file(
+        self,
+        *,
+        container_name: str,
+        path: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        _ = (machine_id, vm_secret, private_ip)
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            raise FileNotFoundError("sandbox workspace not found")
+        return read_workspace_file(entry[0], path)
+
+    def write_file(
+        self,
+        *,
+        container_name: str,
+        path: str,
+        content: str,
+        reload: bool = False,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        _ = (machine_id, vm_secret, private_ip)
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            raise ValueError("sandbox workspace not found")
+        ws_dir, template_id, _ = entry
+        res = write_workspace_file(ws_dir, path, content)
+        reload_res = reload_lab_daemon(ws_dir, template_id) if reload else None
+        return {**res, "reload": reload_res, "telemetry": probe_live_telemetry(ws_dir, template_id)}

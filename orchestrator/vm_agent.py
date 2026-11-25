@@ -3,14 +3,15 @@
 Runs as PID 1 / root inside each ephemeral Fly Firecracker MicroVM (ZERO public IP exposure;
 reachable exclusively over Fly's private 6pn WireGuard mesh from the stateless orchestrator).
 
-Security guarantees:
-  1. ZERO global secrets inside the MicroVM — only a single-use per-sandbox `VM_SESSION_SECRET`.
-  2. Interactive PTY bash runs strictly as unprivileged `operator` (uid=1000) with
-     RLIMIT_NPROC=128, RLIMIT_NOFILE=512, RLIMIT_FSIZE=128MB, and scrubbed env.
-  3. `/opt/crucible-grader` is owned by root:root (0700) — completely unreadable/unwritable by `operator`.
-  4. `/proc/1/environ` is owned by root (0400) — unreadable by `operator` (`Permission denied`).
-  5. Self-enforcing idle (20 min) & hard TTL reaper exits cleanly -> Fly `auto_destroy: true`
-     terminates billing immediately even if the orchestrator restarts.
+Exposes internal 6pn-only APIs:
+  - GET  /internal/health        (unauthenticated readiness check)
+  - GET  /internal/metrics       (live daemons, RAM, Datadog-style telemetry sparkline & live SLA checks)
+  - GET  /internal/files         (list editable lab files inside /home/operator)
+  - GET  /internal/files/read    (read a sandbox workspace file safely)
+  - PUT  /internal/files/write   (write file as `operator` + optional live daemon reload + instant re-grade)
+  - POST /internal/chaos         (arm blind production fault)
+  - POST /internal/verify        (immutable root-owned multi-check grader)
+  - WS   /internal/terminal      (unprivileged `operator` uid=1000 bash PTY with rlimits & heartbeat)
 """
 from __future__ import annotations
 
@@ -34,16 +35,21 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel, Field
 
-# Import immutable grader from sibling path (works both in /opt/crucible-grader and repo)
 try:
     from grader import (  # type: ignore[import-not-found]
         arm_scenario_fault,
         collect_live_daemons,
         has_real_nginx,
         has_real_postgres,
+        list_editable_files,
+        probe_live_telemetry,
         provision_workspace,
-        verify_workspace_sla,
+        read_workspace_file,
+        reload_lab_daemon,
+        verify_workspace_checks,
+        write_workspace_file,
     )
 except ImportError:
     from orchestrator.grader import (
@@ -51,8 +57,13 @@ except ImportError:
         collect_live_daemons,
         has_real_nginx,
         has_real_postgres,
+        list_editable_files,
+        probe_live_telemetry,
         provision_workspace,
-        verify_workspace_sla,
+        read_workspace_file,
+        reload_lab_daemon,
+        verify_workspace_checks,
+        write_workspace_file,
     )
 
 SANDBOX_ID = os.environ.get("SPARTAN_SANDBOX_ID", "sbx_local").strip()
@@ -71,6 +82,12 @@ _state: dict[str, Any] = {
     "last_activity": time.time(),
     "fault_armed": ARM_INITIAL_FAULT,
 }
+
+
+class WriteFileRequest(BaseModel):
+    path: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., max_length=262144)
+    reload: bool = False
 
 
 def _verify_token(token: str) -> dict[str, Any] | None:
@@ -101,7 +118,6 @@ def _require_vm_secret(x_vm_session_secret: str | None = Header(default=None)) -
 
 
 def _try_harden_proc() -> None:
-    """Attempt hidepid=2 on /proc inside our dedicated Firecracker KVM kernel."""
     if os.geteuid() == 0:
         with contextlib.suppress(Exception):
             subprocess.run(
@@ -125,7 +141,6 @@ async def _idle_and_ttl_reaper() -> None:
         expired = now >= EXPIRES_EPOCH
         idle = _state["active_ws"] == 0 and (now - _state["last_activity"]) >= IDLE_TIMEOUT_SECONDS
         if expired or idle:
-            # Clean exit triggers Fly Machines `auto_destroy: true`
             os._exit(0)
 
 
@@ -166,6 +181,7 @@ def internal_metrics() -> dict[str, Any]:
         avail = info.get("MemAvailable", info.get("MemFree", 0)) // 1024
         mem_used_mb = max(0, mem_total_mb - avail)
 
+    telemetry = probe_live_telemetry(WORKSPACE_DIR, TEMPLATE_ID)
     return {
         "sandbox_id": SANDBOX_ID,
         "template_id": TEMPLATE_ID,
@@ -179,7 +195,37 @@ def internal_metrics() -> dict[str, Any]:
         "memory_used_mb": mem_used_mb,
         "memory_total_mb": mem_total_mb,
         "fault_armed": _state["fault_armed"],
+        "telemetry": telemetry,
     }
+
+
+@app.get("/internal/files", dependencies=[Depends(_require_vm_secret)])
+def internal_list_files() -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    return {"files": list_editable_files(WORKSPACE_DIR)}
+
+
+@app.get("/internal/files/read", dependencies=[Depends(_require_vm_secret)])
+def internal_read_file(path: str = Query(..., min_length=1, max_length=200)) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    try:
+        return read_workspace_file(WORKSPACE_DIR, path)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from None
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+
+
+@app.put("/internal/files/write", dependencies=[Depends(_require_vm_secret)])
+def internal_write_file(req: WriteFileRequest) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    try:
+        res = write_workspace_file(WORKSPACE_DIR, req.path, req.content)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    reload_res = reload_lab_daemon(WORKSPACE_DIR, TEMPLATE_ID) if req.reload else None
+    telemetry = probe_live_telemetry(WORKSPACE_DIR, TEMPLATE_ID)
+    return {**res, "reload": reload_res, "telemetry": telemetry}
 
 
 @app.post("/internal/chaos", dependencies=[Depends(_require_vm_secret)])
@@ -197,12 +243,13 @@ def internal_chaos() -> dict[str, Any]:
 @app.post("/internal/verify", dependencies=[Depends(_require_vm_secret)])
 def internal_verify() -> dict[str, Any]:
     _state["last_activity"] = time.time()
-    ok, detail = verify_workspace_sla(WORKSPACE_DIR, TEMPLATE_ID)
+    ok, detail, checks = verify_workspace_checks(WORKSPACE_DIR, TEMPLATE_ID)
     if ok:
         _state["fault_armed"] = False
     return {
         "passed": ok,
         "detail": detail,
+        "checks": checks,
         "daemons": collect_live_daemons(),
     }
 
@@ -230,7 +277,6 @@ async def internal_terminal(
 
     _set_winsize(master_fd, 120, 32)
 
-    # Strictly scrubbed environment for unprivileged `operator` shell (ZERO secrets!)
     clean_env = {
         "PATH": f"{WORKSPACE_DIR / 'bin'}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
         "HOME": str(WORKSPACE_DIR),
@@ -250,7 +296,6 @@ async def internal_terminal(
         with contextlib.suppress(KeyError):
             pw = pwd.getpwnam("operator")
             op_uid, op_gid = pw.pw_uid, pw.pw_gid
-            # Grant operator ownership of the slave PTY tty so interactive tools work cleanly
             with contextlib.suppress(OSError):
                 os.fchown(slave_fd, op_uid, op_gid)
 
@@ -309,8 +354,8 @@ async def internal_terminal(
     banner = (
         f"\x1b[1;92m[crucible-firecracker-kvm]\x1b[0m Dedicated MicroVM · "
         f"{SANDBOX_ID} ({TEMPLATE_ID} · {MODULE_ID})\r\n"
-        f"\x1b[36mLive Services:\x1b[0m {daemon_str} · \x1b[36mTip:\x1b[0m run "
-        f"\x1b[1;33mcat README.md\x1b[0m, \x1b[1;33mls -la\x1b[0m, or \x1b[1;33mhint\x1b[0m\r\n"
+        f"\x1b[36mLive Services:\x1b[0m {daemon_str} · \x1b[36mTip:\x1b[0m use "
+        f"\x1b[1;33mLive Files\x1b[0m tab or run \x1b[1;33mcat README.md\x1b[0m\r\n"
     )
     await websocket.send_text(banner)
 

@@ -212,3 +212,92 @@ def test_firecracker_per_vm_ephemeral_secret_and_stateless_replica_handoff() -> 
     assert adm_kill.status_code == 200
     assert adm_kill.json()["status"] == "terminated"
     assert any(m == "DELETE" and "e82d99aa11bb22" in u for m, u, _ in fly_calls)
+
+
+def test_live_file_editor_strict_path_containment_and_granular_checks(tmp_path: Path) -> None:
+    """File editor allows safe config edits, blocks path traversal (../), and updates granular checks live."""
+    rt = LinuxPtySandboxRuntime(base_dir=tmp_path)
+    app = create_orchestrator_app(
+        api_key=TEST_API_KEY, signing_secret=TEST_SIGNING_SECRET, runtime=rt
+    )
+    client = TestClient(app)
+    headers = {"X-Spartan-Orchestrator-Key": TEST_API_KEY}
+
+    sbx = client.post(
+        "/v1/sandboxes",
+        headers=headers,
+        json={
+            "tenant_id": "crucible",
+            "user_id": "editor_user",
+            "template_id": "lab6-k8s-ebpf",
+            "tier": "pro",
+            "arm_blind_chaos": True,
+        },
+    ).json()
+    sid = sbx["sandbox_id"]
+
+    # 1. List editable files
+    flist = client.get(
+        f"/v1/sandboxes/{sid}/files",
+        headers=headers,
+        params={"tenant_id": "crucible", "user_id": "editor_user"},
+    )
+    assert flist.status_code == 200
+    paths = [f["path"] for f in flist.json()["files"]]
+    assert "k8s/networkpolicy.yaml" in paths
+    assert "k8s/pdb.yaml" in paths
+
+    # 2. Path traversal attack MUST be rejected with 400
+    trav = client.get(
+        f"/v1/sandboxes/{sid}/files/read",
+        headers=headers,
+        params={"tenant_id": "crucible", "user_id": "editor_user", "path": "../../etc/passwd"},
+    )
+    assert trav.status_code == 400
+
+    # 3. Fix only networkpolicy.yaml via file editor -> granular checks show 1/2 passing!
+    rd = client.get(
+        f"/v1/sandboxes/{sid}/files/read",
+        headers=headers,
+        params={"tenant_id": "crucible", "user_id": "editor_user", "path": "k8s/networkpolicy.yaml"},
+    ).json()
+    fixed_np = rd["content"].replace(
+        "# BUG: PgBouncer port 6432 is blocked!",
+        "- protocol: TCP\n        port: 6432",
+    )
+    wr = client.put(
+        f"/v1/sandboxes/{sid}/files/write",
+        headers=headers,
+        json={
+            "tenant_id": "crucible",
+            "user_id": "editor_user",
+            "path": "k8s/networkpolicy.yaml",
+            "content": fixed_np,
+            "reload": True,
+        },
+    )
+    assert wr.status_code == 200
+    tel = wr.json()["telemetry"]
+    assert tel["checks_passing"] == 1 and tel["checks_total"] == 2
+    assert tel["healthy"] is False
+
+    # 4. Fix pdb.yaml -> granular checks flip 2/2 passing!
+    rd_pdb = client.get(
+        f"/v1/sandboxes/{sid}/files/read",
+        headers=headers,
+        params={"tenant_id": "crucible", "user_id": "editor_user", "path": "k8s/pdb.yaml"},
+    ).json()
+    wr2 = client.put(
+        f"/v1/sandboxes/{sid}/files/write",
+        headers=headers,
+        json={
+            "tenant_id": "crucible",
+            "user_id": "editor_user",
+            "path": "k8s/pdb.yaml",
+            "content": rd_pdb["content"].replace("100%", "75%"),
+            "reload": True,
+        },
+    )
+    assert wr2.status_code == 200
+    assert wr2.json()["telemetry"]["checks_passing"] == 2
+    assert wr2.json()["telemetry"]["healthy"] is True

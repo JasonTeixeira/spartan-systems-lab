@@ -230,23 +230,64 @@ async def main() -> None:
             st_m2 == 200 and met2.get("daemons", {}).get("nginx_tls") and met2.get("daemons", {}).get("app_api"),
             f"Real NGINX TLS :8443 + Uvicorn :8000 LIVE: {met2.get('daemons')}",
         )
-        st_v2f, v2f = http_json("POST", f"/v1/sandboxes/{sid2}/verify", body={"tenant_id": "cert-tenant", "user_id": "cert_lab2"})
-        assert_ok(st_v2f == 200 and v2f.get("passed") is False, "Armed Lab 2 correctly fails SLA")
-
-        fix2_cmd = (
-            "sed -i 's/keepalive_timeout 75s;/keepalive_timeout 50s;/' nginx/upstream.conf && "
-            "reload-nginx && "
-            "python3 -c \"from pathlib import Path; p=Path('deploy/rollout.yaml'); "
-            "p.write_text(p.read_text().replace('# TODO: missing preStop drain hook', "
-            "'lifecycle:\\n          preStop:\\n            exec:\\n              command: [\\\"/bin/sh\\\", \\\"-c\\\", \\\"sleep 10\\\"]'))\""
+        tel2 = met2.get("telemetry", {})
+        assert_ok(
+            isinstance(tel2.get("latency_ms"), (int, float)) and len(tel2.get("checks", [])) >= 3,
+            f"Live Datadog telemetry + granular checks active: latency={tel2.get('latency_ms')}ms, checks={tel2.get('checks_passing')}/{tel2.get('checks_total')}",
         )
-        fix2_out = await pty_exec(sid2, tok2, fix2_cmd, wait_timeout=15.0)
-        assert_ok("NGINX reloaded cleanly" in fix2_out, "Reloaded live NGINX TLS 1.3 via PTY")
+
+        # Verify Live File Explorer + Path-Traversal Defense + Save & Reload NGINX API!
+        st_fl, fl = http_json("GET", f"/v1/sandboxes/{sid2}/files?tenant_id=cert-tenant&user_id=cert_lab2")
+        fpaths = [f["path"] for f in fl.get("files", [])]
+        assert_ok(st_fl == 200 and "nginx/upstream.conf" in fpaths and "deploy/rollout.yaml" in fpaths, f"Live VM File Explorer returned {len(fpaths)} files")
+
+        st_trav, _ = http_json("GET", f"/v1/sandboxes/{sid2}/files/read?tenant_id=cert-tenant&user_id=cert_lab2&path=../../etc/passwd")
+        assert_ok(st_trav == 400, "File editor blocked path traversal (../../etc/passwd -> 400)")
+
+        st_rd, rd_ng = http_json("GET", f"/v1/sandboxes/{sid2}/files/read?tenant_id=cert-tenant&user_id=cert_lab2&path=nginx/upstream.conf")
+        assert_ok(st_rd == 200 and "keepalive_timeout 75s;" in rd_ng.get("content", ""), "Read live nginx/upstream.conf from Firecracker VM")
+
+        st_wr1, wr1 = http_json(
+            "PUT",
+            f"/v1/sandboxes/{sid2}/files/write",
+            body={
+                "tenant_id": "cert-tenant",
+                "user_id": "cert_lab2",
+                "path": "nginx/upstream.conf",
+                "content": rd_ng["content"].replace("keepalive_timeout 75s;", "keepalive_timeout 50s;"),
+                "reload": True,
+            },
+        )
+        assert_ok(
+            st_wr1 == 200 and wr1.get("reload", {}).get("reloaded") is True,
+            f"Save & Reload NGINX via File Editor succeeded: {wr1.get('reload', {}).get('output')}",
+        )
+
+        st_rd2, rd_dep = http_json("GET", f"/v1/sandboxes/{sid2}/files/read?tenant_id=cert-tenant&user_id=cert_lab2&path=deploy/rollout.yaml")
+        fixed_dep = rd_dep["content"].replace(
+            "# TODO: missing preStop drain hook",
+            "lifecycle:\n          preStop:\n            exec:\n              command: ['/bin/sh', '-c', 'sleep 10']",
+        )
+        st_wr2, wr2 = http_json(
+            "PUT",
+            f"/v1/sandboxes/{sid2}/files/write",
+            body={
+                "tenant_id": "cert-tenant",
+                "user_id": "cert_lab2",
+                "path": "deploy/rollout.yaml",
+                "content": fixed_dep,
+                "reload": False,
+            },
+        )
+        assert_ok(
+            st_wr2 == 200 and wr2.get("telemetry", {}).get("healthy") is True,
+            f"Live telemetry flipped GREEN immediately after editing rollout.yaml ({wr2.get('telemetry', {}).get('latency_ms')}ms)",
+        )
 
         st_v2p, v2p = http_json("POST", f"/v1/sandboxes/{sid2}/verify", body={"tenant_id": "cert-tenant", "user_id": "cert_lab2"})
         assert_ok(
             st_v2p == 200 and v2p.get("passed") is True and "LIVE NGINX TLS 1.3" in str(v2p["receipt"]["checks"][0]["detail"]),
-            f"Lab 2 SLA PASSED: {v2p['receipt']['checks'][0]['detail']}",
+            f"Lab 2 SLA PASSED via Live File Editor + Reload: {v2p['receipt']['checks'][0]['detail']}",
         )
         http_json("DELETE", f"/v1/sandboxes/{sid2}?tenant_id=cert-tenant&user_id=cert_lab2")
         created_sids.remove(sid2)

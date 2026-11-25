@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel, Field
 
 from orchestrator.models import (
     LAB_TEMPLATES,
@@ -46,6 +47,14 @@ from orchestrator.service import (
     SandboxOrchestratorService,
 )
 from orchestrator.store import InMemorySessionStore, SessionStore, SupabaseSessionStore
+
+
+class SandboxWriteFileBody(BaseModel):
+    tenant_id: str = Field(..., min_length=2, max_length=64)
+    user_id: str = Field(..., min_length=2, max_length=128)
+    path: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., max_length=262144)
+    reload: bool = False
 
 
 def create_orchestrator_app(
@@ -201,6 +210,56 @@ def create_orchestrator_app(
             raise HTTPException(status_code=404, detail=str(exc)) from None
         except SandboxAccessDeniedError as exc:
             raise HTTPException(status_code=403, detail=str(exc)) from None
+
+    @app.get("/v1/sandboxes/{sandbox_id}/files", dependencies=[Depends(require_api_key)])
+    def list_sandbox_files(
+        sandbox_id: str,
+        tenant_id: str = Query(..., min_length=2, max_length=64),
+        user_id: str = Query(..., min_length=2, max_length=128),
+    ) -> dict[str, Any]:
+        try:
+            files = service.list_files(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+            return {"files": files}
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+
+    @app.get("/v1/sandboxes/{sandbox_id}/files/read", dependencies=[Depends(require_api_key)])
+    def read_sandbox_file(
+        sandbox_id: str,
+        tenant_id: str = Query(..., min_length=2, max_length=64),
+        user_id: str = Query(..., min_length=2, max_length=128),
+        path: str = Query(..., min_length=1, max_length=200),
+    ) -> dict[str, Any]:
+        try:
+            return service.read_file(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id, path=path)
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from None
+
+    @app.put("/v1/sandboxes/{sandbox_id}/files/write", dependencies=[Depends(require_api_key)])
+    def write_sandbox_file(sandbox_id: str, req: SandboxWriteFileBody) -> dict[str, Any]:
+        try:
+            return service.write_file(
+                sandbox_id=sandbox_id,
+                tenant_id=req.tenant_id,
+                user_id=req.user_id,
+                path=req.path,
+                content=req.content,
+                reload=req.reload,
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from None
 
     @app.post(
         "/v1/sandboxes/{sandbox_id}/chaos",

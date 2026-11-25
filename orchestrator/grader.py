@@ -1,15 +1,8 @@
-"""Tamper-proof Crucible Lab Provisioner, Real Daemon Manager & Immutable SLA Grader.
+"""Tamper-proof Crucible Lab Provisioner, Real Daemon Manager, File Guard & Immutable SLA Grader.
 
 Designed to live under `/opt/crucible-grader` (root:root 0700) inside each hardware-isolated
 Firecracker MicroVM so the unprivileged `operator` shell user cannot read or alter grading logic,
 hidden test datasets, or service verification probes.
-
-Supports two execution modes automatically:
-  1. `firecracker-real-daemons` (inside Firecracker MicroVM with Postgres 16, PgBouncer,
-     Redis, NGINX, OpenSSL, Uvicorn installed): boots real production daemons and grades live
-     database plans, live PgBouncer pool config, live TLS/NGINX responses, and hidden tests.
-  2. `workspace-lite` (macOS / lightweight CI pytest without root daemons): uses SQLite +
-     isolated scrubbed subprocesses with the exact same immutable hidden-test grading rules.
 """
 from __future__ import annotations
 
@@ -117,6 +110,11 @@ LAB_FAULTS: dict[str, RealLabFault] = {
     ),
 }
 
+ALLOWED_TEXT_EXTS = {
+    ".ini", ".conf", ".yaml", ".yml", ".py", ".json", ".jsonl", ".md", ".log", ".txt", ".sh", ".sql",
+}
+MAX_EDIT_BYTES = 256 * 1024
+
 
 def has_real_postgres() -> bool:
     return (
@@ -139,6 +137,14 @@ def _operator_ids() -> tuple[int, int] | None:
         return None
 
 
+class _suppress_os:
+    def __enter__(self) -> None:
+        return None
+
+    def __exit__(self, exc_type: Any, _exc: Any, _tb: Any) -> bool:
+        return exc_type is not None and issubclass(exc_type, OSError)
+
+
 def _chown_tree(path: Path) -> None:
     if os.geteuid() != 0:
         return
@@ -155,14 +161,6 @@ def _chown_tree(path: Path) -> None:
         for f in files:
             with _suppress_os():
                 os.chown(os.path.join(root, f), uid, gid)
-
-
-class _suppress_os:
-    def __enter__(self) -> None:
-        return None
-
-    def __exit__(self, exc_type: Any, _exc: Any, _tb: Any) -> bool:
-        return exc_type is not None and issubclass(exc_type, OSError)
 
 
 def _write_executable(path: Path, content: str) -> None:
@@ -187,9 +185,8 @@ def _wait_port(port: int, timeout_s: float = 10.0) -> bool:
 
 
 def _scrubbed_subprocess_env(cwd: Path) -> dict[str, str]:
-    """Never leak orchestrator or VM secrets into untrusted user script verification."""
     return {
-        "PATH": "/usr/local/bin:/usr/bin:/bin",
+        "PATH": f"{cwd / 'bin'}:/usr/local/bin:/usr/bin:/bin",
         "HOME": str(cwd),
         "LANG": "C.UTF-8",
         "PYTHONDONTWRITEBYTECODE": "1",
@@ -197,7 +194,6 @@ def _scrubbed_subprocess_env(cwd: Path) -> dict[str, str]:
 
 
 def _unprivileged_preexec():
-    """Drop privileges to `operator` (when running as root) and enforce strict rlimits."""
     ids = _operator_ids() if os.geteuid() == 0 else None
 
     def _fn() -> None:
@@ -218,20 +214,135 @@ def _unprivileged_preexec():
 
 
 # ---------------------------------------------------------------------------
+# Safe Workspace File Explorer & Live Editor Helpers (Strict Path Containment)
+# ---------------------------------------------------------------------------
+
+def _resolve_safe_workspace_path(root: Path, rel_path: str) -> Path:
+    clean = rel_path.strip().lstrip("/")
+    if not clean or ".." in Path(clean).parts or "\x00" in clean:
+        raise ValueError("Invalid workspace file path")
+    root_resolved = root.resolve()
+    target = (root_resolved / clean).resolve()
+    try:
+        target.relative_to(root_resolved)
+    except ValueError as exc:
+        raise ValueError("Path escapes sandbox workspace") from exc
+    if target.is_dir():
+        raise ValueError("Target is a directory")
+    if target.suffix.lower() not in ALLOWED_TEXT_EXTS:
+        raise ValueError(f"Editing '{target.suffix or 'binary'}' files is not permitted via file editor")
+    return target
+
+
+def list_editable_files(root: Path) -> list[dict[str, Any]]:
+    if not root.exists():
+        return []
+    root_resolved = root.resolve()
+    items: list[dict[str, Any]] = []
+    skip_dirs = {"bin", "certs", "__pycache__", ".cache"}
+    for cur_root, dirs, files in os.walk(root_resolved):
+        dirs[:] = sorted(d for d in dirs if d not in skip_dirs and not d.startswith("."))
+        for fname in sorted(files):
+            if fname.startswith(".") or fname.endswith(".pid") or fname.endswith(".key") or fname.endswith(".crt"):
+                continue
+            fpath = Path(cur_root) / fname
+            if fpath.suffix.lower() not in ALLOWED_TEXT_EXTS:
+                continue
+            try:
+                rel = fpath.relative_to(root_resolved).as_posix()
+                size = fpath.stat().st_size
+            except OSError:
+                continue
+            if size > MAX_EDIT_BYTES:
+                continue
+            readonly = rel.startswith("logs/") or rel == "README.md" or rel.endswith("userlist.txt")
+            items.append(
+                {
+                    "path": rel,
+                    "size": size,
+                    "ext": fpath.suffix.lower().lstrip("."),
+                    "readonly": readonly,
+                }
+            )
+    # Prioritize primary editable config/code files first
+    items.sort(key=lambda x: (1 if x["readonly"] else 0, 1 if x["path"].startswith("app/") else 0, x["path"]))
+    return items
+
+
+def read_workspace_file(root: Path, rel_path: str) -> dict[str, Any]:
+    target = _resolve_safe_workspace_path(root, rel_path)
+    if not target.exists():
+        raise FileNotFoundError(f"File '{rel_path}' not found")
+    data = target.read_bytes()
+    if len(data) > MAX_EDIT_BYTES:
+        raise ValueError("File exceeds 256 KB editor limit")
+    rel = target.relative_to(root.resolve()).as_posix()
+    return {
+        "path": rel,
+        "content": data.decode("utf-8", errors="replace"),
+        "size": len(data),
+        "readonly": rel.startswith("logs/") or rel == "README.md" or rel.endswith("userlist.txt"),
+    }
+
+
+def write_workspace_file(root: Path, rel_path: str, content: str) -> dict[str, Any]:
+    target = _resolve_safe_workspace_path(root, rel_path)
+    rel = target.relative_to(root.resolve()).as_posix()
+    if rel.startswith("logs/") or rel == "README.md" or rel.endswith("userlist.txt"):
+        raise ValueError(f"File '{rel}' is read-only")
+    encoded = content.encode("utf-8")
+    if len(encoded) > MAX_EDIT_BYTES:
+        raise ValueError("File exceeds 256 KB editor limit")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(encoded)
+    ids = _operator_ids()
+    if os.geteuid() == 0 and ids is not None:
+        with _suppress_os():
+            os.chown(target, ids[0], ids[1])
+    return {"path": rel, "size": len(encoded), "saved": True}
+
+
+def reload_lab_daemon(root: Path, template_id: str) -> dict[str, Any]:
+    """Safely reload the active lab's live daemon or re-run its pipeline as `operator`."""
+    cmd: list[str] | None = None
+    if template_id == "lab1-core-engine" and (root / "bin" / "reload-pgbouncer").exists():
+        cmd = [str(root / "bin" / "reload-pgbouncer")]
+    elif template_id == "lab2-linux-tls" and (root / "bin" / "reload-nginx").exists():
+        cmd = [str(root / "bin" / "reload-nginx")]
+    elif template_id == "lab3-lakehouse-wap" and (root / "wap" / "publish_gate.py").exists():
+        cmd = [sys.executable, "wap/publish_gate.py"]
+
+    if cmd is None:
+        return {"reloaded": False, "output": "Config saved (no daemon reload required for this lab)."}
+
+    proc = subprocess.run(
+        cmd,
+        cwd=str(root),
+        env=_scrubbed_subprocess_env(root),
+        preexec_fn=_unprivileged_preexec(),
+        capture_output=True,
+        text=True,
+        timeout=8,
+    )
+    out = (proc.stdout + "\n" + proc.stderr).strip()
+    return {
+        "reloaded": proc.returncode == 0,
+        "exit_code": proc.returncode,
+        "output": out[:400] or ("Reloaded successfully." if proc.returncode == 0 else "Reload failed."),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Real Daemon Bootstrappers (Firecracker MicroVM mode)
 # ---------------------------------------------------------------------------
 
 def _start_real_postgres_stack(root: Path, broken: bool) -> None:
-    """Boot real PostgreSQL 16 (:5432), PgBouncer (:6432), Redis (:6379) & FastAPI (:8000)."""
-    # 1. Start PostgreSQL if not already listening
     if not _port_open(5432):
-        # Find installed pg_ctlcluster or postgres binary
         pg_ctlcluster = shutil.which("pg_ctlcluster")
         if pg_ctlcluster:
             ver_dirs = sorted(Path("/etc/postgresql").glob("*"))
             if ver_dirs:
                 ver = ver_dirs[-1].name
-                # Allow local trust auth so operator can psql without hunting passwords
                 hba = Path(f"/etc/postgresql/{ver}/main/pg_hba.conf")
                 if hba.exists():
                     hba_text = hba.read_text(encoding="utf-8")
@@ -242,14 +353,9 @@ def _start_real_postgres_stack(root: Path, broken: bool) -> None:
                             "host all all ::1/128 trust\n",
                             encoding="utf-8",
                         )
-                subprocess.run(
-                    [pg_ctlcluster, ver, "main", "start"],
-                    check=False,
-                    capture_output=True,
-                )
+                subprocess.run([pg_ctlcluster, ver, "main", "start"], check=False, capture_output=True)
         _wait_port(5432, timeout_s=12.0)
 
-    # 2. Create operator superuser-less role + orders DB + 12,000 realistic rows
     if _port_open(5432) and psycopg is not None:
         with psycopg.connect("host=127.0.0.1 port=5432 user=postgres dbname=postgres", autocommit=True) as conn:
             cur = conn.cursor()
@@ -289,7 +395,6 @@ def _start_real_postgres_stack(root: Path, broken: bool) -> None:
                 )
             cur.execute("ANALYZE orders")
 
-    # 3. Real PgBouncer (:6432) owned by `operator` so operator can edit & reload live!
     (root / "config").mkdir(parents=True, exist_ok=True)
     (root / "logs").mkdir(parents=True, exist_ok=True)
     userlist = root / "config" / "userlist.txt"
@@ -316,7 +421,6 @@ def _start_real_postgres_stack(root: Path, broken: bool) -> None:
     )
     _chown_tree(root)
 
-    # Restart/reload PgBouncer as operator
     subprocess.run(["pkill", "-TERM", "pgbouncer"], check=False, capture_output=True)
     time.sleep(0.15)
     ids = _operator_ids()
@@ -331,7 +435,6 @@ def _start_real_postgres_stack(root: Path, broken: bool) -> None:
         )
         _wait_port(6432, timeout_s=5.0)
 
-    # 4. Real Redis (:6379)
     if shutil.which("redis-server") and not _port_open(6379):
         subprocess.Popen(
             ["redis-server", "--daemonize", "yes", "--bind", "127.0.0.1", "--port", "6379", "--save", ""],
@@ -339,7 +442,6 @@ def _start_real_postgres_stack(root: Path, broken: bool) -> None:
             stderr=subprocess.DEVNULL,
         )
 
-    # 5. Live FastAPI Orders Service (:8000) querying real Postgres through PgBouncer (:6432)
     api_script = root / "app" / "orders_api.py"
     api_script.parent.mkdir(parents=True, exist_ok=True)
     api_script.write_text(
@@ -378,7 +480,6 @@ def get_orders(tenant_id: str = "tenant_07"):
 
 
 def _start_real_nginx_stack(root: Path, broken: bool) -> None:
-    """Boot real NGINX (:8080 HTTP, :8443 TLS 1.3) + real Uvicorn backend (:8000)."""
     (root / "nginx").mkdir(parents=True, exist_ok=True)
     (root / "nginx" / "certs").mkdir(parents=True, exist_ok=True)
     (root / "logs").mkdir(parents=True, exist_ok=True)
@@ -388,26 +489,14 @@ def _start_real_nginx_stack(root: Path, broken: bool) -> None:
     if not cert.exists() or not key.exists():
         subprocess.run(
             [
-                "openssl",
-                "req",
-                "-x509",
-                "-newkey",
-                "rsa:2048",
-                "-nodes",
-                "-keyout",
-                str(key),
-                "-out",
-                str(cert),
-                "-days",
-                "7",
-                "-subj",
-                "/CN=edge.crucible.local",
+                "openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes",
+                "-keyout", str(key), "-out", str(cert), "-days", "7",
+                "-subj", "/CN=edge.crucible.local",
             ],
             check=False,
             capture_output=True,
         )
 
-    # Real FastAPI backend (:8000) with 60s idle timeout
     app_dir = root / "app"
     app_dir.mkdir(parents=True, exist_ok=True)
     (app_dir / "edge_backend.py").write_text(
@@ -423,16 +512,8 @@ def health():
     if not _port_open(8000):
         subprocess.Popen(
             [
-                sys.executable,
-                "-m",
-                "uvicorn",
-                "edge_backend:app",
-                "--host",
-                "127.0.0.1",
-                "--port",
-                "8000",
-                "--timeout-keep-alive",
-                "60",
+                sys.executable, "-m", "uvicorn", "edge_backend:app",
+                "--host", "127.0.0.1", "--port", "8000", "--timeout-keep-alive", "60",
             ],
             cwd=str(app_dir),
             stdout=subprocess.DEVNULL,
@@ -440,7 +521,6 @@ def health():
         )
         _wait_port(8000, timeout_s=5.0)
 
-    # Main nginx.conf running cleanly under `operator` (non-root ports 8080/8443)
     main_conf = root / "nginx" / "nginx.conf"
     main_conf.write_text(
         f"worker_processes 1;\n"
@@ -498,8 +578,7 @@ def _seed_lab1(root: Path, broken: bool) -> None:
     (root / "logs").mkdir(parents=True, exist_ok=True)
     (root / "bin").mkdir(parents=True, exist_ok=True)
 
-    real_pg = has_real_postgres()
-    if real_pg:
+    if has_real_postgres():
         _start_real_postgres_stack(root, broken=broken)
         _write_executable(
             root / "bin" / "pg-xray",
@@ -526,7 +605,6 @@ def _seed_lab1(root: Path, broken: bool) -> None:
             f"fi\n",
         )
     else:
-        # Workspace-lite fallback (macOS / non-root CI)
         pool_size = 2 if broken else 32
         (root / "config" / "pgbouncer.ini").write_text(
             f"[databases]\norders = host=127.0.0.1 port=5432 dbname=orders\n\n"
@@ -846,8 +924,8 @@ def provision_workspace(
         f"{'P1 BLIND OUTAGE ARMED — ' + fault.symptom if arm_fault else 'NOMINAL BASELINE (Healthy). Trigger Blind Outage to inject fault.'}\n\n"
         f"## Real Commands Available\n"
         f"- Standard Linux tools: ls, cat, grep, sed, awk, psql, sqlite3, nginx, python3, jq, ss, ps, openssl, curl, vim, nano\n"
-        f"- Run `hint` for a guided nudge toward the root cause\n"
-        f"- Click `Verify SLA & Sign` in the War-Room header (runs immutable root-owned grader)\n",
+        f"- Edit files in the Workbench `Live Files` tab or directly in bash — both stay synced\n"
+        f"- Click `Verify SLA & Sign` to run the immutable root-owned grader and mint your SHA-256 receipt\n",
         encoding="utf-8",
     )
 
@@ -855,12 +933,10 @@ def provision_workspace(
         root / "bin" / "hint",
         f"#!/usr/bin/env bash\necho 'REMEDIATION HINT: {fault.remediation_hint}'\n",
     )
-    # Note: `check-sla` NEVER imports orchestrator code directly from student shell in Firecracker mode;
-    # in Firecracker mode it queries the local read-only status or directs to the signed grader!
     _write_executable(
         root / "bin" / "check-sla",
         "#!/usr/bin/env bash\n"
-        "echo '[crucible-grader] Click \"Verify SLA & Sign\" in the War-Room toolbar to run the immutable root-owned grader and mint your SHA-256 receipt.'\n",
+        "echo '[crucible-grader] Click \"Verify SLA & Sign\" in the Workbench header to run the immutable root-owned grader.'\n",
     )
     _chown_tree(root)
 
@@ -871,159 +947,236 @@ def arm_scenario_fault(root: Path, template_id: str, sandbox_id: str) -> RealLab
 
 
 # ---------------------------------------------------------------------------
-# Immutable Tamper-Proof SLA Verifier (NEVER trusts user test files!)
+# Granular Multi-Check Tamper-Proof SLA Verifier
 # ---------------------------------------------------------------------------
 
-def _verify_lab1(root: Path) -> tuple[bool, str]:
+def _chk(cid: str, label: str, passed: bool, detail: str) -> dict[str, Any]:
+    return {"id": cid, "label": label, "passed": passed, "status": "pass" if passed else "fail", "detail": detail}
+
+
+def _verify_lab1_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
+    checks: list[dict[str, Any]] = []
     if has_real_postgres() and psycopg is not None:
-        # 1. Verify REAL Postgres 16 query plan uses an Index Scan
+        # Check 1: Live Postgres 16 Index Scan
+        idx_ok = False
+        idx_detail = ""
         try:
             with psycopg.connect("host=127.0.0.1 port=5432 user=operator dbname=orders", connect_timeout=3) as conn:
                 plan_json = conn.execute(
                     "EXPLAIN (FORMAT JSON) SELECT id, amount_cents FROM orders "
                     "WHERE tenant_id = 'tenant_07' ORDER BY created_at DESC LIMIT 25"
                 ).fetchone()[0]  # type: ignore[index]
+            plan_str = json.dumps(plan_json)
+            if "Seq Scan" not in plan_str and ("Index Scan" in plan_str or "Index Only Scan" in plan_str):
+                idx_ok = True
+                idx_detail = "Index Scan active on orders(tenant_id, created_at)"
+            else:
+                idx_detail = "Live PostgreSQL 16 plan still doing Seq Scan on orders; create composite index on (tenant_id, created_at)"
         except Exception as exc:
-            return False, f"PostgreSQL :5432 unreachable: {exc}"
+            idx_detail = f"PostgreSQL :5432 unreachable: {exc}"
+        checks.append(_chk("pg_index", "Postgres 16 Index Scan", idx_ok, idx_detail))
 
-        plan_str = json.dumps(plan_json)
-        if "Seq Scan" in plan_str or ("Index Scan" not in plan_str and "Index Only Scan" not in plan_str):
-            return False, "Live PostgreSQL 16 plan still doing Seq Scan on orders; create composite index on (tenant_id, created_at)"
-
-        # 2. Verify REAL PgBouncer live running config (:6432) has default_pool_size >= 25
-        live_pool = 0
+        # Check 2: Live PgBouncer pool >= 25
+        pool_ok = False
+        pool_val = 0
+        pool_detail = ""
         try:
             with psycopg.connect("host=127.0.0.1 port=6432 user=operator dbname=pgbouncer", autocommit=True, connect_timeout=3) as conn:
-                rows = conn.execute("SHOW CONFIG").fetchall()
-                for row in rows:
+                for row in conn.execute("SHOW CONFIG").fetchall():
                     if str(row[0]).strip() == "default_pool_size":
-                        live_pool = int(str(row[1]).strip())
+                        pool_val = int(str(row[1]).strip())
                         break
+            if pool_val >= 25:
+                pool_ok = True
+                pool_detail = f"Live PgBouncer (:6432) default_pool_size={pool_val}"
+            else:
+                pool_detail = f"Live PgBouncer (:6432) default_pool_size={pool_val} < 25 (update config/pgbouncer.ini AND reload-pgbouncer)"
         except Exception as exc:
-            return False, f"PgBouncer :6432 admin console unreachable: {exc}"
+            pool_detail = f"PgBouncer :6432 unreachable: {exc}"
+        checks.append(_chk("pgbouncer_pool", "PgBouncer Pool >= 25", pool_ok, pool_detail))
 
-        if live_pool < 25:
-            return False, f"Live PgBouncer (:6432) default_pool_size={live_pool} < 25 (update config/pgbouncer.ini AND run reload-pgbouncer)"
-
-        # 3. Probe live FastAPI Orders service through PgBouncer
+        # Check 3: Live FastAPI /api/orders probe
+        api_ok = False
+        api_ms = 0.0
+        api_detail = ""
         try:
             t0 = time.perf_counter()
             with urllib.request.urlopen("http://127.0.0.1:8000/api/orders?tenant_id=tenant_07", timeout=4) as resp:
                 body = json.loads(resp.read().decode("utf-8"))
-            ms = round((time.perf_counter() - t0) * 1000.0, 1)
-            if resp.status != 200 or int(body.get("count", 0)) < 1:
-                return False, f"/api/orders returned unexpected response ({resp.status})"
+            api_ms = round((time.perf_counter() - t0) * 1000.0, 1)
+            if resp.status == 200 and int(body.get("count", 0)) >= 1:
+                api_ok = True
+                api_detail = f"HTTP 200 OK · {api_ms}ms ({body.get('count')} rows)"
+            else:
+                api_detail = f"Unexpected response HTTP {resp.status}"
         except Exception as exc:
-            return False, f"Live /api/orders probe failed: {exc}"
+            api_detail = f"/api/orders probe failed: {exc}"
+        checks.append(_chk("orders_api", "Orders API :8000 Live", api_ok, api_detail))
 
-        return True, f"SLA healthy (LIVE Postgres 16 + PgBouncer): Index Scan active · live default_pool_size={live_pool} · /api/orders {ms}ms"
+        all_ok = all(c["passed"] for c in checks)
+        summary = (
+            f"SLA healthy (LIVE Postgres 16 + PgBouncer): Index Scan active · live default_pool_size={pool_val} · /api/orders {api_ms}ms"
+            if all_ok
+            else next(c["detail"] for c in checks if not c["passed"])
+        )
+        return all_ok, summary, checks
 
-    # Workspace-lite fallback (SQLite + pgbouncer.ini)
+    # Workspace-lite fallback
     db_path = root / "data" / "orders.db"
     cfg_path = root / "config" / "pgbouncer.ini"
-    if not db_path.exists() or not cfg_path.exists():
-        return False, "orders.db or pgbouncer.ini missing"
-    conn = sqlite3.connect(str(db_path))
-    try:
-        plan = " ".join(
-            str(r)
-            for r in conn.execute(
-                "EXPLAIN QUERY PLAN SELECT id, amount_cents FROM orders "
-                "WHERE tenant_id='tenant_07' ORDER BY created_at DESC LIMIT 25"
-            ).fetchall()
+    idx_ok = False
+    plan = ""
+    if db_path.exists():
+        conn = sqlite3.connect(str(db_path))
+        try:
+            plan = " ".join(
+                str(r)
+                for r in conn.execute(
+                    "EXPLAIN QUERY PLAN SELECT id, amount_cents FROM orders "
+                    "WHERE tenant_id='tenant_07' ORDER BY created_at DESC LIMIT 25"
+                ).fetchall()
+            )
+            idx_ok = "SEARCH" in plan.upper()
+        finally:
+            conn.close()
+    checks.append(
+        _chk(
+            "pg_index",
+            "Composite Index Scan",
+            idx_ok,
+            f"Indexed query plan ({plan})" if idx_ok else f"orders query still doing full SCAN ({plan}); add composite index on (tenant_id, created_at)",
         )
-    finally:
-        conn.close()
-    if "SEARCH" not in plan.upper():
-        return False, f"orders query still doing full SCAN ({plan}); add composite index on (tenant_id, created_at)"
-    cfg_text = cfg_path.read_text(encoding="utf-8")
+    )
     pool_val = 0
-    for line in cfg_text.splitlines():
-        if line.strip().startswith("default_pool_size"):
-            try:
-                pool_val = int(line.split("=", 1)[1].strip())
-            except ValueError:
-                pool_val = 0
-    if pool_val < 25:
-        return False, f"PgBouncer default_pool_size={pool_val} too low (need >= 25)"
-    return True, f"SLA healthy: indexed query plan ({plan}) + default_pool_size={pool_val}"
+    if cfg_path.exists():
+        for line in cfg_path.read_text(encoding="utf-8").splitlines():
+            if line.strip().startswith("default_pool_size"):
+                try:
+                    pool_val = int(line.split("=", 1)[1].strip())
+                except ValueError:
+                    pool_val = 0
+    pool_ok = pool_val >= 25
+    checks.append(
+        _chk(
+            "pgbouncer_pool",
+            "PgBouncer Pool >= 25",
+            pool_ok,
+            f"default_pool_size={pool_val}" if pool_ok else f"PgBouncer default_pool_size={pool_val} too low (need >= 25)",
+        )
+    )
+    all_ok = all(c["passed"] for c in checks)
+    summary = (
+        f"SLA healthy: indexed query plan ({plan}) + default_pool_size={pool_val}"
+        if all_ok
+        else next(c["detail"] for c in checks if not c["passed"])
+    )
+    return all_ok, summary, checks
 
 
-def _verify_lab2(root: Path) -> tuple[bool, str]:
+def _verify_lab2_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
+    checks: list[dict[str, Any]] = []
     ng_path = root / "nginx" / "upstream.conf"
     dep_path = root / "deploy" / "rollout.yaml"
-    if not ng_path.exists() or not dep_path.exists():
-        return False, "nginx/upstream.conf or deploy/rollout.yaml missing"
-    ng = ng_path.read_text(encoding="utf-8")
-    ka = 999
-    for line in ng.splitlines():
-        s = line.strip()
-        if s.startswith("keepalive_timeout"):
-            parts = s.split()
-            if len(parts) >= 2:
-                raw = parts[1].rstrip("s;")
-                if raw.isdigit():
-                    ka = int(raw)
-    if ka > 55:
-        return False, f"nginx keepalive_timeout={ka}s exceeds safe threshold (<= 55s < 60s app idle)"
 
-    # Structural YAML validation of preStop drain hook
-    dep_raw = dep_path.read_text(encoding="utf-8")
-    if yaml is not None:
-        try:
-            doc = yaml.safe_load(dep_raw)
-            containers = doc["spec"]["template"]["spec"]["containers"]
-            has_prestop = any(
-                isinstance(c, dict)
-                and isinstance(c.get("lifecycle"), dict)
-                and isinstance(c["lifecycle"].get("preStop"), dict)
-                and bool(c["lifecycle"]["preStop"].get("exec") or c["lifecycle"]["preStop"].get("httpGet"))
-                for c in containers
-            )
-            if not has_prestop:
-                return False, "deploy/rollout.yaml containers[*].lifecycle.preStop hook missing or invalid"
-        except Exception as exc:
-            return False, f"deploy/rollout.yaml invalid YAML: {exc}"
-    elif "preStop" not in dep_raw:
-        return False, "deploy/rollout.yaml is still missing a preStop drain hook"
+    ka = 999
+    if ng_path.exists():
+        for line in ng_path.read_text(encoding="utf-8").splitlines():
+            s = line.strip()
+            if s.startswith("keepalive_timeout"):
+                parts = s.split()
+                if len(parts) >= 2:
+                    raw = parts[1].rstrip("s;")
+                    if raw.isdigit():
+                        ka = int(raw)
+    ka_ok = ka <= 55
+    checks.append(
+        _chk(
+            "nginx_keepalive",
+            "Upstream keepalive_timeout <= 55s",
+            ka_ok,
+            f"keepalive_timeout={ka}s (< 60s app idle)" if ka_ok else f"nginx keepalive_timeout={ka}s exceeds safe threshold (<= 55s)",
+        )
+    )
+
+    prestop_ok = False
+    prestop_detail = "deploy/rollout.yaml missing"
+    if dep_path.exists():
+        dep_raw = dep_path.read_text(encoding="utf-8")
+        if yaml is not None:
+            try:
+                doc = yaml.safe_load(dep_raw)
+                containers = doc["spec"]["template"]["spec"]["containers"]
+                prestop_ok = any(
+                    isinstance(c, dict)
+                    and isinstance(c.get("lifecycle"), dict)
+                    and isinstance(c["lifecycle"].get("preStop"), dict)
+                    and bool(c["lifecycle"]["preStop"].get("exec") or c["lifecycle"]["preStop"].get("httpGet"))
+                    for c in containers
+                )
+                prestop_detail = "preStop drain hook active" if prestop_ok else "deploy/rollout.yaml missing lifecycle.preStop hook"
+            except Exception as exc:
+                prestop_detail = f"Invalid YAML in deploy/rollout.yaml: {exc}"
+        else:
+            prestop_ok = "preStop" in dep_raw
+            prestop_detail = "preStop hook present" if prestop_ok else "deploy/rollout.yaml missing preStop hook"
+    checks.append(_chk("k8s_prestop", "K8s preStop Drain Hook", prestop_ok, prestop_detail))
 
     if has_real_nginx():
-        # Verify real nginx -t AND live TLS :8443 proxy response!
         chk = subprocess.run(
             ["nginx", "-t", "-c", str(root / "nginx" / "nginx.conf")],
             capture_output=True,
             text=True,
             timeout=5,
         )
-        if chk.returncode != 0:
-            return False, f"nginx -t syntax check failed: {(chk.stderr or chk.stdout).strip()}"
+        syn_ok = chk.returncode == 0
+        checks.append(
+            _chk(
+                "nginx_syntax",
+                "NGINX Config Syntax (nginx -t)",
+                syn_ok,
+                "nginx -t syntax valid" if syn_ok else (chk.stderr or chk.stdout).strip()[:160],
+            )
+        )
         curl_chk = subprocess.run(
             ["curl", "-skf", "https://127.0.0.1:8443/health"],
             capture_output=True,
             text=True,
             timeout=5,
         )
-        if curl_chk.returncode != 0 or "edge-api" not in curl_chk.stdout:
-            return False, "Live NGINX TLS :8443 -> Uvicorn :8000 health check failed (run reload-nginx)"
-        return True, f"SLA healthy (LIVE NGINX TLS 1.3): nginx -t OK · keepalive_timeout={ka}s · https://:8443 200 OK · preStop verified"
+        tls_ok = curl_chk.returncode == 0 and "edge-api" in curl_chk.stdout
+        checks.append(
+            _chk(
+                "tls_endpoint",
+                "Live TLS 1.3 :8443 -> Uvicorn",
+                tls_ok,
+                "https://127.0.0.1:8443/health 200 OK" if tls_ok else "TLS :8443 proxy health check failed (run reload-nginx)",
+            )
+        )
 
-    return True, f"SLA healthy: keepalive_timeout={ka}s and preStop drain hook active"
+    all_ok = all(c["passed"] for c in checks)
+    summary = (
+        f"SLA healthy (LIVE NGINX TLS 1.3): nginx -t OK · keepalive_timeout={ka}s · https://:8443 200 OK · preStop verified"
+        if (all_ok and has_real_nginx())
+        else (f"SLA healthy: keepalive_timeout={ka}s and preStop drain hook active" if all_ok else next(c["detail"] for c in checks if not c["passed"]))
+    )
+    return all_ok, summary, checks
 
 
-def _verify_lab3(root: Path) -> tuple[bool, str]:
+def _verify_lab3_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
     gate = root / "wap" / "publish_gate.py"
     if not gate.exists():
-        return False, "wap/publish_gate.py missing"
+        c = [_chk("wap_exec", "WAP Publish Gate", False, "wap/publish_gate.py missing")]
+        return False, "wap/publish_gate.py missing", c
 
-    # Run user's publish_gate.py against a HIDDEN root-owned adversarial batch in an isolated temp dir!
     hidden_batch = [
         {"event_id": "h_1", "tenant_id": "alpha", "revenue_cents": 1200},
         {"event_id": "h_2", "tenant_id": None, "revenue_cents": 5000},
         {"event_id": "h_3", "tenant_id": "   ", "revenue_cents": 3200},
         {"event_id": "h_4", "tenant_id": "beta", "revenue_cents": 8900},
-        {"event_id": "h_5", "revenue_cents": 4100},  # missing tenant_id key completely
+        {"event_id": "h_5", "revenue_cents": 4100},
         {"event_id": "h_6", "tenant_id": "gamma", "revenue_cents": 2500},
     ]
+    checks: list[dict[str, Any]] = []
     with tempfile.TemporaryDirectory(prefix="crucible-grade-lab3-") as td:
         td_path = Path(td)
         (td_path / "wap").mkdir(parents=True, exist_ok=True)
@@ -1041,28 +1194,32 @@ def _verify_lab3(root: Path) -> tuple[bool, str]:
             text=True,
             timeout=8,
         )
-        if proc.returncode != 0:
-            return False, f"publish_gate.py failed on hidden audit batch: {(proc.stderr or proc.stdout).strip()[:200]}"
+        exec_ok = proc.returncode == 0
+        checks.append(_chk("wap_exec", "WAP Gate Execution", exec_ok, "Ran cleanly" if exec_ok else (proc.stderr or proc.stdout).strip()[:160]))
         curated_path = td_path / "wap" / "curated.jsonl"
         dlq_path = td_path / "wap" / "dlq.jsonl"
-        if not curated_path.exists() or not dlq_path.exists():
-            return False, "publish_gate.py did not produce wap/curated.jsonl and wap/dlq.jsonl"
-        curated = [json.loads(l) for l in curated_path.read_text(encoding="utf-8").splitlines() if l.strip()]
-        dlq = [json.loads(l) for l in dlq_path.read_text(encoding="utf-8").splitlines() if l.strip()]
-        if any(not (isinstance(r.get("tenant_id"), str) and r["tenant_id"].strip()) for r in curated):
-            return False, "Hidden audit failed: curated.jsonl contains invalid/null/blank tenant_id rows!"
-        if len(curated) != 3 or len(dlq) != 3:
-            return False, f"Hidden audit failed: expected 3 curated + 3 quarantined DLQ rows, got curated={len(curated)} dlq={len(dlq)}"
-    return True, "SLA healthy: WAP gate passed hidden 6-row adversarial audit (3 clean published, 3 poisoned quarantined)"
+        clean_ok = False
+        count_ok = False
+        clean_detail = "curated.jsonl / dlq.jsonl missing"
+        count_detail = "Not evaluated"
+        if exec_ok and curated_path.exists() and dlq_path.exists():
+            curated = [json.loads(l) for l in curated_path.read_text(encoding="utf-8").splitlines() if l.strip()]
+            dlq = [json.loads(l) for l in dlq_path.read_text(encoding="utf-8").splitlines() if l.strip()]
+            clean_ok = not any(not (isinstance(r.get("tenant_id"), str) and r["tenant_id"].strip()) for r in curated)
+            clean_detail = "0 poisoned rows in curated.jsonl" if clean_ok else "curated.jsonl still contains NULL/blank tenant_id rows!"
+            count_ok = len(curated) == 3 and len(dlq) == 3
+            count_detail = f"3 clean curated, 3 poisoned quarantined" if count_ok else f"Expected 3 curated + 3 DLQ, got curated={len(curated)} dlq={len(dlq)}"
+        checks.append(_chk("wap_quarantine", "Zero Poisoned Rows Published", clean_ok, clean_detail))
+        checks.append(_chk("wap_counts", "Hidden 6-Row Audit Split (3/3)", count_ok, count_detail))
+    all_ok = all(c["passed"] for c in checks)
+    return all_ok, ("SLA healthy: WAP gate passed hidden 6-row adversarial audit (3 clean published, 3 poisoned quarantined)" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
 
 
-def _verify_lab4(root: Path) -> tuple[bool, str]:
+def _verify_lab4_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
     retriever = root / "rag" / "retriever.py"
     policy_path = root / "mcp" / "policy.json"
-    if not retriever.exists() or not policy_path.exists():
-        return False, "rag/retriever.py or mcp/policy.json missing"
+    checks: list[dict[str, Any]] = []
 
-    # IMMUTABLE hidden red-team ACL grader (completely ignores user-editable rag/test_acl.py!)
     hidden_test = """
 import sys
 sys.path.insert(0, "rag")
@@ -1080,155 +1237,163 @@ res = retrieve_for_tenant(CORPUS, tenant_id="startup_z", top_k=2)
 assert isinstance(res, list) and len(res) == 2, f"Post-filter starvation: expected 2 startup_z docs, got {len(res)}"
 assert all(d["tenant_id"] == "startup_z" for d in res), "CRITICAL: cross-tenant document leaked!"
 assert [d["id"] for d in res] == ["s1", "s2"], f"Incorrect score ordering: {[d['id'] for d in res]}"
-empty = retrieve_for_tenant(CORPUS, tenant_id="ghost_tenant", top_k=2)
-assert empty == [], f"Unauthorized tenant received docs: {empty}"
+assert retrieve_for_tenant(CORPUS, tenant_id="ghost_tenant", top_k=2) == []
 print("HIDDEN_ACL_PASS")
 """
-    proc = subprocess.run(
-        [sys.executable, "-c", hidden_test],
-        cwd=str(root),
-        env=_scrubbed_subprocess_env(root),
-        preexec_fn=_unprivileged_preexec(),
-        capture_output=True,
-        text=True,
-        timeout=8,
-    )
-    if proc.returncode != 0 or "HIDDEN_ACL_PASS" not in proc.stdout:
-        return False, f"Hidden ACL red-team probe failed: {(proc.stderr or proc.stdout).strip()[:220]}"
+    acl_ok = False
+    acl_detail = "rag/retriever.py missing"
+    if retriever.exists():
+        proc = subprocess.run(
+            [sys.executable, "-c", hidden_test],
+            cwd=str(root),
+            env=_scrubbed_subprocess_env(root),
+            preexec_fn=_unprivileged_preexec(),
+            capture_output=True,
+            text=True,
+            timeout=8,
+        )
+        acl_ok = proc.returncode == 0 and "HIDDEN_ACL_PASS" in proc.stdout
+        acl_detail = "Pre-filter ACL passed (0 leaks, 100% small-tenant recall)" if acl_ok else (proc.stderr or proc.stdout).strip()[:180]
+    checks.append(_chk("rag_prefilter", "Pre-Filter Tenant ACL (Hidden Red-Team)", acl_ok, acl_detail))
 
-    try:
-        policy = json.loads(policy_path.read_text(encoding="utf-8"))
-    except ValueError as exc:
-        return False, f"mcp/policy.json invalid JSON: {exc}"
-    if float(policy.get("max_usd", 999)) > 2.0 or int(policy.get("max_steps", 999)) > 12:
-        return False, f"mcp/policy.json caps unsafe: max_usd={policy.get('max_usd')} max_steps={policy.get('max_steps')}"
-    if policy.get("require_approval_for_writes") is not True:
-        return False, "mcp/policy.json must enforce require_approval_for_writes: true"
-    return True, "SLA healthy: hidden multi-tenant pre-filter ACL passed (0 leaks) + bounded MCP budget verified"
+    budget_ok = False
+    writes_ok = False
+    budget_detail = "mcp/policy.json missing"
+    writes_detail = "mcp/policy.json missing"
+    if policy_path.exists():
+        try:
+            policy = json.loads(policy_path.read_text(encoding="utf-8"))
+            max_usd = float(policy.get("max_usd", 999))
+            max_steps = int(policy.get("max_steps", 999))
+            budget_ok = max_usd <= 2.0 and max_steps <= 12
+            budget_detail = f"max_usd=${max_usd}, max_steps={max_steps}" if budget_ok else f"Unsafe caps: max_usd={max_usd} (<=2), max_steps={max_steps} (<=12)"
+            writes_ok = policy.get("require_approval_for_writes") is True
+            writes_detail = "require_approval_for_writes=true" if writes_ok else "require_approval_for_writes must be true"
+        except ValueError as exc:
+            budget_detail = f"Invalid JSON: {exc}"
+    checks.append(_chk("mcp_budget", "Bounded MCP Budget Caps", budget_ok, budget_detail))
+    checks.append(_chk("mcp_writes", "MCP Write Approval Gate", writes_ok, writes_detail))
+
+    all_ok = all(c["passed"] for c in checks)
+    return all_ok, ("SLA healthy: hidden multi-tenant pre-filter ACL passed (0 leaks) + bounded MCP budget verified" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
 
 
-def _verify_lab5(root: Path) -> tuple[bool, str]:
+def _verify_lab5_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
     guard = root / "raft" / "storage_guard.py"
-    if not guard.exists():
-        return False, "raft/storage_guard.py missing"
-
-    # IMMUTABLE hidden adversarial split-brain grader (ignores user-editable raft/test_fencing.py!)
     hidden_test = """
 import sys
 sys.path.insert(0, "raft")
 from storage_guard import FencedStorage
 
 s = FencedStorage()
-assert s.write("acct", "100", fencing_token=10) is True, "Initial term-10 write failed"
-assert s.write("acct", "250", fencing_token=15) is True, "Higher term-15 write failed"
+assert s.write("acct", "100", fencing_token=10) is True
+assert s.write("acct", "250", fencing_token=15) is True
 assert s.write("acct", "STALE_14", fencing_token=14) is False, "Zombie leader term=14 was accepted!"
 assert s.write("acct", "STALE_01", fencing_token=1) is False, "Ancient leader term=1 was accepted!"
-assert s.data["acct"] == "250", f"Committed state corrupted: {s.data['acct']}"
-assert s.write("acct", "300", fencing_token=15) is True, "Same-term leader write should succeed"
-assert s.write("acct", "400", fencing_token=16) is True, "New term-16 leader write failed"
-assert s.write("acct", "STALE_15", fencing_token=15) is False, "Old term-15 zombie write after term-16 was accepted!"
+assert s.data["acct"] == "250", "Committed state corrupted!"
+assert s.write("acct", "300", fencing_token=15) is True
+assert s.write("acct", "400", fencing_token=16) is True
+assert s.write("acct", "STALE_15", fencing_token=15) is False, "Stale term=15 accepted after term=16!"
 assert s.data["acct"] == "400"
 print("HIDDEN_RAFT_PASS")
 """
-    proc = subprocess.run(
-        [sys.executable, "-c", hidden_test],
-        cwd=str(root),
-        env=_scrubbed_subprocess_env(root),
-        preexec_fn=_unprivileged_preexec(),
-        capture_output=True,
-        text=True,
-        timeout=8,
-    )
-    if proc.returncode != 0 or "HIDDEN_RAFT_PASS" not in proc.stdout:
-        return False, f"Hidden Raft fencing probe failed: {(proc.stderr or proc.stdout).strip()[:220]}"
-    return True, "SLA healthy: hidden multi-term split-brain adversarial suite passed (0 zombie overwrites)"
+    ok = False
+    detail = "raft/storage_guard.py missing"
+    if guard.exists():
+        proc = subprocess.run(
+            [sys.executable, "-c", hidden_test],
+            cwd=str(root),
+            env=_scrubbed_subprocess_env(root),
+            preexec_fn=_unprivileged_preexec(),
+            capture_output=True,
+            text=True,
+            timeout=8,
+        )
+        ok = proc.returncode == 0 and "HIDDEN_RAFT_PASS" in proc.stdout
+        detail = "All stale zombie writes rejected; committed term preserved" if ok else (proc.stderr or proc.stdout).strip()[:180]
+    checks = [_chk("raft_fencing", "Monotonic Split-Brain Fencing (Hidden Suite)", ok, detail)]
+    return ok, ("SLA healthy: hidden multi-term split-brain adversarial suite passed (0 zombie overwrites)" if ok else detail), checks
 
 
-def _verify_lab6(root: Path) -> tuple[bool, str]:
+def _verify_lab6_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
     np_path = root / "k8s" / "networkpolicy.yaml"
     pdb_path = root / "k8s" / "pdb.yaml"
-    if not np_path.exists() or not pdb_path.exists():
-        return False, "k8s/networkpolicy.yaml or k8s/pdb.yaml missing"
+    checks: list[dict[str, Any]] = []
 
-    np_text = np_path.read_text(encoding="utf-8")
-    pdb_text = pdb_path.read_text(encoding="utf-8")
-
-    if yaml is not None:
-        try:
-            np_doc = yaml.safe_load(np_text)
-            pdb_doc = yaml.safe_load(pdb_text)
-        except Exception as exc:
-            return False, f"Invalid K8s YAML manifest: {exc}"
-        if not isinstance(np_doc, dict) or np_doc.get("kind") != "NetworkPolicy":
-            return False, "k8s/networkpolicy.yaml must be kind: NetworkPolicy"
-        policy_types = np_doc.get("spec", {}).get("policyTypes", [])
-        if "Egress" not in policy_types:
-            return False, "NetworkPolicy spec.policyTypes must include Egress"
-        egress = np_doc.get("spec", {}).get("egress", []) or []
-        ports_found: set[tuple[str, int]] = set()
-        for rule in egress:
-            if not isinstance(rule, dict):
-                continue
-            for p in rule.get("ports", []) or []:
-                if isinstance(p, dict) and p.get("port") is not None:
-                    proto = str(p.get("protocol", "TCP")).upper()
-                    try:
-                        ports_found.add((proto, int(p["port"])))
-                    except (ValueError, TypeError):
-                        pass
-        if ("TCP", 6432) not in ports_found:
-            return False, "k8s/networkpolicy.yaml egress still blocks TCP port 6432 to PgBouncer"
-
-        if not isinstance(pdb_doc, dict) or pdb_doc.get("kind") != "PodDisruptionBudget":
-            return False, "k8s/pdb.yaml must be kind: PodDisruptionBudget"
-        pdb_spec = pdb_doc.get("spec", {}) or {}
-        min_avail = pdb_spec.get("minAvailable")
-        max_unavail = pdb_spec.get("maxUnavailable")
-        safe_pdb = False
-        if max_unavail is not None:
+    np_ok = False
+    np_detail = "k8s/networkpolicy.yaml missing"
+    if np_path.exists():
+        np_text = np_path.read_text(encoding="utf-8")
+        if yaml is not None:
             try:
-                safe_pdb = int(str(max_unavail).rstrip("%")) >= 1
-            except ValueError:
-                safe_pdb = False
-        elif min_avail is not None:
-            raw = str(min_avail).strip()
-            if raw.endswith("%"):
-                try:
-                    safe_pdb = int(raw[:-1]) <= 80
-                except ValueError:
-                    safe_pdb = False
-            else:
-                try:
-                    safe_pdb = int(raw) <= 3
-                except ValueError:
-                    safe_pdb = False
-        if not safe_pdb:
-            return False, f"k8s/pdb.yaml blocks AZ node drains (minAvailable={min_avail}, maxUnavailable={max_unavail}; need <= 80% or maxUnavailable >= 1)"
-        return True, "SLA healthy: structural K8s NetworkPolicy allows TCP:6432 egress & PDB permits safe AZ drains"
+                np_doc = yaml.safe_load(np_text)
+                policy_types = np_doc.get("spec", {}).get("policyTypes", []) if isinstance(np_doc, dict) else []
+                egress = np_doc.get("spec", {}).get("egress", []) if isinstance(np_doc, dict) else []
+                ports_found: set[tuple[str, int]] = set()
+                for rule in egress or []:
+                    if isinstance(rule, dict):
+                        for p in rule.get("ports", []) or []:
+                            if isinstance(p, dict) and p.get("port") is not None:
+                                try:
+                                    ports_found.add((str(p.get("protocol", "TCP")).upper(), int(p["port"])))
+                                except (ValueError, TypeError):
+                                    pass
+                np_ok = isinstance(np_doc, dict) and np_doc.get("kind") == "NetworkPolicy" and "Egress" in policy_types and ("TCP", 6432) in ports_found
+                np_detail = "Egress TCP:6432 (PgBouncer) allowed" if np_ok else "NetworkPolicy egress still blocks TCP port 6432"
+            except Exception as exc:
+                np_detail = f"Invalid YAML: {exc}"
+        else:
+            np_ok = "6432" in np_text
+            np_detail = "Port 6432 allowed" if np_ok else "Port 6432 blocked"
+    checks.append(_chk("k8s_netpol", "NetworkPolicy Egress TCP :6432", np_ok, np_detail))
 
-    # Fallback if PyYAML unavailable
-    if "6432" not in np_text:
-        return False, "k8s/networkpolicy.yaml still blocks egress TCP port 6432 to PgBouncer"
-    if "100%" in pdb_text:
-        return False, "k8s/pdb.yaml minAvailable: 100% still blocks AZ node drains"
-    return True, "SLA healthy: Cilium/K8s egress allows :6432 and PDB allows safe node drains"
+    pdb_ok = False
+    pdb_detail = "k8s/pdb.yaml missing"
+    if pdb_path.exists():
+        pdb_text = pdb_path.read_text(encoding="utf-8")
+        if yaml is not None:
+            try:
+                pdb_doc = yaml.safe_load(pdb_text)
+                spec = pdb_doc.get("spec", {}) if isinstance(pdb_doc, dict) else {}
+                min_avail = spec.get("minAvailable")
+                max_unavail = spec.get("maxUnavailable")
+                if max_unavail is not None:
+                    pdb_ok = int(str(max_unavail).rstrip("%")) >= 1
+                elif min_avail is not None:
+                    raw = str(min_avail).strip()
+                    pdb_ok = int(raw[:-1]) <= 80 if raw.endswith("%") else int(raw) <= 3
+                pdb_detail = f"Safe drain budget (minAvailable={min_avail}, maxUnavailable={max_unavail})" if pdb_ok else f"PDB blocks AZ drains (minAvailable={min_avail}; set <= 80% or maxUnavailable: 1)"
+            except Exception as exc:
+                pdb_detail = f"Invalid YAML: {exc}"
+        else:
+            pdb_ok = "100%" not in pdb_text
+            pdb_detail = "PDB drain safe" if pdb_ok else "minAvailable: 100% blocks drains"
+    checks.append(_chk("k8s_pdb", "PDB Safe AZ Node Drain", pdb_ok, pdb_detail))
+
+    all_ok = all(c["passed"] for c in checks)
+    return all_ok, ("SLA healthy: structural K8s NetworkPolicy allows TCP:6432 egress & PDB permits safe AZ drains" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
 
 
-def verify_workspace_sla(root: Path, template_id: str) -> tuple[bool, str]:
+def verify_workspace_checks(root: Path, template_id: str) -> tuple[bool, str, list[dict[str, Any]]]:
     if not root.exists():
-        return False, "sandbox workspace missing"
+        return False, "sandbox workspace missing", [_chk("workspace", "Workspace Mounted", False, "missing")]
     verifiers = {
-        "lab1-core-engine": _verify_lab1,
-        "lab2-linux-tls": _verify_lab2,
-        "lab3-lakehouse-wap": _verify_lab3,
-        "lab4-rag-acl": _verify_lab4,
-        "lab5-raft-internals": _verify_lab5,
-        "lab6-k8s-ebpf": _verify_lab6,
+        "lab1-core-engine": _verify_lab1_checks,
+        "lab2-linux-tls": _verify_lab2_checks,
+        "lab3-lakehouse-wap": _verify_lab3_checks,
+        "lab4-rag-acl": _verify_lab4_checks,
+        "lab5-raft-internals": _verify_lab5_checks,
+        "lab6-k8s-ebpf": _verify_lab6_checks,
     }
     fn = verifiers.get(template_id)
     if fn is None:
-        return False, f"unknown template {template_id}"
+        return False, f"unknown template {template_id}", []
     return fn(root)
+
+
+def verify_workspace_sla(root: Path, template_id: str) -> tuple[bool, str]:
+    ok, detail, _ = verify_workspace_checks(root, template_id)
+    return ok, detail
 
 
 def collect_live_daemons() -> dict[str, bool]:
@@ -1238,4 +1403,53 @@ def collect_live_daemons() -> dict[str, bool]:
         "redis": _port_open(6379),
         "nginx_tls": _port_open(8443),
         "app_api": _port_open(8000),
+    }
+
+
+def probe_live_telemetry(root: Path, template_id: str) -> dict[str, Any]:
+    """Fast live telemetry sample for the Workbench's real-time Datadog-style sparkline."""
+    t0 = time.perf_counter()
+    healthy, summary, checks = verify_workspace_checks(root, template_id)
+    probe_ms = round((time.perf_counter() - t0) * 1000.0, 1)
+
+    # Extract real service latency for Lab 1 / Lab 2 when live daemons are running
+    metric_label = "SLA PROBE"
+    metric_value_ms = probe_ms
+    if template_id == "lab1-core-engine" and has_real_postgres():
+        metric_label = "/api/orders p99"
+        try:
+            q0 = time.perf_counter()
+            with urllib.request.urlopen("http://127.0.0.1:8000/api/orders?tenant_id=tenant_07", timeout=2) as resp:
+                body = json.loads(resp.read().decode("utf-8"))
+            raw_ms = float(body.get("latency_ms", round((time.perf_counter() - q0) * 1000.0, 1)))
+            # Reflect PgBouncer pool queueing penalty visibly when pool is starved so sparkline shows real pain vs fix!
+            pool_ok = any(c["id"] == "pgbouncer_pool" and c["passed"] for c in checks)
+            idx_ok = any(c["id"] == "pg_index" and c["passed"] for c in checks)
+            if not idx_ok or not pool_ok:
+                metric_value_ms = round(max(raw_ms, 180.0 if not idx_ok else 95.0), 1)
+            else:
+                metric_value_ms = round(raw_ms, 1)
+        except Exception:
+            metric_value_ms = 500.0
+    elif template_id == "lab2-linux-tls" and has_real_nginx():
+        metric_label = "TLS :8443 TTFB"
+        q0 = time.perf_counter()
+        chk = subprocess.run(
+            ["curl", "-skf", "https://127.0.0.1:8443/health"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+        raw_ms = round((time.perf_counter() - q0) * 1000.0, 1)
+        ka_ok = any(c["id"] == "nginx_keepalive" and c["passed"] for c in checks)
+        metric_value_ms = raw_ms if (chk.returncode == 0 and ka_ok) else round(max(raw_ms, 210.0), 1)
+
+    return {
+        "healthy": healthy,
+        "summary": summary,
+        "metric_label": metric_label,
+        "latency_ms": metric_value_ms,
+        "checks_passing": sum(1 for c in checks if c["passed"]),
+        "checks_total": len(checks),
+        "checks": checks,
     }
