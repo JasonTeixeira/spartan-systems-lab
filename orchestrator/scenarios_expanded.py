@@ -80,6 +80,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             symptom="P1 ALERT: Schema migration & checkout queries stalled behind idle-in-transaction locks. Inspect config/postgres-guard.conf and data/orders plan.",
             remediation_hint="Set idle_in_transaction_session_timeout <= 30000 (ms) and lock_timeout <= 5000 (ms) in config/postgres-guard.conf and ensure orders index is present.",
         ),
+        ScenarioSpec(
+            scenario_id="pg_wal_bloat_and_vacuum_freeze",
+            template_id="lab1-core-engine",
+            title="Postgres MVCC Dead-Tuple Bloat, WAL Spike & XID Wraparound",
+            difficulty="L7",
+            symptom="P1 STORAGE ALERT: orders table is 68% bloated with dead MVCC tuples, WAL disk growth hit 14GB/hr, and autovacuum cannot reclaim pages behind idle transactions. Inspect config/postgres-guard.conf & logs/pg_vacuum.log.",
+            remediation_hint="Set autovacuum_vacuum_scale_factor <= 0.05, max_wal_size >= 2048 (MB), and idle_in_transaction_session_timeout <= 30000 in config/postgres-guard.conf, plus index orders(tenant_id, created_at) and raise PgBouncer pool >= 25.",
+        ),
     ],
     "lab2-linux-tls": [
         ScenarioSpec(
@@ -105,6 +113,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             difficulty="L5",
             symptom="P1 ALERT: Enterprise webhook payloads failing with HTTP 413 Request Entity Too Large and worker_connections saturated. Inspect nginx/security.conf & nginx/upstream.conf.",
             remediation_hint="Raise client_max_body_size >= 10m in nginx/security.conf and ensure upstream keepalive_timeout <= 55s, then run reload-nginx.",
+        ),
+        ScenarioSpec(
+            scenario_id="tc_netem_packet_loss_tail_collapse",
+            template_id="lab2-linux-tls",
+            title="TCP tc-netem 2.5% Packet Loss + Retry Storm Tail Collapse",
+            difficulty="L7",
+            symptom="P1 NETWORK ALERT: Cross-AZ link hit 2.5% packet loss under CUBIC congestion control, collapsing TCP throughput and causing an NGINX retry storm. Inspect config/netem.conf, nginx/upstream.conf & deploy/rollout.yaml.",
+            remediation_hint="Switch congestion_control to bbr and clear loss_pct <= 0.1 in config/netem.conf, cap keepalive_timeout <= 55s in nginx/upstream.conf, and preserve lifecycle.preStop in deploy/rollout.yaml.",
         ),
     ],
     "lab3-lakehouse-wap": [
@@ -160,6 +176,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             symptom="P1 DATA INTEGRITY ALERT: Old leader paused 15s in stop-the-world GC, woke up, and clobbered ledger rows written by term 16. Enforce monotonic fencing in raft/storage_guard.py.",
             remediation_hint="Check fencing_token < self.high_water_token at the storage boundary before mutating state in raft/storage_guard.py.",
         ),
+        ScenarioSpec(
+            scenario_id="raft_isr_lag_and_fencing_storm",
+            template_id="lab5-raft-internals",
+            title="Kafka ISR Shrink + Unfenced Raft Leader Failover",
+            difficulty="L7",
+            symptom="P1 CONSENSUS ALERT: Broker failover dropped 1,800 acked payment events because acks=1 & min_insync_replicas=1 allowed un-replicated commits while stale leader bypassed fencing. Fix raft/cluster.json & raft/storage_guard.py.",
+            remediation_hint="Set acks='all' and min_insync_replicas >= 2 (with replication_factor >= 3) in raft/cluster.json and enforce monotonic fencing_token rejection in raft/storage_guard.py.",
+        ),
     ],
     "lab6-k8s-ebpf": [
         ScenarioSpec(
@@ -195,6 +219,14 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             difficulty="L6",
             symptom="P1 SRE ALERT: Edge worker dropped into EMFILE accept loop under burst traffic and refuses restart due to orphaned PID 99999 lockfile. Fix config/limits.conf, run/worker.lock & config/hosts.override.",
             remediation_hint="Set nofile >= 65535, delete run/worker.lock, and restore payments.internal -> 127.0.0.1.",
+        ),
+        ScenarioSpec(
+            scenario_id="cgroup_oom_kill_and_cpu_throttle",
+            template_id="lab7-linux-sre",
+            title="Linux cgroup v2 OOM-Kill (Exit 137) + CFS CPU Throttling",
+            difficulty="L7",
+            symptom="P1 KERNEL ALERT: Worker pods CrashLoopBackOff with Exit 137 (memory.max=128M) while surviving pods suffer 480ms p99 CFS throttling (cpu.max=5000 100000). Inspect config/cgroup.conf & logs/dmesg_oom.log.",
+            remediation_hint="Raise memory_max_mb >= 512 and cpu_quota_us >= 50000 (out of 100000) in config/cgroup.conf, plus clear run/worker.lock, set nofile >= 65535, and fix payments.internal.",
         ),
     ],
     "lab8-scale-api": [
@@ -361,6 +393,34 @@ def verify_lab7(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
             if s and not s.startswith("#") and "payments.internal" in s and s.startswith("127.0.0.1"):
                 dns_ok = True
     checks.append(_chk("linux_dns", "payments.internal -> 127.0.0.1", dns_ok, "payments.internal resolves to 127.0.0.1" if dns_ok else "config/hosts.override still points payments.internal to wrong IP"))
+
+    cg_path = root / "config" / "cgroup.conf"
+    if cg_path.exists():
+        ckv: dict[str, str] = {}
+        for line in cg_path.read_text(encoding="utf-8").splitlines():
+            s = line.strip()
+            if s and not s.startswith("#") and "=" in s:
+                k, v = s.split("=", 1)
+                ckv[k.strip()] = v.strip()
+        try:
+            mem_mb = int(float(ckv.get("memory_max_mb", "0")))
+        except ValueError:
+            mem_mb = 0
+        try:
+            cpu_q = int(float(ckv.get("cpu_quota_us", "0")))
+        except ValueError:
+            cpu_q = 0
+        cg_ok = mem_mb >= 512 and cpu_q >= 50000
+        checks.append(
+            _chk(
+                "linux_cgroup",
+                "Linux cgroup v2 Memory (>=512MB) & CFS Quota (>=50ms)",
+                cg_ok,
+                f"memory_max_mb={mem_mb}, cpu_quota_us={cpu_q}"
+                if cg_ok
+                else f"Unsafe cgroup limits: memory_max_mb={mem_mb} (>=512), cpu_quota_us={cpu_q} (>=50000)",
+            )
+        )
 
     all_ok = all(c["passed"] for c in checks)
     return all_ok, ("SLA healthy: Linux FD limits (>=65535), stale lock cleared & DNS restored" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks

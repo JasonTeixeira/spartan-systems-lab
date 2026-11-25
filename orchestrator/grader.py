@@ -1043,10 +1043,71 @@ def arm_scenario_fault(
             "lock_timeout = 0\n",
             encoding="utf-8",
         )
+    elif spec.scenario_id == "pg_wal_bloat_and_vacuum_freeze":
+        (root / "config").mkdir(parents=True, exist_ok=True)
+        (root / "logs").mkdir(parents=True, exist_ok=True)
+        (root / "config" / "postgres-guard.conf").write_text(
+            "# BROKEN: MVCC dead-tuple bloat & WAL checkpoint storm\n"
+            "autovacuum_vacuum_scale_factor = 0.50\n"
+            "max_wal_size = 128\n"
+            "idle_in_transaction_session_timeout = 0\n",
+            encoding="utf-8",
+        )
+        (root / "logs" / "pg_vacuum.log").write_text(
+            "WARNING: table orders dead_tuple_ratio=0.68 (bloat_mb=4820) — autovacuum skipped (scale_factor=0.50)\n"
+            "WARNING: checkpoints occurring every 14 seconds (max_wal_size=128MB too small, WAL rate 14GB/hr)\n"
+            "WARNING: xmin horizon pinned by idle-in-transaction pid=4128 (age=1.82B txids)\n",
+            encoding="utf-8",
+        )
     elif spec.scenario_id in {"nginx_weak_tls_and_missing_hsts", "nginx_413_body_and_worker_limit"}:
         (root / "nginx").mkdir(parents=True, exist_ok=True)
         (root / "nginx" / "security.conf").write_text(
             "ssl_protocols TLSv1 TLSv1.1 TLSv1.2;\nclient_max_body_size 1k;\n",
+            encoding="utf-8",
+        )
+    elif spec.scenario_id == "tc_netem_packet_loss_tail_collapse":
+        (root / "config").mkdir(parents=True, exist_ok=True)
+        (root / "logs").mkdir(parents=True, exist_ok=True)
+        (root / "config" / "netem.conf").write_text(
+            "# BROKEN: Cross-AZ tc netem loss + CUBIC throughput collapse\n"
+            "loss_pct = 2.5\n"
+            "delay_ms = 45\n"
+            "congestion_control = cubic\n",
+            encoding="utf-8",
+        )
+        (root / "logs" / "netem.log").write_text(
+            "NETEM_ALERT: eth0 qdisc netem loss 2.5% delay 45ms · TCP CUBIC cwnd collapsed to 4 segments · p99=3420ms\n",
+            encoding="utf-8",
+        )
+    elif spec.scenario_id == "raft_isr_lag_and_fencing_storm":
+        (root / "raft").mkdir(parents=True, exist_ok=True)
+        (root / "raft" / "cluster.json").write_text(
+            json.dumps(
+                {
+                    "replication_factor": 3,
+                    "min_insync_replicas": 1,
+                    "acks": "1",
+                    "unclean_leader_election": True,
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+    elif spec.scenario_id == "cgroup_oom_kill_and_cpu_throttle":
+        (root / "config").mkdir(parents=True, exist_ok=True)
+        (root / "logs").mkdir(parents=True, exist_ok=True)
+        (root / "config" / "cgroup.conf").write_text(
+            "# BROKEN: cgroup v2 memory.max triggers OOM-kill (Exit 137) & cpu.max CFS throttling\n"
+            "memory_max_mb = 128\n"
+            "cpu_quota_us = 5000\n"
+            "cpu_period_us = 100000\n",
+            encoding="utf-8",
+        )
+        (root / "logs" / "dmesg_oom.log").write_text(
+            "[41822.904112] memory: usage 131072kB, limit 131072kB, failcnt 8412\n"
+            "[41822.904189] Memory cgroup out of memory: Killed process 2190 (worker) total-vm:512400kB, anon-rss:128900kB (Exit 137)\n"
+            "[41824.110002] cpu.stat nr_throttled=41209 throttled_usec=18429000 (cpu.max=5000 100000)\n",
             encoding="utf-8",
         )
     (root / "README.md").write_text(
@@ -1139,6 +1200,40 @@ def _verify_lab1_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
             api_detail = f"/api/orders probe failed: {exc}"
         checks.append(_chk("orders_api", "Orders API :8000 Live", api_ok, api_detail))
 
+        guard_path = root / "config" / "postgres-guard.conf"
+        if guard_path.exists():
+            raw_guard = guard_path.read_text(encoding="utf-8")
+            kv: dict[str, str] = {}
+            for line in raw_guard.splitlines():
+                s = line.strip()
+                if s and not s.startswith("#") and "=" in s:
+                    k, v = s.split("=", 1)
+                    kv[k.strip()] = v.strip().rstrip("MBmbmsMS")
+            if "autovacuum_vacuum_scale_factor" in kv or "max_wal_size" in kv:
+                try:
+                    sf = float(kv.get("autovacuum_vacuum_scale_factor", "1.0"))
+                except ValueError:
+                    sf = 1.0
+                try:
+                    wal = int(float(kv.get("max_wal_size", "0")))
+                except ValueError:
+                    wal = 0
+                try:
+                    idle_ms = int(float(kv.get("idle_in_transaction_session_timeout", "0")))
+                except ValueError:
+                    idle_ms = 0
+                vac_ok = sf <= 0.05 and wal >= 2048 and 0 < idle_ms <= 30000
+                checks.append(
+                    _chk(
+                        "pg_mvcc_wal",
+                        "Postgres MVCC Autovacuum & WAL Guard",
+                        vac_ok,
+                        f"scale_factor={sf}, max_wal_size={wal}MB, idle_tx_timeout={idle_ms}ms"
+                        if vac_ok
+                        else f"Unsafe MVCC/WAL config: scale_factor={sf} (<=0.05), max_wal_size={wal} (>=2048), idle_tx={idle_ms} (1..30000)",
+                    )
+                )
+
         all_ok = all(c["passed"] for c in checks)
         summary = (
             f"SLA healthy (LIVE Postgres 16 + PgBouncer): Index Scan active · live default_pool_size={pool_val} · /api/orders {api_ms}ms"
@@ -1190,6 +1285,39 @@ def _verify_lab1_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
             f"default_pool_size={pool_val}" if pool_ok else f"PgBouncer default_pool_size={pool_val} too low (need >= 25)",
         )
     )
+    guard_path = root / "config" / "postgres-guard.conf"
+    if guard_path.exists():
+        raw_guard = guard_path.read_text(encoding="utf-8")
+        kv: dict[str, str] = {}
+        for line in raw_guard.splitlines():
+            s = line.strip()
+            if s and not s.startswith("#") and "=" in s:
+                k, v = s.split("=", 1)
+                kv[k.strip()] = v.strip().rstrip("MBmbmsMS")
+        if "autovacuum_vacuum_scale_factor" in kv or "max_wal_size" in kv:
+            try:
+                sf = float(kv.get("autovacuum_vacuum_scale_factor", "1.0"))
+            except ValueError:
+                sf = 1.0
+            try:
+                wal = int(float(kv.get("max_wal_size", "0")))
+            except ValueError:
+                wal = 0
+            try:
+                idle_ms = int(float(kv.get("idle_in_transaction_session_timeout", "0")))
+            except ValueError:
+                idle_ms = 0
+            vac_ok = sf <= 0.05 and wal >= 2048 and 0 < idle_ms <= 30000
+            checks.append(
+                _chk(
+                    "pg_mvcc_wal",
+                    "Postgres MVCC Autovacuum & WAL Guard",
+                    vac_ok,
+                    f"scale_factor={sf}, max_wal_size={wal}MB, idle_tx_timeout={idle_ms}ms"
+                    if vac_ok
+                    else f"Unsafe MVCC/WAL config: scale_factor={sf} (<=0.05), max_wal_size={wal} (>=2048), idle_tx={idle_ms} (1..30000)",
+                )
+            )
     all_ok = all(c["passed"] for c in checks)
     summary = (
         f"SLA healthy: indexed query plan ({plan}) + default_pool_size={pool_val}"
@@ -1246,6 +1374,31 @@ def _verify_lab2_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
             prestop_ok = "preStop" in dep_raw
             prestop_detail = "preStop hook present" if prestop_ok else "deploy/rollout.yaml missing preStop hook"
     checks.append(_chk("k8s_prestop", "K8s preStop Drain Hook", prestop_ok, prestop_detail))
+
+    netem_path = root / "config" / "netem.conf"
+    if netem_path.exists():
+        nkv: dict[str, str] = {}
+        for line in netem_path.read_text(encoding="utf-8").splitlines():
+            s = line.strip()
+            if s and not s.startswith("#") and "=" in s:
+                k, v = s.split("=", 1)
+                nkv[k.strip()] = v.strip().lower()
+        try:
+            loss_val = float(nkv.get("loss_pct", "99"))
+        except ValueError:
+            loss_val = 99.0
+        cc = nkv.get("congestion_control", "")
+        netem_ok = loss_val <= 0.1 and cc == "bbr"
+        checks.append(
+            _chk(
+                "tcp_netem_bbr",
+                "TCP BBR & Loss Cleared (<= 0.1%)",
+                netem_ok,
+                f"congestion_control={cc}, loss_pct={loss_val}%"
+                if netem_ok
+                else f"Network degraded: congestion_control={cc or 'unset'} (need bbr), loss_pct={loss_val}% (need <= 0.1%)",
+            )
+        )
 
     if has_real_nginx():
         chk = subprocess.run(
@@ -1438,7 +1591,29 @@ print("HIDDEN_RAFT_PASS")
         ok = proc.returncode == 0 and "HIDDEN_RAFT_PASS" in proc.stdout
         detail = "All stale zombie writes rejected; committed term preserved" if ok else (proc.stderr or proc.stdout).strip()[:180]
     checks = [_chk("raft_fencing", "Monotonic Split-Brain Fencing (Hidden Suite)", ok, detail)]
-    return ok, ("SLA healthy: hidden multi-term split-brain adversarial suite passed (0 zombie overwrites)" if ok else detail), checks
+
+    cluster_path = root / "raft" / "cluster.json"
+    if cluster_path.exists():
+        isr_ok = False
+        isr_detail = "Invalid JSON in raft/cluster.json"
+        try:
+            cfg = json.loads(cluster_path.read_text(encoding="utf-8"))
+            acks_ok = str(cfg.get("acks", "")).lower() == "all"
+            rf = int(cfg.get("replication_factor", 0))
+            min_isr = int(cfg.get("min_insync_replicas", 0))
+            unclean = bool(cfg.get("unclean_leader_election", False))
+            isr_ok = acks_ok and rf >= 3 and min_isr >= 2 and not unclean
+            isr_detail = (
+                f"acks=all, RF={rf}, min_insync_replicas={min_isr}, unclean_leader_election=false"
+                if isr_ok
+                else f"Unsafe ISR durability: acks={cfg.get('acks')}, RF={rf}, min_isr={min_isr}, unclean={unclean}"
+            )
+        except Exception as exc:
+            isr_detail = f"Invalid raft/cluster.json: {exc}"
+        checks.append(_chk("raft_isr", "Kafka/Raft Quorum Durability (acks=all, min.isr>=2)", isr_ok, isr_detail))
+
+    all_ok = all(c["passed"] for c in checks)
+    return all_ok, ("SLA healthy: hidden multi-term split-brain adversarial suite & quorum durability passed" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
 
 
 def _verify_lab6_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:

@@ -14,9 +14,11 @@ from orchestrator.runtime import LinuxPtySandboxRuntime
 def test_24_scenario_catalog_and_roulette(tmp_path: Path) -> None:
     catalog = list_all_scenarios()
     total = sum(len(items) for items in catalog.values())
-    assert total == 25 or total >= 24, f"Expected >=24 scenarios, got {total}"
-    assert len(catalog["lab1-core-engine"]) == 4
-    assert len(catalog["lab2-linux-tls"]) == 3
+    assert total >= 28, f"Expected >=28 scenarios (incl Sprint 2 deep chaos), got {total}"
+    assert len(catalog["lab1-core-engine"]) == 5
+    assert len(catalog["lab2-linux-tls"]) == 4
+    assert len(catalog["lab5-raft-internals"]) == 3
+    assert len(catalog["lab7-linux-sre"]) == 3
 
     # Specific scenario mutation works cleanly
     ws = tmp_path / "sbx_s1"
@@ -197,3 +199,48 @@ def test_fly_warm_pool_claim_and_skip_launch() -> None:
     assert create_call["skip_launch"] is True
     assert create_call["config"]["auto_destroy"] is False
     assert create_call["config"]["metadata"]["crucible_pool"] == "warm"
+
+
+def test_sprint2_deep_systems_chaos_scenarios(tmp_path: Path) -> None:
+    import json
+    from orchestrator.grader import verify_workspace_checks
+
+    # 1. Postgres MVCC / WAL bloat
+    ws1 = tmp_path / "mvcc"
+    arm_scenario_fault(ws1, "lab1-core-engine", "sbx_mvcc", scenario_id="pg_wal_bloat_and_vacuum_freeze")
+    ok1, _, checks1 = verify_workspace_checks(ws1, "lab1-core-engine")
+    assert ok1 is False
+    assert any(c["id"] == "pg_mvcc_wal" and not c["passed"] for c in checks1)
+
+    # 2. TCP tc-netem packet loss + BBR
+    ws2 = tmp_path / "netem"
+    arm_scenario_fault(ws2, "lab2-linux-tls", "sbx_netem", scenario_id="tc_netem_packet_loss_tail_collapse")
+    ok2, _, checks2 = verify_workspace_checks(ws2, "lab2-linux-tls")
+    assert ok2 is False
+    assert any(c["id"] == "tcp_netem_bbr" and not c["passed"] for c in checks2)
+    (ws2 / "config" / "netem.conf").write_text("loss_pct = 0.0\ndelay_ms = 5\ncongestion_control = bbr\n", encoding="utf-8")
+    _, _, checks2_fix = verify_workspace_checks(ws2, "lab2-linux-tls")
+    assert any(c["id"] == "tcp_netem_bbr" and c["passed"] for c in checks2_fix)
+
+    # 3. Raft / Kafka ISR durability + fencing
+    ws5 = tmp_path / "isr"
+    arm_scenario_fault(ws5, "lab5-raft-internals", "sbx_isr", scenario_id="raft_isr_lag_and_fencing_storm")
+    ok5, _, checks5 = verify_workspace_checks(ws5, "lab5-raft-internals")
+    assert ok5 is False
+    assert any(c["id"] == "raft_isr" and not c["passed"] for c in checks5)
+    (ws5 / "raft" / "cluster.json").write_text(
+        json.dumps({"replication_factor": 3, "min_insync_replicas": 2, "acks": "all", "unclean_leader_election": False}),
+        encoding="utf-8",
+    )
+    _, _, checks5_fix = verify_workspace_checks(ws5, "lab5-raft-internals")
+    assert any(c["id"] == "raft_isr" and c["passed"] for c in checks5_fix)
+
+    # 4. Linux cgroup v2 OOM + CFS throttle
+    ws7 = tmp_path / "cgroup"
+    arm_scenario_fault(ws7, "lab7-linux-sre", "sbx_cg", scenario_id="cgroup_oom_kill_and_cpu_throttle")
+    ok7, _, checks7 = verify_workspace_checks(ws7, "lab7-linux-sre")
+    assert ok7 is False
+    assert any(c["id"] == "linux_cgroup" and not c["passed"] for c in checks7)
+    (ws7 / "config" / "cgroup.conf").write_text("memory_max_mb = 1024\ncpu_quota_us = 100000\ncpu_period_us = 100000\n", encoding="utf-8")
+    _, _, checks7_fix = verify_workspace_checks(ws7, "lab7-linux-sre")
+    assert any(c["id"] == "linux_cgroup" and c["passed"] for c in checks7_fix)
