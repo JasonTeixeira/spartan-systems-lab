@@ -522,7 +522,8 @@ class FlyMachinesRuntime:
                 extra_headers = {"fly-machine-lease-nonce": lease_nonce} if lease_nonce else None
 
                 # 2. Update stopped warm machine config with brand-new per-user env & fresh VM_SESSION_SECRET.
-                # Note: Fly Machines API `POST /machines/{id}` (without skip_launch) atomically updates AND launches!
+                # Note: Fly Machines API `POST /machines/{id}` (without skip_launch) atomically updates AND boots!
+                # Calling `/start` immediately after triggers HTTP 412 ("machine getting replaced") because Fly is already starting it.
                 st, upd = self._request(
                     "POST",
                     f"/apps/{self.app_name}/machines/{mid}",
@@ -532,16 +533,6 @@ class FlyMachinesRuntime:
                 )
                 if st >= 400 or not isinstance(upd, dict):
                     continue
-                if str(upd.get("state", "")) in {"stopped", "created"}:
-                    st_start, _ = self._request(
-                        "POST",
-                        f"/apps/{self.app_name}/machines/{mid}/start",
-                        {},
-                        timeout=20.0,
-                        extra_headers=extra_headers,
-                    )
-                    if st_start >= 400:
-                        continue
                 return {
                     "id": mid,
                     "region": str(upd.get("region") or m.get("region") or self.region),
