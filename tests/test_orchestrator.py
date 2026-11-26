@@ -321,5 +321,75 @@ def test_fly_persistent_volume_pro_auto_provision_and_reuse(tmp_path) -> None:
     assert (sl_dir / "alerts.yml").exists()
     assert (sl_dir / "alerts.test.yml").exists()
     assert (sl_dir / "backup_restore_drill.sh").exists()
-    assert "v11" in LAB_TEMPLATES["lab0-free-range"].image
+    assert "v12" in LAB_TEMPLATES["lab0-free-range"].image
     assert TIER_QUOTAS["pro"].ttl_minutes == 120
+
+
+def test_sprint_m4_m5_multiregion_preview_allowlist_steps_and_moto(tmp_path) -> None:
+    """Verify multi-region Fly routing (iad/ams/sin), port preview SSRF allowlist, step checker, .tf read & Moto AWS helper."""
+    from fastapi import HTTPException
+    from orchestrator.grader import check_lifecycle_steps, provision_workspace, read_workspace_file
+    from orchestrator.models import ProvisionRequest
+    from orchestrator.runtime import FlyMachinesRuntime
+    from orchestrator.service import SandboxOrchestratorService
+    from orchestrator.vm_agent import _fetch_local_preview
+
+    regions_seen: list[str] = []
+
+    def fake_fly(method: str, url: str, body: dict | None):
+        if method == "POST" and url.endswith("/machines"):
+            reg = (body or {}).get("region", "iad")
+            regions_seen.append(reg)
+            return 200, {"id": f"vm_{reg}", "region": reg, "state": "started"}
+        return 200, {}
+
+    rt = FlyMachinesRuntime(app_name="crucible-sandboxes", api_token="t", region="iad", http_sender=fake_fly)
+    svc = SandboxOrchestratorService(runtime=rt, signing_secret="super-secret-signing-key-123456")
+
+    eu_sess = svc.provision(
+        ProvisionRequest(
+            tenant_id="spartan-academy",
+            user_id="eu_user",
+            template_id="lab0-free-range",
+            tier="pro",
+            region="ams",
+        )
+    )
+    ap_sess = svc.provision(
+        ProvisionRequest(
+            tenant_id="spartan-academy",
+            user_id="ap_user",
+            template_id="lab0-free-range",
+            tier="pro",
+            region="sin",
+        )
+    )
+    assert eu_sess.region == "ams"
+    assert ap_sess.region == "sin"
+    assert regions_seen == ["ams", "sin"]
+
+    # Port preview must block VM agent (:8091) and raw DB (:5432) ports
+    for blocked in (8091, 5432, 6379, 22):
+        try:
+            _fetch_local_preview(blocked, "")
+            raise AssertionError(f"Expected port {blocked} to be blocked")
+        except HTTPException as exc:
+            assert exc.status_code == 403
+
+    # .tf readable via workspace file editor + automation-service + Lab 9 Moto AWS helper seeded
+    provision_workspace(tmp_path, "lab0-free-range", "sbx_m5", arm_fault=False)
+    tf_read = read_workspace_file(tmp_path, "playground/server-lifecycle/main.tf")
+    assert "terraform_data" in tf_read["content"]
+    assert (tmp_path / "playground" / "automation-service" / "app.py").exists()
+    assert (tmp_path / "playground" / "automation-service" / "test_service.py").exists()
+    assert (tmp_path / "bin" / "start-local-aws").exists()
+
+    step_res = check_lifecycle_steps(tmp_path, "T13")
+    assert step_res["task_id"] == "T13"
+    assert step_res["total_count"] >= 3
+    assert any(s["id"] == "auto_present" and s["passed"] for s in step_res["steps"])
+
+    lab9_root = tmp_path / "lab9"
+    provision_workspace(lab9_root, "lab9-iac-iam", "sbx_m5_l9", arm_fault=False)
+    assert (lab9_root / "terraform" / "local_aws_demo.py").exists()
+    assert (lab9_root / "bin" / "start-local-aws").exists()

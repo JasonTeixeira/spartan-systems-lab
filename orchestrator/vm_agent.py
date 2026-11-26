@@ -35,6 +35,7 @@ import subprocess
 import tarfile
 import termios
 import time
+import urllib.error
 import urllib.request
 from collections import deque
 from pathlib import Path
@@ -52,6 +53,7 @@ except Exception:  # pragma: no cover
 try:
     from grader import (  # type: ignore[import-not-found]
         arm_scenario_fault,
+        check_lifecycle_steps,
         collect_live_daemons,
         has_real_nginx,
         has_real_postgres,
@@ -68,6 +70,7 @@ try:
 except ImportError:
     from orchestrator.grader import (
         arm_scenario_fault,
+        check_lifecycle_steps,
         collect_live_daemons,
         has_real_nginx,
         has_real_postgres,
@@ -488,6 +491,81 @@ def _collect_live_prometheus_scrape(
 
 class SnapshotCreateBody(BaseModel):
     name: str = Field(..., min_length=1, max_length=48)
+
+
+class StepCheckBody(BaseModel):
+    task_id: str = Field(default="free-range", min_length=1, max_length=48)
+
+
+PREVIEW_ALLOWED_PORTS: frozenset[int] = frozenset({3000, 5000, 8000, 8080, 9090, 9093})
+MAX_PREVIEW_BYTES = 512 * 1024
+
+
+def _fetch_local_preview(port: int, subpath: str = "") -> dict[str, Any]:
+    if port not in PREVIEW_ALLOWED_PORTS:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Port {port} is not in the safe preview allowlist ({sorted(PREVIEW_ALLOWED_PORTS)}).",
+        )
+    clean_sub = subpath.lstrip("/")
+    if ".." in clean_sub or "\r" in clean_sub or "\n" in clean_sub:
+        raise HTTPException(status_code=400, detail="Invalid preview path.")
+    url = f"http://127.0.0.1:{port}/{clean_sub}"
+    req = urllib.request.Request(url, method="GET", headers={"User-Agent": "Crucible-Port-Preview/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=4.0) as resp:  # noqa: S310
+            raw = resp.read(MAX_PREVIEW_BYTES + 1)
+            truncated = len(raw) > MAX_PREVIEW_BYTES
+            body_bytes = raw[:MAX_PREVIEW_BYTES]
+            ct = resp.headers.get("Content-Type", "text/plain; charset=utf-8")
+            return {
+                "ok": True,
+                "port": port,
+                "path": f"/{clean_sub}",
+                "status_code": resp.status,
+                "content_type": ct,
+                "truncated": truncated,
+                "body": body_bytes.decode("utf-8", errors="replace"),
+            }
+    except urllib.error.HTTPError as exc:
+        err_body = exc.read(65536).decode("utf-8", errors="replace")
+        return {
+            "ok": False,
+            "port": port,
+            "path": f"/{clean_sub}",
+            "status_code": exc.code,
+            "content_type": exc.headers.get("Content-Type", "text/plain; charset=utf-8"),
+            "truncated": False,
+            "body": err_body,
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "port": port,
+            "path": f"/{clean_sub}",
+            "status_code": 502,
+            "content_type": "text/plain; charset=utf-8",
+            "truncated": False,
+            "body": f"Nothing listening on 127.0.0.1:{port} ({exc})",
+        }
+
+
+@app.get("/internal/preview/{port}", dependencies=[Depends(_require_vm_secret)])
+def internal_preview_root(port: int) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    return _fetch_local_preview(port, "")
+
+
+@app.get("/internal/preview/{port}/{subpath:path}", dependencies=[Depends(_require_vm_secret)])
+def internal_preview_path(port: int, subpath: str) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    return _fetch_local_preview(port, subpath)
+
+
+@app.post("/internal/steps/check", dependencies=[Depends(_require_vm_secret)])
+def internal_check_steps(body: StepCheckBody) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    return check_lifecycle_steps(WORKSPACE_DIR, body.task_id)
 
 
 class ExtendTtlRequest(BaseModel):

@@ -714,6 +714,47 @@ def seed_lab9(root: Path, broken: bool) -> None:
         else 'terraform {\n  backend "s3" {\n    bucket         = "crucible-tf-state"\n    key            = "prod/terraform.tfstate"\n    region         = "us-east-1"\n    encrypt        = true\n    dynamodb_table = "crucible-tf-locks"\n  }\n}\n'
     )
     (root / "terraform" / "backend.tf").write_text(tf_backend, encoding="utf-8")
+    (root / "terraform" / "local_aws_demo.py").write_text(
+        '"""Run real AWS S3 + DynamoDB + IAM operations locally via Moto (:4566) at $0 AWS spend.\n\n'
+        'Usage:\n'
+        '  start-local-aws\n'
+        '  python3 terraform/local_aws_demo.py\n'
+        '"""\n'
+        'import boto3\n\n'
+        'ENDPOINT = "http://127.0.0.1:4566"\n'
+        'KW = dict(endpoint_url=ENDPOINT, region_name="us-east-1", aws_access_key_id="test", aws_secret_access_key="test")\n\n'
+        'if __name__ == "__main__":\n'
+        '    s3 = boto3.client("s3", **KW)\n'
+        '    ddb = boto3.client("dynamodb", **KW)\n'
+        '    s3.create_bucket(Bucket="crucible-tf-state")\n'
+        '    s3.put_object(Bucket="crucible-tf-state", Key="prod/terraform.tfstate", Body=b"{\\"version\\": 4}")\n'
+        '    existing = ddb.list_tables().get("TableNames", [])\n'
+        '    if "crucible-tf-locks" not in existing:\n'
+        '        ddb.create_table(\n'
+        '            TableName="crucible-tf-locks",\n'
+        '            KeySchema=[{"AttributeName": "LockID", "KeyType": "HASH"}],\n'
+        '            AttributeDefinitions=[{"AttributeName": "LockID", "AttributeType": "S"}],\n'
+        '            BillingMode="PAY_PER_REQUEST",\n'
+        '        )\n'
+        '    print("LOCAL AWS EMULATOR READY:", s3.list_buckets()["Buckets"][0]["Name"], ddb.list_tables()["TableNames"])\n',
+        encoding="utf-8",
+    )
+    bin_dir = root / "bin"
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    aws_helper = bin_dir / "start-local-aws"
+    aws_helper.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        "if pgrep -f 'moto_server.*4566' >/dev/null 2>&1; then\n"
+        "  echo 'Local AWS Emulator (Moto) already running on http://127.0.0.1:4566'\n"
+        "  exit 0\n"
+        "fi\n"
+        "nohup moto_server -H 127.0.0.1 -p 4566 >/tmp/moto-aws.log 2>&1 &\n"
+        "sleep 1.2\n"
+        "echo 'Local AWS Emulator (Moto) started on http://127.0.0.1:4566 (S3, DynamoDB, IAM, SQS, STS)'\n",
+        encoding="utf-8",
+    )
+    aws_helper.chmod(0o755)
 
 
 def verify_lab9(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:

@@ -695,11 +695,13 @@ class FlyMachinesRuntime:
         tenant_id: str,
         user_id: str,
         size_gb: int = 2,
+        region: str | None = None,
     ) -> str | None:
         """Reuse an unattached 2 GB encrypted NVMe Fly Volume for this Pro user, or provision one."""
         if not self.api_token and self.http_sender is None:
             return None
-        digest = hashlib.sha256(f"{tenant_id}:{user_id}".encode("utf-8")).hexdigest()[:12]
+        target_region = (region or self.region or "iad").strip().lower()
+        digest = hashlib.sha256(f"{tenant_id}:{user_id}:{target_region}".encode("utf-8")).hexdigest()[:12]
         vol_name = f"crucible_u_{digest}"
         try:
             st, existing = self._request("GET", f"/apps/{self.app_name}/volumes", timeout=12.0)
@@ -709,7 +711,7 @@ class FlyMachinesRuntime:
                         continue
                     if (
                         str(vol.get("name", "")) == vol_name
-                        and str(vol.get("region", "")) == self.region
+                        and str(vol.get("region", "")) == target_region
                         and str(vol.get("state", "")) == "created"
                         and not vol.get("attached_machine_id")
                         and isinstance(vol.get("id"), str)
@@ -719,7 +721,7 @@ class FlyMachinesRuntime:
             pass
         payload = {
             "name": vol_name,
-            "region": self.region,
+            "region": target_region,
             "size_gb": max(1, min(10, int(size_gb))),
             "encrypted": True,
             "snapshot_retention": 5,
@@ -744,6 +746,7 @@ class FlyMachinesRuntime:
         scenario_id: str | None = None,
         user_id: str | None = None,
         persist_volume: bool = False,
+        region: str | None = None,
     ) -> StartSandboxResult:
         _ = network_name  # Fly provides hardware KVM + private 6pn WireGuard per MicroVM
         resolved_image = (
@@ -751,6 +754,9 @@ class FlyMachinesRuntime:
             or os.environ.get("FLY_SANDBOX_IMAGE", "").strip()
             or template.image
         )
+        target_region = (region or self.region or "iad").strip().lower()
+        if target_region not in {"iad", "ams", "sin"}:
+            target_region = self.region
         attached_volume_id: str | None = None
         if persist_volume and user_id:
             try:
@@ -758,6 +764,7 @@ class FlyMachinesRuntime:
                     tenant_id=tenant_id,
                     user_id=user_id,
                     size_gb=2,
+                    region=target_region,
                 )
             except RuntimeError:
                 attached_volume_id = None
@@ -768,7 +775,7 @@ class FlyMachinesRuntime:
             template=template,
             quota=quota,
             expires_epoch=expires_epoch,
-            region=self.region,
+            region=target_region,
             image_override=resolved_image,
             vm_secret=vm_secret,
             arm_blind_chaos=arm_blind_chaos,
@@ -777,7 +784,7 @@ class FlyMachinesRuntime:
         )
         resp: dict[str, Any] | None = (
             None
-            if attached_volume_id
+            if attached_volume_id or target_region != self.region
             else self._try_claim_warm_machine(
                 resolved_image=resolved_image,
                 payload=payload,
@@ -1021,6 +1028,60 @@ class FlyMachinesRuntime:
             return False, f"Firecracker grader unreachable ({status}): {resp.get('error', 'unknown')}", []
         checks = resp.get("checks")
         return bool(resp.get("passed", False)), str(resp.get("detail", "verified")), checks if isinstance(checks, list) else []
+
+    def preview_port(
+        self,
+        *,
+        container_name: str,
+        port: int,
+        subpath: str = "",
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            raise ValueError("VM not tracked")
+        clean = subpath.lstrip("/")
+        path = f"/internal/preview/{port}/{clean}" if clean else f"/internal/preview/{port}"
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="GET",
+            path=path,
+            vm_secret=vm_secret,
+            timeout=10.0,
+        )
+        if status == 403:
+            raise PermissionError(str(resp.get("detail") or "Port not allowed"))
+        if status >= 400 and "body" not in resp:
+            raise ValueError(str(resp.get("detail") or resp.get("error") or f"Preview failed ({status})"))
+        return resp
+
+    def check_steps(
+        self,
+        *,
+        container_name: str,
+        task_id: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            raise ValueError("VM not tracked")
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="POST",
+            path="/internal/steps/check",
+            vm_secret=vm_secret,
+            body={"task_id": task_id},
+            timeout=15.0,
+        )
+        if status >= 400:
+            raise ValueError(str(resp.get("detail") or resp.get("error") or f"Step check failed ({status})"))
+        return resp
 
     def stop_sandbox(
         self, *, container_name: str, network_name: str, machine_id: str | None = None

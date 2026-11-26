@@ -206,6 +206,8 @@ class SandboxOrchestratorService:
         if self.runtime.backend_name == "fly":
             start_kwargs["user_id"] = req.user_id
             start_kwargs["persist_volume"] = bool(req.persist_volume and req.tier in {"pro", "enterprise"})
+            if req.region:
+                start_kwargs["region"] = req.region
         start_res = self.runtime.start_sandbox(**start_kwargs)
         machine_id = start_res.machine_id if start_res else None
         region = start_res.region if start_res else None
@@ -629,6 +631,52 @@ class SandboxOrchestratorService:
         rec.blind_symptom = None
         self._store.upsert(rec)
         return res
+
+    def preview_port(
+        self,
+        *,
+        sandbox_id: str,
+        tenant_id: str,
+        user_id: str,
+        port: int,
+        subpath: str = "",
+    ) -> dict[str, Any]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "preview_port", None)
+        if not callable(fn):
+            raise ValueError("Live port preview is only supported on live Firecracker VMs.")
+        return fn(
+            container_name=rec.container_name,
+            port=port,
+            subpath=subpath,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
+        )
+
+    def check_steps(
+        self,
+        *,
+        sandbox_id: str,
+        tenant_id: str,
+        user_id: str,
+        task_id: str,
+    ) -> dict[str, Any]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "check_steps", None)
+        if callable(fn):
+            return fn(
+                container_name=rec.container_name,
+                task_id=task_id,
+                machine_id=rec.fly_machine_id,
+                vm_secret=rec.vm_secret,
+                private_ip=rec.private_ip,
+            )
+        return {"task_id": task_id, "passed": False, "passed_count": 0, "total_count": 0, "steps": []}
 
     def verify_and_issue_receipt(
         self, *, sandbox_id: str, tenant_id: str, user_id: str

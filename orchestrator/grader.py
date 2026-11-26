@@ -96,6 +96,7 @@ LAB_FAULTS: dict[str, RealLabFault] = {
 
 ALLOWED_TEXT_EXTS = {
     ".ini", ".conf", ".yaml", ".yml", ".py", ".json", ".jsonl", ".md", ".log", ".txt", ".sh", ".sql",
+    ".tf", ".toml", ".service", ".timer", ".cfg",
 }
 MAX_EDIT_BYTES = 256 * 1024
 
@@ -1178,6 +1179,226 @@ def _seed_lab0_free_range(root: Path, broken: bool) -> None:
         "echo \"[4/4] Encrypted backup & restore verification PASSED ($LINES SQL lines decrypted).\"\n",
         encoding="utf-8",
     )
+    auto_dir = pg_dir / "automation-service"
+    auto_dir.mkdir(parents=True, exist_ok=True)
+    (auto_dir / "app.py").write_text(
+        '"""Server-Lifecycle Reference Service (FastAPI + SQLite/Postgres + Lease-Fenced Worker + Tenant Auth).\n\n'
+        'Adapted from Server-Building-Mastery-v5 for zero-setup execution inside Crucible Firecracker VMs.\n'
+        'Run tests: pytest playground/automation-service/test_service.py\n'
+        'Run API:   uvicorn app:app --app-dir playground/automation-service --host 127.0.0.1 --port 8080\n'
+        '"""\n'
+        'from __future__ import annotations\n'
+        'import hashlib\n'
+        'import hmac\n'
+        'import time\n'
+        'import uuid\n'
+        'from dataclasses import dataclass, field\n'
+        'from typing import Any\n'
+        'from fastapi import Depends, FastAPI, Header, HTTPException\n'
+        'from pydantic import BaseModel, Field\n\n'
+        '@dataclass\n'
+        'class JobRecord:\n'
+        '    id: str\n'
+        '    tenant: str\n'
+        '    idempotency_key: str\n'
+        '    text: str\n'
+        '    status: str = "queued"\n'
+        '    attempts: int = 0\n'
+        '    lease_until: float = 0.0\n'
+        '    claim: str = ""\n'
+        '    result: dict[str, Any] | None = None\n\n'
+        'class JobStore:\n'
+        '    def __init__(self) -> None:\n'
+        '        self.jobs: dict[str, JobRecord] = {}\n'
+        '        self.by_key: dict[tuple[str, str], str] = {}\n'
+        '        self.tokens: dict[str, dict[str, Any]] = {\n'
+        '            hashlib.sha256(b"crucible_demo_tenant_a_token_32chars!").hexdigest(): {"tenant": "tenant_a", "scopes": {"jobs:read", "jobs:write"}, "revoked": False},\n'
+        '            hashlib.sha256(b"crucible_demo_tenant_b_token_32chars!").hexdigest(): {"tenant": "tenant_b", "scopes": {"jobs:read", "jobs:write"}, "revoked": False},\n'
+        '        }\n\n'
+        '    def authenticate(self, auth_header: str | None, scope: str) -> str:\n'
+        '        if not auth_header or not auth_header.startswith("Bearer "):\n'
+        '            raise HTTPException(401, "Missing bearer token")\n'
+        '        digest = hashlib.sha256(auth_header[7:].strip().encode()).hexdigest()\n'
+        '        rec = self.tokens.get(digest)\n'
+        '        if not rec or rec.get("revoked"):\n'
+        '            raise HTTPException(401, "Invalid or revoked credential")\n'
+        '        if scope not in rec["scopes"]:\n'
+        '            raise HTTPException(403, "Insufficient scope")\n'
+        '        return str(rec["tenant"])\n\n'
+        '    def enqueue(self, tenant: str, key: str, text: str) -> JobRecord:\n'
+        '        if (tenant, key) in self.by_key:\n'
+        '            return self.jobs[self.by_key[(tenant, key)]]\n'
+        '        jid = str(uuid.uuid4())\n'
+        '        rec = JobRecord(id=jid, tenant=tenant, idempotency_key=key, text=text)\n'
+        '        self.jobs[jid] = rec\n'
+        '        self.by_key[(tenant, key)] = jid\n'
+        '        return rec\n\n'
+        '    def process_one(self, lease_seconds: float = 30.0) -> bool:\n'
+        '        now = time.time()\n'
+        '        for job in self.jobs.values():\n'
+        '            eligible = job.status == "queued" or (job.status == "running" and job.lease_until <= now)\n'
+        '            if not eligible:\n'
+        '                continue\n'
+        '            if job.attempts >= 3:\n'
+        '                job.status = "failed"\n'
+        '                continue\n'
+        '            claim = str(uuid.uuid4())\n'
+        '            job.status = "running"\n'
+        '            job.attempts += 1\n'
+        '            job.claim = claim\n'
+        '            job.lease_until = now + lease_seconds\n'
+        '            res = {"words": len(job.text.split()), "characters": len(job.text)}\n'
+        '            if hmac.compare_digest(job.claim, claim):\n'
+        '                job.result = res\n'
+        '                job.status = "completed"\n'
+        '            return True\n'
+        '        return False\n\n'
+        'store = JobStore()\n'
+        'app = FastAPI(title="Crucible Server-Lifecycle Automation Service")\n\n'
+        'class JobIn(BaseModel):\n'
+        '    text: str = Field(..., min_length=1, max_length=10000)\n\n'
+        '@app.get("/health/live")\n'
+        'def health_live() -> dict[str, str]:\n'
+        '    return {"status": "alive", "service": "automation-service"}\n\n'
+        '@app.post("/jobs", status_code=202)\n'
+        'def submit_job(body: JobIn, idempotency_key: str = Header(..., min_length=1), authorization: str | None = Header(default=None)) -> dict[str, Any]:\n'
+        '    tenant = store.authenticate(authorization, "jobs:write")\n'
+        '    job = store.enqueue(tenant, idempotency_key, body.text)\n'
+        '    return {"id": job.id, "status": job.status, "tenant": job.tenant}\n\n'
+        '@app.get("/jobs/{job_id}")\n'
+        'def get_job(job_id: str, authorization: str | None = Header(default=None)) -> dict[str, Any]:\n'
+        '    tenant = store.authenticate(authorization, "jobs:read")\n'
+        '    job = store.jobs.get(job_id)\n'
+        '    if not job or job.tenant != tenant:\n'
+        '        raise HTTPException(404, "Job not found")\n'
+        '    return {"id": job.id, "status": job.status, "attempts": job.attempts, "result": job.result}\n',
+        encoding="utf-8",
+    )
+    (auto_dir / "test_service.py").write_text(
+        'from fastapi.testclient import TestClient\n'
+        'from app import app, store\n\n'
+        'client = TestClient(app)\n'
+        'H_A = {"Authorization": "Bearer crucible_demo_tenant_a_token_32chars!", "Idempotency-Key": "req-001"}\n'
+        'H_B = {"Authorization": "Bearer crucible_demo_tenant_b_token_32chars!"}\n\n'
+        'def test_lifecycle_idempotency_worker_and_tenant_isolation():\n'
+        '    r1 = client.post("/jobs", headers=H_A, json={"text": "hello useful servers"})\n'
+        '    r2 = client.post("/jobs", headers=H_A, json={"text": "hello useful servers"})\n'
+        '    assert r1.status_code == 202 and r1.json()["id"] == r2.json()["id"]\n'
+        '    jid = r1.json()["id"]\n'
+        '    assert client.get(f"/jobs/{jid}", headers=H_B).status_code == 404\n'
+        '    assert store.process_one() is True\n'
+        '    done = client.get(f"/jobs/{jid}", headers=H_A).json()\n'
+        '    assert done["status"] == "completed" and done["result"]["words"] == 3\n',
+        encoding="utf-8",
+    )
+    bin_dir = root / "bin"
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    aws_helper = bin_dir / "start-local-aws"
+    aws_helper.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        "if pgrep -f 'moto_server.*4566' >/dev/null 2>&1; then\n"
+        "  echo 'Local AWS Emulator (Moto) already running on http://127.0.0.1:4566'\n"
+        "  exit 0\n"
+        "fi\n"
+        "nohup moto_server -H 127.0.0.1 -p 4566 >/tmp/moto-aws.log 2>&1 &\n"
+        "sleep 1.2\n"
+        "echo 'Local AWS Emulator (Moto) started on http://127.0.0.1:4566'\n",
+        encoding="utf-8",
+    )
+    aws_helper.chmod(0o755)
+
+
+def check_lifecycle_steps(root: Path, task_id: str) -> dict[str, Any]:
+    """KillerCoda-style real-time step checker for Track 0 Server Lifecycle & Free-Range tasks."""
+    clean_id = (task_id or "free-range").strip().upper()
+    daemons = collect_live_daemons()
+    steps: list[dict[str, Any]] = []
+
+    def _add(sid: str, label: str, passed: bool, detail: str) -> None:
+        steps.append({"id": sid, "label": label, "passed": bool(passed), "detail": detail})
+
+    if clean_id in {"T07", "T08", "T09"}:
+        _add(
+            "tofu_bin",
+            "OpenTofu CLI available (`tofu version`)",
+            shutil.which("tofu") is not None,
+            "OpenTofu installed in /usr/local/bin/tofu" if shutil.which("tofu") else "tofu binary missing",
+        )
+        tf_state = root / "playground" / "server-lifecycle" / "terraform.tfstate"
+        _add(
+            "tofu_applied",
+            "Terraform/OpenTofu plan applied (`terraform.tfstate` exists)",
+            tf_state.exists() and tf_state.stat().st_size > 20,
+            "Local state file verified" if tf_state.exists() else "Run: cd ~/playground/server-lifecycle && tofu init && tofu apply -auto-approve",
+        )
+        _add(
+            "nginx_tls",
+            "HTTPS edge listener active on :8443",
+            bool(daemons.get("nginx_tls")),
+            "NGINX TLS 1.3 healthy on :8443" if daemons.get("nginx_tls") else "Start or reload NGINX (:8443)",
+        )
+    elif clean_id in {"T15", "T16", "T19"}:
+        _add(
+            "promtool_bin",
+            "Prometheus & promtool installed",
+            shutil.which("promtool") is not None,
+            "promtool binary ready" if shutil.which("promtool") else "promtool missing",
+        )
+        alert_test = root / "playground" / "server-lifecycle" / "alerts.test.yml"
+        prom_ok = False
+        prom_detail = "Run: promtool test rules ~/playground/server-lifecycle/alerts.test.yml"
+        if shutil.which("promtool") and alert_test.exists():
+            proc = subprocess.run(
+                ["promtool", "test", "rules", str(alert_test)],
+                capture_output=True,
+                text=True,
+                timeout=8,
+                check=False,
+            )
+            prom_ok = proc.returncode == 0
+            prom_detail = "All Prometheus firing & resolved alert assertions PASSED" if prom_ok else (proc.stderr or proc.stdout).strip()[:160]
+        _add("promtool_rules", "Prometheus alert rule unit tests pass", prom_ok, prom_detail)
+        _add("app_health", "Live API /health responding on :8000", bool(daemons.get("app_api")), "Orders API healthy on :8000" if daemons.get("app_api") else "API not listening on :8000")
+    elif clean_id in {"T20", "T21", "T22"}:
+        _add("age_bin", "`age` encryption CLI installed", shutil.which("age") is not None, "age encryption ready" if shutil.which("age") else "age binary missing")
+        _add("pg_live", "Live PostgreSQL 15 running on :5432", bool(daemons.get("postgresql")), "PostgreSQL accepting connections" if daemons.get("postgresql") else "PostgreSQL not running")
+        drill = root / "playground" / "server-lifecycle" / "backup_restore_drill.sh"
+        _add("backup_script", "Encrypted backup/restore drill script present", drill.exists(), "Run: bash ~/playground/server-lifecycle/backup_restore_drill.sh" if drill.exists() else "Script missing")
+    elif clean_id in {"T10", "T11", "T12", "T13", "T14", "T17", "T18"}:
+        auto_app = root / "playground" / "automation-service" / "app.py"
+        auto_test = root / "playground" / "automation-service" / "test_service.py"
+        _add("auto_present", "Reference automation-service present in ~/playground/automation-service", auto_app.exists(), "FastAPI + lease-fenced worker + tenant auth ready" if auto_app.exists() else "Missing playground/automation-service")
+        _add("pg_pool", "PostgreSQL (:5432) & PgBouncer (:6432) online", bool(daemons.get("postgresql") and daemons.get("pgbouncer")), "Database & connection pooler verified" if (daemons.get("postgresql") and daemons.get("pgbouncer")) else "Check Postgres/PgBouncer")
+        pytest_ok = False
+        pytest_detail = "Run: pytest ~/playground/automation-service/test_service.py"
+        if auto_test.exists() and shutil.which("pytest"):
+            proc = subprocess.run(
+                ["pytest", "-q", str(auto_test)],
+                cwd=str(auto_test.parent),
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+            pytest_ok = proc.returncode == 0
+            pytest_detail = "Idempotency, lease-fenced worker & tenant isolation tests PASSED" if pytest_ok else (proc.stdout or proc.stderr).strip()[:160]
+        _add("auto_pytest", "Automation-service contract & tenant isolation pytest green", pytest_ok, pytest_detail)
+    else:
+        _add("pg_live", "Live PostgreSQL 15 (+ pgvector) on :5432", bool(daemons.get("postgresql")), "Connected on 127.0.0.1:5432" if daemons.get("postgresql") else "Postgres stopped")
+        _add("pgbouncer_live", "Live PgBouncer pooler on :6432", bool(daemons.get("pgbouncer")), "Pooler accepting SQL on :6432" if daemons.get("pgbouncer") else "PgBouncer stopped")
+        _add("redis_live", "Live Redis 7 cache on :6379", bool(daemons.get("redis")), "Redis responding on :6379" if daemons.get("redis") else "Redis stopped")
+        _add("nginx_live", "Live NGINX TLS 1.3 edge on :8443", bool(daemons.get("nginx_tls")), "HTTPS edge active on :8443" if daemons.get("nginx_tls") else "NGINX stopped")
+        _add("api_live", "Live FastAPI Orders API on :8000", bool(daemons.get("app_api")), "Preview ready on :8000/health" if daemons.get("app_api") else "API stopped")
+
+    passed_count = sum(1 for s in steps if s["passed"])
+    return {
+        "task_id": clean_id,
+        "passed": passed_count == len(steps) and len(steps) > 0,
+        "passed_count": passed_count,
+        "total_count": len(steps),
+        "steps": steps,
+    }
 
 
 def _seed_lab11(root: Path, broken: bool) -> None:

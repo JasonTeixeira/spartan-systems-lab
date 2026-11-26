@@ -27,6 +27,7 @@ from pydantic import BaseModel, Field
 from orchestrator.build_projects import list_build_projects
 from orchestrator.grader import list_all_scenarios
 from orchestrator.models import (
+    ALLOWED_FLY_REGIONS,
     LAB_TEMPLATES,
     TIER_QUOTAS,
     ChaosInjectRequest,
@@ -85,6 +86,12 @@ class SandboxSnapshotBody(BaseModel):
 class SandboxOwnerBody(BaseModel):
     tenant_id: str = Field(..., min_length=2, max_length=64)
     user_id: str = Field(..., min_length=2, max_length=128)
+
+
+class SandboxStepCheckBody(BaseModel):
+    tenant_id: str = Field(..., min_length=2, max_length=64)
+    user_id: str = Field(..., min_length=2, max_length=128)
+    task_id: str = Field(default="free-range", min_length=1, max_length=48)
 
 
 def create_orchestrator_app(
@@ -192,12 +199,14 @@ def create_orchestrator_app(
             "store": service.store_name,
             "isolation": "kvm-firecracker-microvm" if runtime.backend_name == "fly" else runtime.backend_name,
             "activeSandboxes": service.active_count(),
+            "supportedRegions": list(ALLOWED_FLY_REGIONS),
         }
 
     @app.get("/v1/templates", dependencies=[Depends(require_api_key)])
     def list_templates() -> dict[str, Any]:
         return {
             "templates": [t.model_dump() for t in LAB_TEMPLATES.values()],
+            "supported_regions": list(ALLOWED_FLY_REGIONS),
             "quotas": {
                 k: {
                     "max_concurrent": q.max_concurrent,
@@ -558,6 +567,59 @@ def create_orchestrator_app(
         try:
             return service.reset_sandbox(
                 sandbox_id=sandbox_id, tenant_id=req.tenant_id, user_id=req.user_id
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from None
+
+    @app.get("/v1/sandboxes/{sandbox_id}/preview/{port}", dependencies=[Depends(require_api_key)])
+    def preview_sandbox_port_root(
+        sandbox_id: str,
+        port: int,
+        tenant_id: str = Query(..., min_length=2, max_length=64),
+        user_id: str = Query(..., min_length=2, max_length=128),
+    ) -> dict[str, Any]:
+        try:
+            return service.preview_port(
+                sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id, port=port, subpath=""
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except (SandboxAccessDeniedError, PermissionError) as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from None
+
+    @app.get("/v1/sandboxes/{sandbox_id}/preview/{port}/{subpath:path}", dependencies=[Depends(require_api_key)])
+    def preview_sandbox_port_path(
+        sandbox_id: str,
+        port: int,
+        subpath: str,
+        tenant_id: str = Query(..., min_length=2, max_length=64),
+        user_id: str = Query(..., min_length=2, max_length=128),
+    ) -> dict[str, Any]:
+        try:
+            return service.preview_port(
+                sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id, port=port, subpath=subpath
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except (SandboxAccessDeniedError, PermissionError) as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from None
+
+    @app.post("/v1/sandboxes/{sandbox_id}/steps/check", dependencies=[Depends(require_api_key)])
+    def check_sandbox_steps(sandbox_id: str, req: SandboxStepCheckBody) -> dict[str, Any]:
+        try:
+            return service.check_steps(
+                sandbox_id=sandbox_id,
+                tenant_id=req.tenant_id,
+                user_id=req.user_id,
+                task_id=req.task_id,
             )
         except SandboxNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from None

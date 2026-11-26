@@ -23,6 +23,8 @@ LabTemplateId = Literal[
 
 SandboxTier = Literal["free", "pro", "enterprise"]
 SandboxStatus = Literal["provisioning", "running", "terminated", "expired"]
+FlyRegion = Literal["iad", "ams", "sin"]
+ALLOWED_FLY_REGIONS: tuple[str, ...] = ("iad", "ams", "sin")
 
 
 @dataclass(frozen=True)
@@ -74,7 +76,7 @@ class LabTemplateSpec(BaseModel):
     default_shell: str = "/bin/bash"
 
 
-SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v11"
+SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v12"
 
 LAB_TEMPLATES: dict[LabTemplateId, LabTemplateSpec] = {
     "lab0-free-range": LabTemplateSpec(
@@ -187,6 +189,7 @@ class ProvisionRequest(BaseModel):
     arm_blind_chaos: bool = False
     scenario_id: str | None = Field(default=None, max_length=80)
     persist_volume: bool = False
+    region: FlyRegion | None = None
 
 
 class SandboxSession(BaseModel):

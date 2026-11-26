@@ -72,17 +72,26 @@ RUN ARCH="$(dpkg --print-architecture)" \
 # Create unprivileged student shell user (uid=1000, unprivileged group `users`)
 RUN useradd -m -u 1000 -g users -s /bin/bash operator
 
-# Install lightweight Python runtime for VM agent + FastAPI + Real DuckDB/PyArrow + psycopg + pgvector
+# Install lightweight Python runtime for VM agent + FastAPI + Real DuckDB/PyArrow + psycopg + pgvector + Local AWS (Moto) + Server-Lifecycle stack
 RUN python3 -m venv /opt/crucible-venv \
     && /opt/crucible-venv/bin/pip install --no-cache-dir \
-       fastapi \
-       "uvicorn[standard]" \
-       "psycopg[binary]" \
+       alembic \
+       boto3 \
        duckdb \
-       pyarrow \
+       fastapi \
+       httpx \
+       "moto[server]" \
        numpy \
+       "psycopg[binary]" \
+       pyarrow \
+       pytest \
        pyyaml \
-       websockets
+       sqlalchemy \
+       "uvicorn[standard]" \
+       websockets \
+    && ln -sf /opt/crucible-venv/bin/moto_server /usr/local/bin/moto_server \
+    && ln -sf /opt/crucible-venv/bin/pytest /usr/local/bin/pytest \
+    && ln -sf /opt/crucible-venv/bin/alembic /usr/local/bin/alembic
 
 # Place immutable root-owned grader & VM control agent strictly inaccessible to `operator` (0700)
 WORKDIR /opt/crucible-grader
