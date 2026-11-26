@@ -125,6 +125,7 @@ class SessionStore(Protocol):
     def list_running(
         self, *, tenant_id: str | None = None, user_id: str | None = None
     ) -> list[StoredSandboxRecord]: ...
+    def list_expired(self, *, now_epoch: float, limit: int = 50) -> list[StoredSandboxRecord]: ...
 
 
 class InMemorySessionStore:
@@ -151,6 +152,15 @@ class InMemorySessionStore:
             if user_id is not None and rec.user_id != user_id:
                 continue
             out.append(rec)
+        return out
+
+    def list_expired(self, *, now_epoch: float, limit: int = 50) -> list[StoredSandboxRecord]:
+        out: list[StoredSandboxRecord] = []
+        for rec in self._items.values():
+            if rec.status == "running" and now_epoch >= rec.expires_epoch:
+                out.append(rec)
+                if len(out) >= limit:
+                    break
         return out
 
 
@@ -212,6 +222,20 @@ class SupabaseSessionStore:
             params["tenant_id"] = f"eq.{tenant_id}"
         if user_id is not None:
             params["user_id"] = f"eq.{user_id}"
+        qs = urllib.parse.urlencode(params)
+        rows = self._request("GET", query=f"?{qs}")
+        if not isinstance(rows, list):
+            return []
+        return [StoredSandboxRecord.from_row(r) for r in rows]
+
+    def list_expired(self, *, now_epoch: float, limit: int = 50) -> list[StoredSandboxRecord]:
+        params = {
+            "status": "eq.running",
+            "expires_epoch": f"lte.{int(now_epoch)}",
+            "select": "*",
+            "order": "expires_epoch.asc",
+            "limit": str(max(1, min(200, int(limit)))),
+        }
         qs = urllib.parse.urlencode(params)
         rows = self._request("GET", query=f"?{qs}")
         if not isinstance(rows, list):

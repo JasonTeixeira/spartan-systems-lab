@@ -95,6 +95,7 @@ _state: dict[str, Any] = {
     "ready": False,
     "active_ws": 0,
     "last_activity": time.time(),
+    "expires_epoch": EXPIRES_EPOCH,
     "fault_armed": ARM_INITIAL_FAULT,
     "active_scenario_id": INITIAL_SCENARIO_ID,
 }
@@ -305,7 +306,7 @@ async def _idle_and_ttl_reaper() -> None:
     while True:
         await asyncio.sleep(20)
         now = time.time()
-        expired = now >= EXPIRES_EPOCH
+        expired = now >= int(_state.get("expires_epoch", EXPIRES_EPOCH))
         idle = _state["active_ws"] == 0 and (now - _state["last_activity"]) >= IDLE_TIMEOUT_SECONDS
         if expired or idle:
             os._exit(0)
@@ -453,9 +454,27 @@ def _collect_live_prometheus_scrape(
     return m, "\n".join(lines) + "\n"
 
 
+class ExtendTtlRequest(BaseModel):
+    expires_epoch: int = Field(..., ge=1)
+
+
+@app.post("/internal/extend", dependencies=[Depends(_require_vm_secret)])
+def internal_extend(req: ExtendTtlRequest) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    current = int(_state.get("expires_epoch", EXPIRES_EPOCH))
+    updated = max(current, int(req.expires_epoch))
+    _state["expires_epoch"] = updated
+    return {
+        "ok": True,
+        "expires_epoch": updated,
+        "ttl_remaining_seconds": max(0, int(updated - time.time())),
+    }
+
+
 @app.get("/internal/metrics", dependencies=[Depends(_require_vm_secret)])
 def internal_metrics() -> dict[str, Any]:
-    _state["last_activity"] = time.time()
+    # Do NOT reset _state["last_activity"] on background metrics polling so truly idle VMs
+    # cleanly auto-reap after IDLE_TIMEOUT_SECONDS instead of burning idle compute.
     mem_used_mb = 0
     mem_total_mb = 0
     with contextlib.suppress(OSError):
@@ -660,8 +679,12 @@ async def internal_terminal(
             os.setgid(op_gid)
             os.setuid(op_uid)
 
+    use_tmux = bool(shutil.which("tmux"))
     shell_bin = "/bin/bash" if os.path.exists("/bin/bash") else "/bin/sh"
-    shell_args = [shell_bin, "--noprofile", "--norc", "-i"] if shell_bin.endswith("bash") else [shell_bin, "-i"]
+    if use_tmux:
+        shell_args = ["tmux", "new-session", "-A", "-s", "crucible"]
+    else:
+        shell_args = [shell_bin, "--noprofile", "--norc", "-i"] if shell_bin.endswith("bash") else [shell_bin, "-i"]
     proc = subprocess.Popen(
         shell_args,
         stdin=slave_fd,
@@ -699,7 +722,7 @@ async def internal_terminal(
     daemon_str = ", ".join(daemons) if daemons else "linux-shell"
     banner = (
         f"\x1b[1;92m[crucible-firecracker-kvm]\x1b[0m Dedicated MicroVM · "
-        f"{SANDBOX_ID} ({TEMPLATE_ID} · {MODULE_ID})\r\n"
+        f"{SANDBOX_ID} ({TEMPLATE_ID} · {MODULE_ID}) · {'tmux persistent session' if use_tmux else 'live PTY'}\r\n"
         f"\x1b[36mLive Services:\x1b[0m {daemon_str} · \x1b[36mTip:\x1b[0m use "
         f"\x1b[1;33mLive Files\x1b[0m tab or run \x1b[1;33mcat README.md\x1b[0m\r\n"
     )
@@ -712,7 +735,18 @@ async def internal_terminal(
                 break
             await websocket.send_text(chunk.decode("utf-8", errors="replace"))
 
+    async def _push_metrics_over_ws() -> None:
+        """Push telemetry every 6s over the existing WS to eliminate 3s Vercel/Supabase polling."""
+        while True:
+            await asyncio.sleep(6.0)
+            try:
+                snap = await asyncio.to_thread(internal_metrics)
+                await websocket.send_text(json.dumps({"type": "metrics", "data": snap}))
+            except Exception:
+                break
+
     reader_task = asyncio.create_task(_pump_pty_to_ws())
+    metrics_task = asyncio.create_task(_push_metrics_over_ws())
     try:
         while True:
             raw = await websocket.receive_text()
@@ -747,15 +781,26 @@ async def internal_terminal(
         with contextlib.suppress(Exception):
             loop.remove_reader(master_fd)
         reader_task.cancel()
+        metrics_task.cancel()
         with contextlib.suppress(asyncio.CancelledError):
             await reader_task
+        with contextlib.suppress(asyncio.CancelledError):
+            await metrics_task
         with contextlib.suppress(OSError):
             os.close(master_fd)
+        # When tmux is active, only terminate the attached client (preserving the tmux server & user shell
+        # across browser refreshes and Wi-Fi drops!). Without tmux, clean up the process group as before.
         if proc.poll() is None:
             with contextlib.suppress(OSError):
-                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                if use_tmux:
+                    proc.terminate()
+                else:
+                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
             with contextlib.suppress(subprocess.TimeoutExpired):
                 proc.wait(timeout=2)
             if proc.poll() is None:
                 with contextlib.suppress(OSError):
-                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+                    if use_tmux:
+                        proc.kill()
+                    else:
+                        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)

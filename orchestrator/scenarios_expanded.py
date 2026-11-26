@@ -111,8 +111,8 @@ LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
             template_id="lab2-linux-tls",
             title="NGINX 413 Upload Rejection + Worker Starvation",
             difficulty="L5",
-            symptom="P1 ALERT: Enterprise webhook payloads failing with HTTP 413 Request Entity Too Large and worker_connections saturated. Inspect nginx/security.conf & nginx/upstream.conf.",
-            remediation_hint="Raise client_max_body_size >= 10m in nginx/security.conf and ensure upstream keepalive_timeout <= 55s, then run reload-nginx.",
+            symptom="P1 ALERT: Enterprise webhook payloads failing with HTTP 413 Request Entity Too Large and worker_connections saturated. Inspect nginx/upload.conf & nginx/upstream.conf.",
+            remediation_hint="Raise client_max_body_size >= 10m in nginx/upload.conf and ensure upstream keepalive_timeout <= 55s, then run reload-nginx.",
         ),
         ScenarioSpec(
             scenario_id="tc_netem_packet_loss_tail_collapse",

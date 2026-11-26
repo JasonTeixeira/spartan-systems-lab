@@ -438,7 +438,7 @@ class FlyMachinesRuntime:
 
     def ensure_warm_pool(self, target_size: int | None = None) -> dict[str, Any]:
         """Ensure `target_size` brand-new stopped (`skip_launch: true`) Firecracker VMs exist ($0/hr idle)."""
-        desired = self.warm_pool_size if target_size is None else max(0, min(5, int(target_size)))
+        desired = self.warm_pool_size if target_size is None else max(0, min(25, int(target_size)))
         resolved_image = self._resolved_image()
         if desired <= 0:
             return {"desired": 0, "ready": 0, "created": 0}
@@ -998,6 +998,27 @@ class FlyMachinesRuntime:
         if status != 200:
             return False, f"Firecracker grader unreachable ({status}): {resp.get('error', 'unknown')}"
         return bool(resp.get("passed", False)), str(resp.get("detail", "verified"))
+
+    def extend_vm_ttl(
+        self,
+        *,
+        machine_id: str,
+        vm_secret: str | None,
+        private_ip: str | None,
+        expires_epoch: int,
+    ) -> bool:
+        if self.http_sender is not None and self.vm_http_sender is None:
+            return True
+        status, _ = self._vm_request(
+            machine_id=machine_id,
+            private_ip=private_ip,
+            method="POST",
+            path="/internal/extend",
+            vm_secret=vm_secret,
+            body={"expires_epoch": int(expires_epoch)},
+            timeout=5.0,
+        )
+        return status == 200
 
 
 @dataclass

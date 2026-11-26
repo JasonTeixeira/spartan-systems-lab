@@ -46,7 +46,7 @@ TIER_QUOTAS: dict[SandboxTier, TierQuota] = {
     "pro": TierQuota(
         tier="pro",
         max_concurrent=2,
-        ttl_minutes=90,
+        ttl_minutes=120,
         cpu_limit=1.0,
         memory_mb=1024,
         pids_limit=256,
@@ -73,7 +73,7 @@ class LabTemplateSpec(BaseModel):
     default_shell: str = "/bin/bash"
 
 
-SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v5"
+SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v6"
 
 LAB_TEMPLATES: dict[LabTemplateId, LabTemplateSpec] = {
     "lab1-core-engine": LabTemplateSpec(

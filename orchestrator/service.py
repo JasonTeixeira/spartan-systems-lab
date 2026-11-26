@@ -38,6 +38,10 @@ class SandboxAccessDeniedError(Exception):
     pass
 
 
+def _iso_from_epoch(epoch: float) -> str:
+    return datetime.fromtimestamp(epoch, UTC).isoformat()
+
+
 def _record_to_session(rec: StoredSandboxRecord, *, include_token: bool = False) -> SandboxSession:
     return SandboxSession(
         sandbox_id=rec.sandbox_id,
@@ -88,10 +92,16 @@ class SandboxOrchestratorService:
     def _now(self) -> float:
         return time.time()
 
-    def reap_expired(self, now_epoch: float | None = None) -> list[str]:
+    def reap_expired(self, now_epoch: float | None = None, limit: int = 50) -> list[str]:
         now = self._now() if now_epoch is None else now_epoch
         reaped: list[str] = []
-        for rec in self._store.list_running():
+        list_exp = getattr(self._store, "list_expired", None)
+        candidates = (
+            list_exp(now_epoch=now, limit=limit)
+            if callable(list_exp)
+            else [r for r in self._store.list_running() if now >= r.expires_epoch][:limit]
+        )
+        for rec in candidates:
             if now >= rec.expires_epoch:
                 self.runtime.stop_sandbox(
                     container_name=rec.container_name,
@@ -105,17 +115,17 @@ class SandboxOrchestratorService:
         return reaped
 
     def active_count(self) -> int:
-        self.reap_expired()
-        return len(self._store.list_running())
+        now = self._now()
+        return sum(1 for r in self._store.list_running() if now < r.expires_epoch)
 
     def authenticate_terminal_record(
         self, *, sandbox_id: str, token: str
     ) -> StoredSandboxRecord | None:
-        self.reap_expired()
         rec = self._store.get(sandbox_id)
         if (
             rec is None
             or rec.status != "running"
+            or self._now() >= rec.expires_epoch
             or not token
             or not rec.terminal_token
             or not hmac.compare_digest(token, rec.terminal_token)
@@ -128,22 +138,29 @@ class SandboxOrchestratorService:
         return _record_to_session(rec, include_token=True) if rec is not None else None
 
     def list_user_sandboxes(self, *, tenant_id: str, user_id: str) -> list[SandboxSession]:
-        self.reap_expired()
+        now = self._now()
         return [
             _record_to_session(r, include_token=False)
             for r in self._store.list_running(tenant_id=tenant_id, user_id=user_id)
+            if now < r.expires_epoch
         ]
 
     def list_all_active(self) -> list[SandboxSession]:
-        self.reap_expired()
-        return [_record_to_session(r, include_token=False) for r in self._store.list_running()]
+        now = self._now()
+        return [
+            _record_to_session(r, include_token=False)
+            for r in self._store.list_running()
+            if now < r.expires_epoch
+        ]
 
     def provision(self, req: ProvisionRequest) -> SandboxSession:
-        self.reap_expired()
+        now_check = self._now()
         quota = TIER_QUOTAS[req.tier]
-        active_for_user = self._store.list_running(
-            tenant_id=req.tenant_id, user_id=req.user_id
-        )
+        active_for_user = [
+            r
+            for r in self._store.list_running(tenant_id=req.tenant_id, user_id=req.user_id)
+            if now_check < r.expires_epoch
+        ]
         if len(active_for_user) >= quota.max_concurrent:
             raise QuotaExceededError(
                 f"Tier '{req.tier}' allows at most {quota.max_concurrent} concurrent "
@@ -256,13 +273,95 @@ class SandboxOrchestratorService:
     def _require_owned_record(
         self, *, sandbox_id: str, tenant_id: str, user_id: str
     ) -> StoredSandboxRecord:
-        self.reap_expired()
         rec = self._store.get(sandbox_id)
         if rec is None:
             raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' not found")
         if rec.tenant_id != tenant_id or rec.user_id != user_id:
             raise SandboxAccessDeniedError("Cross-tenant or cross-user sandbox access denied")
+        if rec.status == "running" and self._now() >= rec.expires_epoch:
+            self.runtime.stop_sandbox(
+                container_name=rec.container_name,
+                network_name=rec.network_name,
+                machine_id=rec.fly_machine_id,
+            )
+            rec.status = "expired"
+            rec.terminal_token = None
+            self._store.upsert(rec)
         return rec
+
+    def issue_terminal_token(
+        self, *, sandbox_id: str, tenant_id: str, user_id: str
+    ) -> dict[str, Any]:
+        """Re-issue a valid terminal WebSocket token for an already-running owned sandbox (fixes browser refresh)."""
+        rec = self._require_owned_record(
+            sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
+        )
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is no longer running ({rec.status})")
+        token_secret = rec.vm_secret or self._signing_secret
+        token = create_terminal_token(
+            secret=token_secret,
+            sandbox_id=rec.sandbox_id,
+            tenant_id=rec.tenant_id,
+            user_id=rec.user_id,
+            expires_epoch=rec.expires_epoch,
+        )
+        rec.terminal_token = token
+        self._store.upsert(rec)
+        return {
+            "sandbox_id": rec.sandbox_id,
+            "terminal_token": token,
+            "terminal_ws_url": rec.terminal_ws_url,
+            "expires_at": _iso_from_epoch(rec.expires_epoch),
+            "ttl_remaining_seconds": max(0, int(rec.expires_epoch - self._now())),
+        }
+
+    def extend_sandbox(
+        self,
+        *,
+        sandbox_id: str,
+        tenant_id: str,
+        user_id: str,
+        extra_minutes: int = 60,
+    ) -> dict[str, Any]:
+        """Extend an active sandbox's TTL by up to +60m (capped at 6 hours continuous lifetime)."""
+        rec = self._require_owned_record(
+            sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
+        )
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is no longer running ({rec.status})")
+        add_min = max(15, min(60, int(extra_minutes)))
+        max_epoch = int(rec.created_epoch + 6 * 3600)
+        new_expires = min(max_epoch, int(max(rec.expires_epoch, self._now()) + add_min * 60))
+        rec.expires_epoch = new_expires
+        token_secret = rec.vm_secret or self._signing_secret
+        new_token = create_terminal_token(
+            secret=token_secret,
+            sandbox_id=rec.sandbox_id,
+            tenant_id=rec.tenant_id,
+            user_id=rec.user_id,
+            expires_epoch=new_expires,
+        )
+        rec.terminal_token = new_token
+        self._store.upsert(rec)
+        ext_fn = getattr(self.runtime, "extend_vm_ttl", None)
+        if callable(ext_fn) and rec.fly_machine_id:
+            try:
+                ext_fn(
+                    machine_id=rec.fly_machine_id,
+                    vm_secret=rec.vm_secret,
+                    private_ip=rec.private_ip,
+                    expires_epoch=new_expires,
+                )
+            except Exception:
+                pass
+        return {
+            "sandbox_id": rec.sandbox_id,
+            "expires_at": _iso_from_epoch(new_expires),
+            "ttl_remaining_seconds": max(0, int(new_expires - self._now())),
+            "terminal_token": new_token,
+            "extended_minutes": add_min,
+        }
 
     def get_sandbox(
         self, *, sandbox_id: str, tenant_id: str, user_id: str

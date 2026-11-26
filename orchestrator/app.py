@@ -107,7 +107,7 @@ def create_orchestrator_app(
                 api_token=os.environ.get("FLY_API_TOKEN", "").strip(),
                 region=os.environ.get("FLY_SANDBOX_REGION", "iad").strip() or "iad",
                 image_override=os.environ.get("FLY_SANDBOX_IMAGE", "").strip(),
-                warm_pool_size=max(0, min(5, int(os.environ.get("FLY_WARM_POOL_SIZE", "0") or "0"))),
+                warm_pool_size=max(0, min(25, int(os.environ.get("FLY_WARM_POOL_SIZE", "0") or "0"))),
             )
         else:
             runtime = MemorySandboxRuntime()
@@ -129,11 +129,34 @@ def create_orchestrator_app(
         store=resolved_store,
     )
 
+    @contextlib.asynccontextmanager
+    async def _lifespan(_app: FastAPI):
+        stop_event = asyncio.Event()
+
+        async def _reaper_worker() -> None:
+            while not stop_event.is_set():
+                try:
+                    await asyncio.wait_for(stop_event.wait(), timeout=30.0)
+                    break
+                except asyncio.TimeoutError:
+                    with contextlib.suppress(Exception):
+                        await asyncio.to_thread(service.reap_expired)
+
+        task = asyncio.create_task(_reaper_worker())
+        try:
+            yield
+        finally:
+            stop_event.set()
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError, Exception):
+                await task
+
     app = FastAPI(
         title="Crucible Cloud Sandbox Orchestrator",
-        version="2.0.0",
+        version="2.1.0",
         docs_url=None,
         redoc_url=None,
+        lifespan=_lifespan,
     )
     app.state.orchestrator = service
 
@@ -414,7 +437,7 @@ def create_orchestrator_app(
         return {"reaped": reaped, "activeSandboxes": service.active_count()}
 
     @app.post("/v1/admin/warm-pool", dependencies=[Depends(require_api_key)])
-    def replenish_warm_pool(target_size: int | None = Query(default=None, ge=0, le=5)) -> dict[str, Any]:
+    def replenish_warm_pool(target_size: int | None = Query(default=None, ge=0, le=25)) -> dict[str, Any]:
         if isinstance(runtime, FlyMachinesRuntime):
             return runtime.ensure_warm_pool(target_size=target_size)
         return {"desired": 0, "ready": 0, "created": 0, "backend": runtime.backend_name}
@@ -440,13 +463,55 @@ def create_orchestrator_app(
         except SandboxNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from None
 
+    @app.post(
+        "/v1/sandboxes/{sandbox_id}/terminal-token",
+        dependencies=[Depends(require_api_key)],
+    )
+    def issue_terminal_token(
+        sandbox_id: str,
+        tenant_id: str = Query(..., min_length=2, max_length=64),
+        user_id: str = Query(..., min_length=2, max_length=128),
+    ) -> dict[str, Any]:
+        try:
+            return service.issue_terminal_token(
+                sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+
+    @app.post(
+        "/v1/sandboxes/{sandbox_id}/extend",
+        dependencies=[Depends(require_api_key)],
+    )
+    def extend_sandbox(
+        sandbox_id: str,
+        tenant_id: str = Query(..., min_length=2, max_length=64),
+        user_id: str = Query(..., min_length=2, max_length=128),
+        extra_minutes: int = Query(default=60, ge=15, le=60),
+    ) -> dict[str, Any]:
+        try:
+            return service.extend_sandbox(
+                sandbox_id=sandbox_id,
+                tenant_id=tenant_id,
+                user_id=user_id,
+                extra_minutes=extra_minutes,
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+
     @app.websocket("/v1/sandboxes/{sandbox_id}/terminal")
     async def sandbox_terminal(
         websocket: WebSocket,
         sandbox_id: str,
         token: str = Query(default=""),
     ) -> None:
-        rec = service.authenticate_terminal_record(sandbox_id=sandbox_id, token=token)
+        rec = await asyncio.to_thread(
+            service.authenticate_terminal_record, sandbox_id=sandbox_id, token=token
+        )
         if rec is None:
             await websocket.close(code=4401)
             return

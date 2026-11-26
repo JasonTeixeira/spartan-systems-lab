@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     file \
     git \
     iproute2 \
+    iptables \
     jq \
     less \
     lsof \
@@ -32,6 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     redis-server \
     sqlite3 \
     tcpdump \
+    tmux \
     vim-tiny \
     && apt-get install -y --no-install-recommends build-essential postgresql-server-dev-15 \
     && git clone --depth 1 --branch v0.8.0 https://github.com/pgvector/pgvector.git /tmp/pgvector \

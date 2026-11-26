@@ -327,3 +327,66 @@ def test_sprint_m0_vm_root_rce_and_egress_hardening(tmp_path: Path) -> None:
     assert "_try_harden_egress_firewall()" in agent_src
     assert "fdaa::/16" in agent_src
     assert "169.254.169.254/32" in agent_src
+
+
+def test_sprint_m1_terminal_token_reissue_extend_and_o1_polling() -> None:
+    """Sprint M1: refresh token re-issue, +60m extend, tmux PTY, WS metrics push, no O(N^2) reap on reads."""
+    from fastapi.testclient import TestClient
+    from orchestrator.app import create_orchestrator_app
+    from orchestrator.runtime import MemorySandboxRuntime
+
+    app = create_orchestrator_app(
+        runtime=MemorySandboxRuntime(),
+        api_key="test-key-0123456789",
+        signing_secret="test-secret-0123456789",
+    )
+    client = TestClient(app)
+    headers = {"X-Spartan-Orchestrator-Key": "test-key-0123456789"}
+
+    prov = client.post(
+        "/v1/sandboxes",
+        headers=headers,
+        json={"tenant_id": "crucible", "user_id": "u_m1", "template_id": "lab1-core-engine", "tier": "pro"},
+    )
+    assert prov.status_code == 200
+    sbx = prov.json()
+    sid = sbx["sandbox_id"]
+
+    # Refresh flow: GET /v1/sandboxes omits token -> POST /terminal-token re-issues valid token
+    listed = client.get("/v1/sandboxes", headers=headers, params={"tenant_id": "crucible", "user_id": "u_m1"}).json()
+    assert listed["sandboxes"][0]["terminal_token"] is None
+
+    reissued = client.post(
+        f"/v1/sandboxes/{sid}/terminal-token",
+        headers=headers,
+        params={"tenant_id": "crucible", "user_id": "u_m1"},
+    )
+    assert reissued.status_code == 200
+    tok = reissued.json()["terminal_token"]
+    assert tok and reissued.json()["ttl_remaining_seconds"] > 0
+
+    # Cross-user token re-issue must fail closed (403)
+    bad = client.post(
+        f"/v1/sandboxes/{sid}/terminal-token",
+        headers=headers,
+        params={"tenant_id": "crucible", "user_id": "attacker"},
+    )
+    assert bad.status_code == 403
+
+    # +60m TTL extend succeeds and advances expiry
+    ext = client.post(
+        f"/v1/sandboxes/{sid}/extend",
+        headers=headers,
+        params={"tenant_id": "crucible", "user_id": "u_m1", "extra_minutes": 60},
+    )
+    assert ext.status_code == 200
+    assert ext.json()["ttl_remaining_seconds"] > reissued.json()["ttl_remaining_seconds"] + 3000
+
+    # Verify tmux & WS metrics push & no metrics-poll last_activity reset in vm_agent.py
+    agent_src = (Path(__file__).resolve().parent.parent / "orchestrator" / "vm_agent.py").read_text(encoding="utf-8")
+    assert '"tmux", "new-session", "-A", "-s", "crucible"' in agent_src
+    assert "_push_metrics_over_ws" in agent_src
+    assert "def internal_extend" in agent_src
+    # Verify service.py no longer calls reap_expired() on every request
+    service_src = (Path(__file__).resolve().parent.parent / "orchestrator" / "service.py").read_text(encoding="utf-8")
+    assert service_src.count("self.reap_expired()") == 0
