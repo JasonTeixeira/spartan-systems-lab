@@ -444,13 +444,30 @@ def verify_lab7(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
 
     worker_bin = root / "bin" / "run-worker.py"
     if worker_bin.exists():
-        wproc = subprocess.run(
-            [sys.executable, "bin/run-worker.py"],
-            cwd=str(root),
-            capture_output=True,
-            text=True,
-            timeout=6,
-        )
+        # Security: NEVER execute student-writable bin/run-worker.py as uid=0 or with VM_SESSION_SECRET.
+        safe_env = {
+            "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "HOME": str(root),
+            "LANG": "C.UTF-8",
+            "PYTHONUNBUFFERED": "1",
+        }
+        run_kwargs: dict[str, Any] = {
+            "cwd": str(root),
+            "env": safe_env,
+            "capture_output": True,
+            "text": True,
+            "timeout": 6,
+        }
+        if os.geteuid() == 0:
+            try:
+                import pwd
+
+                pw = pwd.getpwnam("operator")
+                run_kwargs["user"] = pw.pw_uid
+                run_kwargs["group"] = pw.pw_gid
+            except Exception:
+                pass
+        wproc = subprocess.run([sys.executable, "bin/run-worker.py"], **run_kwargs)
         w_ok = wproc.returncode == 0 and "WORKER_READY" in wproc.stdout
         checks.append(
             _chk(

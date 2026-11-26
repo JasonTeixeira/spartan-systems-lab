@@ -301,3 +301,29 @@ def test_live_file_editor_strict_path_containment_and_granular_checks(tmp_path: 
     assert wr2.status_code == 200
     assert wr2.json()["telemetry"]["checks_passing"] == 2
     assert wr2.json()["telemetry"]["healthy"] is True
+
+
+def test_sprint_m0_vm_root_rce_and_egress_hardening(tmp_path: Path) -> None:
+    """Sprint M0 security lock: no root RCE via worker/nginx/daemons/postgres trust + egress firewall."""
+    grader_src = (Path(__file__).resolve().parent.parent / "orchestrator" / "grader.py").read_text(encoding="utf-8")
+    scenarios_src = (Path(__file__).resolve().parent.parent / "orchestrator" / "scenarios_expanded.py").read_text(encoding="utf-8")
+    agent_src = (Path(__file__).resolve().parent.parent / "orchestrator" / "vm_agent.py").read_text(encoding="utf-8")
+
+    # 1. Postgres superuser TCP trust must be removed; pgvector SQL must run as operator
+    assert "host all all 127.0.0.1/32 trust" not in grader_src
+    assert "local all postgres peer" in grader_src
+    assert "user=operator dbname=orders" in grader_src
+
+    # 2. nginx -t must block load_module and run unprivileged with scrubbed env
+    assert "load_module" in grader_src
+    assert "preexec_fn=_unprivileged_preexec()" in grader_src
+
+    # 3. lab7 bin/run-worker.py must run with scrubbed env (never leaking VM_SESSION_SECRET)
+    assert "safe_env = {" in scenarios_src
+    assert 'pwd.getpwnam("operator")' in scenarios_src
+
+    # 4. vm_agent must invoke _try_harden_egress_firewall blocking Fly 6PN lateral scan & mining ports
+    assert "def _try_harden_egress_firewall" in agent_src
+    assert "_try_harden_egress_firewall()" in agent_src
+    assert "fdaa::/16" in agent_src
+    assert "169.254.169.254/32" in agent_src

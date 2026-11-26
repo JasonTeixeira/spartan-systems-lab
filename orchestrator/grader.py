@@ -347,25 +347,52 @@ def _start_real_postgres_stack(root: Path, broken: bool) -> None:
                 hba = Path(f"/etc/postgresql/{ver}/main/pg_hba.conf")
                 if hba.exists():
                     hba_text = hba.read_text(encoding="utf-8")
-                    if "127.0.0.1/32 trust" not in hba_text:
+                    if "host orders operator 127.0.0.1/32 trust" not in hba_text:
+                        # Security: postgres superuser is restricted to local peer auth only;
+                        # TCP access is strictly scoped to unprivileged `operator` role on `orders`.
                         hba.write_text(
-                            "local all all trust\n"
-                            "host all all 127.0.0.1/32 trust\n"
-                            "host all all ::1/128 trust\n",
+                            "local all postgres peer\n"
+                            "local all operator trust\n"
+                            "host orders operator 127.0.0.1/32 trust\n"
+                            "host orders operator ::1/128 trust\n",
                             encoding="utf-8",
                         )
                 subprocess.run([pg_ctlcluster, ver, "main", "start"], check=False, capture_output=True)
         _wait_port(5432, timeout_s=12.0)
 
     if _port_open(5432) and psycopg is not None:
-        with psycopg.connect("host=127.0.0.1 port=5432 user=postgres dbname=postgres", autocommit=True) as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT 1 FROM pg_roles WHERE rolname = 'operator'")
-            if cur.fetchone() is None:
-                cur.execute("CREATE ROLE operator WITH LOGIN PASSWORD 'crucible'")
-            cur.execute("SELECT 1 FROM pg_database WHERE datname = 'orders'")
-            if cur.fetchone() is None:
-                cur.execute("CREATE DATABASE orders OWNER operator")
+        # Bootstrap roles/db as postgres via local unix socket (peer auth as postgres user if root)
+        pg_bootstrap_sql = (
+            "DO $$ BEGIN "
+            "IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'operator') THEN "
+            "CREATE ROLE operator WITH LOGIN PASSWORD 'crucible'; "
+            "END IF; END $$; "
+        )
+        if os.geteuid() == 0 and shutil.which("su"):
+            subprocess.run(
+                ["su", "-", "postgres", "-c", f"psql -v ON_ERROR_STOP=0 -c \"{pg_bootstrap_sql}\""],
+                check=False,
+                capture_output=True,
+            )
+            subprocess.run(
+                ["su", "-", "postgres", "-c", "psql -tc \"SELECT 1 FROM pg_database WHERE datname = 'orders'\" | grep -q 1 || createdb -O operator orders"],
+                check=False,
+                capture_output=True,
+            )
+            subprocess.run(
+                ["su", "-", "postgres", "-c", "psql -d orders -c 'CREATE EXTENSION IF NOT EXISTS vector;'"],
+                check=False,
+                capture_output=True,
+            )
+        else:
+            with psycopg.connect("host=127.0.0.1 port=5432 user=postgres dbname=postgres", autocommit=True) as conn:
+                cur = conn.cursor()
+                cur.execute("SELECT 1 FROM pg_roles WHERE rolname = 'operator'")
+                if cur.fetchone() is None:
+                    cur.execute("CREATE ROLE operator WITH LOGIN PASSWORD 'crucible'")
+                cur.execute("SELECT 1 FROM pg_database WHERE datname = 'orders'")
+                if cur.fetchone() is None:
+                    cur.execute("CREATE DATABASE orders OWNER operator")
 
         with psycopg.connect("host=127.0.0.1 port=5432 user=operator dbname=orders", autocommit=True) as conn:
             cur = conn.cursor()
@@ -437,10 +464,17 @@ def _start_real_postgres_stack(root: Path, broken: bool) -> None:
         _wait_port(6432, timeout_s=5.0)
 
     if shutil.which("redis-server") and not _port_open(6379):
+        redis_kwargs: dict[str, Any] = {
+            "env": _scrubbed_subprocess_env(root),
+            "stdout": subprocess.DEVNULL,
+            "stderr": subprocess.DEVNULL,
+        }
+        if ids is not None:
+            redis_kwargs["user"] = ids[0]
+            redis_kwargs["group"] = ids[1]
         subprocess.Popen(
             ["redis-server", "--daemonize", "yes", "--bind", "127.0.0.1", "--port", "6379", "--save", ""],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            **redis_kwargs,
         )
 
     api_script = root / "app" / "orders_api.py"
@@ -471,11 +505,18 @@ def get_orders(tenant_id: str = "tenant_07"):
         encoding="utf-8",
     )
     if not _port_open(8000):
+        api_kwargs: dict[str, Any] = {
+            "cwd": str(api_script.parent),
+            "env": _scrubbed_subprocess_env(root),
+            "stdout": subprocess.DEVNULL,
+            "stderr": subprocess.DEVNULL,
+        }
+        if ids is not None:
+            api_kwargs["user"] = ids[0]
+            api_kwargs["group"] = ids[1]
         subprocess.Popen(
             [sys.executable, "-m", "uvicorn", "orders_api:app", "--host", "127.0.0.1", "--port", "8000"],
-            cwd=str(api_script.parent),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            **api_kwargs,
         )
         _wait_port(8000, timeout_s=5.0)
 
@@ -511,14 +552,22 @@ def health():
         encoding="utf-8",
     )
     if not _port_open(8000):
+        edge_ids = _operator_ids()
+        edge_kwargs: dict[str, Any] = {
+            "cwd": str(app_dir),
+            "env": _scrubbed_subprocess_env(root),
+            "stdout": subprocess.DEVNULL,
+            "stderr": subprocess.DEVNULL,
+        }
+        if edge_ids is not None:
+            edge_kwargs["user"] = edge_ids[0]
+            edge_kwargs["group"] = edge_ids[1]
         subprocess.Popen(
             [
                 sys.executable, "-m", "uvicorn", "edge_backend:app",
                 "--host", "127.0.0.1", "--port", "8000", "--timeout-keep-alive", "60",
             ],
-            cwd=str(app_dir),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            **edge_kwargs,
         )
         _wait_port(8000, timeout_s=5.0)
 
@@ -1619,19 +1668,37 @@ def _verify_lab2_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
         )
 
     if has_real_nginx():
-        chk = subprocess.run(
-            ["nginx", "-t", "-c", str(root / "nginx" / "nginx.conf")],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        syn_ok = chk.returncode == 0
+        # Security: block dynamic shared-object loading (`load_module`) and run `nginx -t` unprivileged.
+        nginx_dir = root / "nginx"
+        has_forbidden_load_module = False
+        if nginx_dir.exists():
+            for cfg in nginx_dir.rglob("*.conf"):
+                try:
+                    if re.search(r"^\s*load_module\b", cfg.read_text(encoding="utf-8", errors="ignore"), re.MULTILINE):
+                        has_forbidden_load_module = True
+                        break
+                except OSError:
+                    pass
+        if has_forbidden_load_module:
+            syn_ok = False
+            syn_detail = "Forbidden directive `load_module` detected in nginx config"
+        else:
+            chk = subprocess.run(
+                ["nginx", "-t", "-c", str(root / "nginx" / "nginx.conf")],
+                env=_scrubbed_subprocess_env(root),
+                preexec_fn=_unprivileged_preexec(),
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            syn_ok = chk.returncode == 0
+            syn_detail = "nginx -t syntax valid" if syn_ok else (chk.stderr or chk.stdout).strip()[:160]
         checks.append(
             _chk(
                 "nginx_syntax",
                 "NGINX Config Syntax (nginx -t)",
                 syn_ok,
-                "nginx -t syntax valid" if syn_ok else (chk.stderr or chk.stdout).strip()[:160],
+                syn_detail,
             )
         )
         curl_chk = subprocess.run(
@@ -1845,7 +1912,8 @@ print("HIDDEN_ACL_PASS")
             pgvec_ok = False
             pgvec_detail = "pgvector query failed"
             try:
-                with psycopg.connect("host=127.0.0.1 port=5432 user=postgres dbname=postgres", autocommit=True) as conn:
+                # Security: execute student-writable SQL strictly as unprivileged `operator` role, never `postgres` superuser.
+                with psycopg.connect("host=127.0.0.1 port=5432 user=operator dbname=orders", autocommit=True) as conn:
                     cur = conn.cursor()
                     stmts = [s.strip() for s in sql_text.split(";") if s.strip() and not all(ln.strip().startswith("--") or not ln.strip() for ln in s.splitlines())]
                     last_rows: list[Any] = []

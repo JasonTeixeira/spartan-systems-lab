@@ -26,6 +26,7 @@ import os
 import pty
 import pwd
 import resource
+import shutil
 import signal
 import ssl
 import struct
@@ -174,8 +175,39 @@ def _try_harden_proc() -> None:
             )
 
 
+def _try_harden_egress_firewall() -> None:
+    """Apply fail-safe outbound firewall rules inside Firecracker VM when root + CAP_NET_ADMIN.
+
+    Blocks outbound Fly 6PN lateral scanning (`fdaa::/16` except established/related orchestrator
+    return traffic and local DNS `fdaa::3`), RFC1918 probing, and common crypto-mining Stratum ports.
+    """
+    if os.geteuid() != 0:
+        return
+    ip6 = shutil.which("ip6tables")
+    ip4 = shutil.which("iptables")
+    rules: list[list[str]] = []
+    if ip6:
+        rules.extend(
+            [
+                [ip6, "-A", "OUTPUT", "-m", "conntrack", "--ctstate", "ESTABLISHED,RELATED", "-j", "ACCEPT"],
+                [ip6, "-A", "OUTPUT", "-o", "lo", "-j", "ACCEPT"],
+                [ip6, "-A", "OUTPUT", "-d", "fdaa::/16", "-p", "tcp", "--sport", str(AGENT_PORT), "-j", "ACCEPT"],
+                [ip6, "-A", "OUTPUT", "-d", "fdaa::/16", "-j", "DROP"],
+            ]
+        )
+    if ip4:
+        for port in ("3333", "4444", "5555", "7777", "8333", "9999", "14444", "45700"):
+            rules.append([ip4, "-A", "OUTPUT", "-p", "tcp", "--dport", port, "-j", "DROP"])
+        for cidr in ("169.254.169.254/32", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"):
+            rules.append([ip4, "-A", "OUTPUT", "-d", cidr, "-j", "DROP"])
+    for cmd in rules:
+        with contextlib.suppress(Exception):
+            subprocess.run(cmd, check=False, capture_output=True, timeout=2)
+
+
 def _bootstrap_lab() -> None:
     _try_harden_proc()
+    _try_harden_egress_firewall()
     if ARM_INITIAL_FAULT:
         fault = arm_scenario_fault(
             WORKSPACE_DIR,
