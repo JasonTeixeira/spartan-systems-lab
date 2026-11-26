@@ -86,6 +86,7 @@ SANDBOX_ID = os.environ.get("SPARTAN_SANDBOX_ID", "sbx_local").strip()
 TEMPLATE_ID = os.environ.get("SPARTAN_TEMPLATE", "lab1-core-engine").strip()
 MODULE_ID = os.environ.get("SPARTAN_MODULE", "M01").strip()
 VM_SECRET = os.environ.get("VM_SESSION_SECRET", "").strip()
+AGENT_PORT = int(os.environ.get("VM_AGENT_PORT", "8091"))
 EXPIRES_EPOCH = int(os.environ.get("SPARTAN_EXPIRES_AT", str(int(time.time()) + 3600)))
 IDLE_TIMEOUT_SECONDS = int(os.environ.get("SPARTAN_IDLE_TIMEOUT_SECONDS", "1200"))
 ARM_INITIAL_FAULT = os.environ.get("SPARTAN_ARM_CHAOS", "0").strip().lower() in {"1", "true", "yes"}

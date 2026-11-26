@@ -494,3 +494,18 @@ def test_free_range_sandbox_snapshots_restore_and_factory_reset(tmp_path: Path) 
         params={"tenant_id": "spartan-academy", "user_id": "u_free_range", "path": "playground/experiment.py"},
     )
     assert "Crucible Free-Range Cloud VM ready!" in r_pristine.json()["content"]
+
+
+def test_vm_agent_egress_firewall_has_no_name_errors(monkeypatch) -> None:
+    """Exercise _try_harden_egress_firewall with mocked root + iptables/ip6tables to prevent NameError crashes."""
+    from orchestrator import vm_agent
+
+    executed: list[list[str]] = []
+    monkeypatch.setattr(vm_agent.os, "geteuid", lambda: 0)
+    monkeypatch.setattr(vm_agent.shutil, "which", lambda name: f"/usr/sbin/{name}")
+    monkeypatch.setattr(vm_agent.subprocess, "run", lambda cmd, **_kw: executed.append(cmd))
+
+    vm_agent._try_harden_egress_firewall()
+    assert vm_agent.AGENT_PORT == 8091
+    assert any("--sport" in cmd and "8091" in cmd for cmd in executed)
+    assert any("169.254.169.254/32" in cmd for cmd in executed)
