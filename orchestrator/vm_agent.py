@@ -963,12 +963,15 @@ async def internal_terminal(
             await websocket.send_text(chunk.decode("utf-8", errors="replace"))
 
     async def _push_metrics_over_ws() -> None:
-        """Push telemetry every 6s over the existing WS to eliminate 3s Vercel/Supabase polling."""
+        """Push compact telemetry every 6s over WS (compact JSON without bulky prometheus_text)."""
         while True:
             await asyncio.sleep(6.0)
             try:
                 snap = await asyncio.to_thread(internal_metrics)
-                await websocket.send_text(json.dumps({"type": "metrics", "data": snap}))
+                compact_snap = {k: v for k, v in snap.items() if k != "prometheus_text"}
+                await websocket.send_text(
+                    json.dumps({"type": "metrics", "data": compact_snap}, separators=(",", ":"))
+                )
             except Exception:
                 break
 
@@ -985,7 +988,9 @@ async def internal_terminal(
                     if isinstance(parsed, dict):
                         msg_type = parsed.get("type")
                         if msg_type == "ping":
-                            await websocket.send_text(json.dumps({"type": "pong", "ts": int(time.time())}))
+                            await websocket.send_text(
+                                json.dumps({"type": "pong", "ts": int(time.time())}, separators=(",", ":"))
+                            )
                             continue
                         if msg_type == "resize":
                             _set_winsize(

@@ -190,6 +190,11 @@ class SandboxOrchestratorService:
         )
         vm_secret = secrets.token_urlsafe(32) if use_per_vm_secret else None
 
+        resolved_spec = (
+            get_scenario_spec(template.id, scenario_id=req.scenario_id)
+            if req.arm_blind_chaos
+            else None
+        )
         start_kwargs: dict[str, Any] = {
             "sandbox_id": sandbox_id,
             "tenant_id": req.tenant_id,
@@ -201,8 +206,9 @@ class SandboxOrchestratorService:
             "vm_secret": vm_secret or "",
             "arm_blind_chaos": req.arm_blind_chaos,
         }
-        if req.scenario_id and self.runtime.backend_name in {"fly", "linux-pty"}:
-            start_kwargs["scenario_id"] = req.scenario_id
+        effective_scenario_id = resolved_spec.scenario_id if resolved_spec else req.scenario_id
+        if effective_scenario_id and self.runtime.backend_name in {"fly", "linux-pty"}:
+            start_kwargs["scenario_id"] = effective_scenario_id
         if self.runtime.backend_name == "fly":
             start_kwargs["user_id"] = req.user_id
             start_kwargs["persist_volume"] = bool(req.persist_volume and req.tier in {"pro", "enterprise"})
@@ -225,8 +231,8 @@ class SandboxOrchestratorService:
 
         fault: ChaosFault | None = None
         if req.arm_blind_chaos:
-            # If the runtime already armed chaos during boot (Firecracker / LinuxPty), record fault metadata
-            spec = get_scenario_spec(template.id, scenario_id=req.scenario_id)
+            # Reuse the EXACT resolved scenario passed into the Firecracker VM so UI Brief & VM Fault never diverge
+            spec = resolved_spec or get_scenario_spec(template.id, scenario_id=req.scenario_id)
             if self.runtime.backend_name in {"fly", "linux-pty"}:
                 fault = ChaosFault(
                     id=spec.scenario_id,

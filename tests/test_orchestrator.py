@@ -321,7 +321,7 @@ def test_fly_persistent_volume_pro_auto_provision_and_reuse(tmp_path) -> None:
     assert (sl_dir / "alerts.yml").exists()
     assert (sl_dir / "alerts.test.yml").exists()
     assert (sl_dir / "backup_restore_drill.sh").exists()
-    assert "v12" in LAB_TEMPLATES["lab0-free-range"].image
+    assert "v13" in LAB_TEMPLATES["lab0-free-range"].image
     assert TIER_QUOTAS["pro"].ttl_minutes == 120
 
 
