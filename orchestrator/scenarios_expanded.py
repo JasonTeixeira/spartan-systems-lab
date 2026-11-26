@@ -368,6 +368,54 @@ def seed_lab7(root: Path, broken: bool) -> None:
         else "INFO worker nominal · nofile=65535 · payments.internal -> 127.0.0.1\n",
         encoding="utf-8",
     )
+    (root / "bin").mkdir(parents=True, exist_ok=True)
+    worker_bin = root / "bin" / "run-worker.py"
+    worker_bin.write_text(
+        """#!/usr/bin/env python3
+from __future__ import annotations
+import os, sys
+from pathlib import Path
+
+root = Path.cwd()
+if (root / "run" / "worker.lock").exists():
+    print("FATAL: stale lockfile run/worker.lock exists", file=sys.stderr)
+    sys.exit(2)
+
+nofile = 0
+for line in (root / "config" / "limits.conf").read_text(encoding="utf-8").splitlines():
+    parts = line.split()
+    if len(parts) >= 4 and parts[2] == "nofile" and parts[3].isdigit():
+        nofile = max(nofile, int(parts[3]))
+if nofile < 65535:
+    print(f"FATAL: EMFILE nofile={nofile} < 65535", file=sys.stderr)
+    sys.exit(3)
+
+dns_ok = any(
+    s and not s.startswith("#") and "payments.internal" in s and s.startswith("127.0.0.1")
+    for s in (ln.strip() for ln in (root / "config" / "hosts.override").read_text(encoding="utf-8").splitlines())
+)
+if not dns_ok:
+    print("FATAL: payments.internal does not resolve to 127.0.0.1", file=sys.stderr)
+    sys.exit(4)
+
+# Real OS file-descriptor pipe stress test (open 32 simultaneous pipe pairs = 64 live FDs)
+pipes: list[tuple[int, int]] = []
+try:
+    for i in range(32):
+        r_fd, w_fd = os.pipe()
+        os.write(w_fd, b"ok")
+        assert os.read(r_fd, 2) == b"ok"
+        pipes.append((r_fd, w_fd))
+finally:
+    for r_fd, w_fd in pipes:
+        os.close(r_fd)
+        os.close(w_fd)
+
+print(f"WORKER_READY nofile={nofile} fd_pipes_verified=64")
+""",
+        encoding="utf-8",
+    )
+    worker_bin.chmod(0o755)
 
 
 def verify_lab7(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
@@ -393,6 +441,25 @@ def verify_lab7(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
             if s and not s.startswith("#") and "payments.internal" in s and s.startswith("127.0.0.1"):
                 dns_ok = True
     checks.append(_chk("linux_dns", "payments.internal -> 127.0.0.1", dns_ok, "payments.internal resolves to 127.0.0.1" if dns_ok else "config/hosts.override still points payments.internal to wrong IP"))
+
+    worker_bin = root / "bin" / "run-worker.py"
+    if worker_bin.exists():
+        wproc = subprocess.run(
+            [sys.executable, "bin/run-worker.py"],
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            timeout=6,
+        )
+        w_ok = wproc.returncode == 0 and "WORKER_READY" in wproc.stdout
+        checks.append(
+            _chk(
+                "linux_worker_exec",
+                "Real Linux Worker Startup + 64-FD Pipe Stress",
+                w_ok,
+                wproc.stdout.strip()[:160] if w_ok else (wproc.stderr or wproc.stdout).strip()[:160],
+            )
+        )
 
     sysctl_path = root / "config" / "sysctl.conf"
     if sysctl_path.exists():
@@ -502,21 +569,24 @@ class PaymentLedger:
 """
         if broken
         else """from __future__ import annotations
+import threading
 
 class PaymentLedger:
     def __init__(self) -> None:
         self.balances_cents: dict[str, int] = {}
         self.seen_keys: dict[str, dict] = {}
+        self._lock = threading.Lock()
 
     def charge(self, account_id: str, amount_cents: int, idempotency_key: str) -> dict:
-        if idempotency_key in self.seen_keys:
-            prev = dict(self.seen_keys[idempotency_key])
-            prev["duplicate"] = True
-            return prev
-        self.balances_cents[account_id] = self.balances_cents.get(account_id, 0) + amount_cents
-        receipt = {"account_id": account_id, "charged_cents": amount_cents, "duplicate": False}
-        self.seen_keys[idempotency_key] = receipt
-        return receipt
+        with self._lock:
+            if idempotency_key in self.seen_keys:
+                prev = dict(self.seen_keys[idempotency_key])
+                prev["duplicate"] = True
+                return prev
+            self.balances_cents[account_id] = self.balances_cents.get(account_id, 0) + amount_cents
+            receipt = {"account_id": account_id, "charged_cents": amount_cents, "duplicate": False}
+            self.seen_keys[idempotency_key] = receipt
+            return receipt
 """
     )
     (root / "api" / "rate_limiter.py").write_text(rl_code, encoding="utf-8")
@@ -553,18 +623,30 @@ assert b.allow("whale", 19.85) is True
     checks.append(_chk("scale_rl", "Sliding-Window Rate Limiter (Hidden Burst Test)", rl_ok, "Enforces per-key sliding window cleanly" if rl_ok else (p1.stderr or p1.stdout).strip()[:180]))
 
     led_test = """
-import sys; sys.path.insert(0, "api")
+import sys, threading; sys.path.insert(0, "api")
 from ledger import PaymentLedger
 lg = PaymentLedger()
 r1 = lg.charge("acct_1", 7900, "idem_abc")
 r2 = lg.charge("acct_1", 7900, "idem_abc")
 r3 = lg.charge("acct_1", 1900, "idem_def")
 assert lg.balances_cents["acct_1"] == 9800, f"Double-charge bug! Balance={lg.balances_cents['acct_1']} expected 9800"
+
+# Real 16-thread concurrent webhook retry race test
+barrier = threading.Barrier(16)
+results = []
+def worker():
+    barrier.wait()
+    results.append(lg.charge("acct_race", 5000, "idem_race_1"))
+threads = [threading.Thread(target=worker) for _ in range(16)]
+for t in threads: t.start()
+for t in threads: t.join()
+assert len(results) == 16
+assert lg.balances_cents.get("acct_race") == 5000, f"Concurrent race double-charge! got {lg.balances_cents.get('acct_race')}"
 print("LEDGER_PASS")
 """
     p2 = subprocess.run([sys.executable, "-c", led_test], cwd=str(root), env=env_fn(root), preexec_fn=preexec_fn(), capture_output=True, text=True, timeout=8)
     led_ok = p2.returncode == 0 and "LEDGER_PASS" in p2.stdout
-    checks.append(_chk("scale_ledger", "Idempotent Payment Ledger (Zero Double-Charge)", led_ok, "Idempotency-Key dedup verified (balance=9800)" if led_ok else (p2.stderr or p2.stdout).strip()[:180]))
+    checks.append(_chk("scale_ledger", "Idempotent Payment Ledger (16-Thread Concurrency Race)", led_ok, "Idempotency-Key dedup & 16-thread race verified (balance=9800, race=5000)" if led_ok else (p2.stderr or p2.stdout).strip()[:180]))
 
     all_ok = all(c["passed"] for c in checks)
     return all_ok, ("SLA healthy: Sliding-window rate limiter & idempotent payment ledger passed hidden tests" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks

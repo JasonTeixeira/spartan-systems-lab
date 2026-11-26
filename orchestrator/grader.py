@@ -763,9 +763,23 @@ print(f"Published {len(good)} clean rows, quarantined {len(bad)} invalid rows to
     _write_executable(root / "wap" / "publish_gate.py", gate_code)
 
     # Real DuckDB + Parquet Point-in-Time ML Leakage & WAP Audit script (runs on real DuckDB inside KVM v5!)
-    duckdb_script = """#!/usr/bin/env python3
+    duckdb_join_sql = (
+        """-- BUG: regular JOIN pulls future carrier_events (event_ts > pred_ts), leaking future labels!
+SELECT s.shipment_id, e.status, e.event_ts <= s.pred_ts AS pit_safe
+FROM shipments s
+JOIN carrier_events e
+  ON s.shipment_id = e.shipment_id
+ORDER BY s.shipment_id, e.event_ts DESC"""
+        if broken
+        else """-- SAFE Point-in-Time ASOF join guarantees zero future leakage (event_ts <= pred_ts)
+SELECT s.shipment_id, e.status, e.event_ts <= s.pred_ts AS pit_safe
+FROM shipments s
+ASOF JOIN carrier_events e
+  ON s.shipment_id = e.shipment_id AND s.pred_ts >= e.event_ts
+ORDER BY s.shipment_id"""
+    )
+    duckdb_script = f"""#!/usr/bin/env python3
 import duckdb
-from pathlib import Path
 
 con = duckdb.connect()
 con.execute(\"\"\"
@@ -779,16 +793,12 @@ CREATE TABLE carrier_events AS SELECT * FROM (VALUES
   ('s2', TIMESTAMP '2026-11-20 08:45:00', 'in_transit')
 ) t(shipment_id, event_ts, status);
 \"\"\")
-# Point-in-Time ASOF join guarantees zero future leakage (event_ts <= pred_ts)
 rows = con.execute(\"\"\"
-SELECT s.shipment_id, e.status, e.event_ts <= s.pred_ts AS pit_safe
-FROM shipments s
-ASOF JOIN carrier_events e
-  ON s.shipment_id = e.shipment_id AND s.pred_ts >= e.event_ts
-ORDER BY s.shipment_id
+{duckdb_join_sql}
 \"\"\").fetchall()
-assert all(r[2] for r in rows), f"Temporal leakage detected: {rows}"
-print(f"DUCKDB_PIT_PASS: {len(rows)} shipments verified with zero future leakage -> {rows}")
+assert len(rows) == 2, f"Expected 2 point-in-time rows, got {{len(rows)}}: {{rows}}"
+assert all(r[2] for r in rows), f"Temporal leakage detected (future event_ts > pred_ts): {{rows}}"
+print(f"DUCKDB_PIT_PASS: {{len(rows)}} shipments verified with zero future leakage -> {{rows}}")
 """
     _write_executable(root / "wap" / "duckdb_pit_audit.py", duckdb_script)
     _chown_tree(root)
@@ -857,8 +867,29 @@ print("PASS: Local ACL smoke check passed (2/2 small_co docs, 0 leaks)")
     )
 
     # Real PostgreSQL pgvector HNSW + Pre-Filter Tenant ACL SQL lab script (runs on live Postgres + pgvector inside KVM v5!)
+    if has_real_postgres() and not _port_open(5432):
+        _start_real_postgres_stack(root, broken=False)
+
+    pgvec_query = (
+        """-- BUG: Post-filter slices LIMIT 2 BEFORE filtering tenant_id -> starves small_co (0 rows)!
+SELECT id, tenant_id, body, cosine_dist
+FROM (
+  SELECT id, tenant_id, body, round((embedding <=> '[1,0,0]')::numeric, 4) AS cosine_dist
+  FROM rag_chunks
+  ORDER BY embedding <=> '[1,0,0]'
+  LIMIT 2
+) sub
+WHERE tenant_id = 'small_co';"""
+        if broken
+        else """-- SAFE PRE-FILTER: WHERE tenant_id = JWT BEFORE vector distance ORDER BY + LIMIT 2
+SELECT id, tenant_id, body, round((embedding <=> '[1,0,0]')::numeric, 4) AS cosine_dist
+FROM rag_chunks
+WHERE tenant_id = 'small_co'
+ORDER BY embedding <=> '[1,0,0]'
+LIMIT 2;"""
+    )
     (root / "rag" / "pgvector_acl_lab.sql").write_text(
-        """-- Real PostgreSQL 15 + pgvector Pre-Filter vs Post-Filter Tenant ACL Proof
+        f"""-- Real PostgreSQL 15 + pgvector Pre-Filter vs Post-Filter Tenant ACL Proof
 CREATE EXTENSION IF NOT EXISTS vector;
 DROP TABLE IF EXISTS rag_chunks;
 CREATE TABLE rag_chunks (
@@ -874,12 +905,7 @@ INSERT INTO rag_chunks VALUES
   ('d3', 'small_co',  'SmallCo incident runbook A', '[0.82, 0.18, 0.00]'),
   ('d4', 'small_co',  'SmallCo incident runbook B', '[0.78, 0.22, 0.00]');
 
--- SAFE PRE-FILTER: WHERE tenant_id = JWT BEFORE vector distance ORDER BY + LIMIT 2
-SELECT id, tenant_id, body, round((embedding <=> '[1,0,0]')::numeric, 4) AS cosine_dist
-FROM rag_chunks
-WHERE tenant_id = 'small_co'
-ORDER BY embedding <=> '[1,0,0]'
-LIMIT 2;
+{pgvec_query}
 """,
         encoding="utf-8",
     )
@@ -1696,8 +1722,49 @@ def _verify_lab3_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
         if dedup_required:
             dedup_pass = bool(exec_ok and curated_path.exists() and len([json.loads(l).get("event_id") for l in curated_path.read_text(encoding="utf-8").splitlines() if l.strip()]) == len(set(json.loads(l).get("event_id") for l in curated_path.read_text(encoding="utf-8").splitlines() if l.strip())) == 3)
             checks.append(_chk("wap_dedup", "Idempotent event_id Deduplication", dedup_pass, "0 duplicate event_ids in curated.jsonl" if dedup_pass else "Duplicate event_ids leaked into curated.jsonl!"))
+
+    # Real DuckDB Point-in-Time ASOF Join audit (executes real DuckDB in Firecracker v5; strict SQL check fallback on hosts without duckdb)
+    duckdb_script = root / "wap" / "duckdb_pit_audit.py"
+    if duckdb_script.exists():
+        has_duckdb = False
+        try:
+            import duckdb as _duckdb_check  # noqa: F401
+            has_duckdb = True
+        except Exception:
+            has_duckdb = False
+
+        if has_duckdb:
+            dproc = subprocess.run(
+                [sys.executable, "wap/duckdb_pit_audit.py"],
+                cwd=str(root),
+                env=_scrubbed_subprocess_env(root),
+                preexec_fn=_unprivileged_preexec(),
+                capture_output=True,
+                text=True,
+                timeout=8,
+            )
+            pit_ok = dproc.returncode == 0 and "DUCKDB_PIT_PASS" in dproc.stdout
+            pit_detail = (
+                "Live DuckDB ASOF JOIN verified (0 future feature leaks)"
+                if pit_ok
+                else (dproc.stderr or dproc.stdout).strip()[:180]
+            )
+        else:
+            code_lines = [
+                ln for ln in duckdb_script.read_text(encoding="utf-8").splitlines()
+                if not ln.lstrip().startswith(("#", "--"))
+            ]
+            active_sql = "\n".join(code_lines).upper()
+            pit_ok = "ASOF JOIN" in active_sql and ("PRED_TS >= E.EVENT_TS" in active_sql or "EVENT_TS <= S.PRED_TS" in active_sql)
+            pit_detail = (
+                "DuckDB ASOF JOIN point-in-time predicate verified"
+                if pit_ok
+                else "wap/duckdb_pit_audit.py must use ASOF JOIN with pred_ts >= event_ts (zero future leakage)"
+            )
+        checks.append(_chk("duckdb_pit_asof", "DuckDB Point-in-Time ASOF Join (Zero Leakage)", pit_ok, pit_detail))
+
     all_ok = all(c["passed"] for c in checks)
-    return all_ok, ("SLA healthy: WAP gate passed hidden 6-row adversarial audit (3 clean published, 3 poisoned quarantined)" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
+    return all_ok, ("SLA healthy: WAP gate + DuckDB ASOF point-in-time audit passed (0 poisoned/leaked rows)" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
 
 
 def _verify_lab4_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
@@ -1770,8 +1837,49 @@ print("HIDDEN_ACL_PASS")
     checks.append(_chk("mcp_budget", "Bounded MCP Budget Caps", budget_ok, budget_detail))
     checks.append(_chk("mcp_writes", "MCP Write Approval Gate", writes_ok, writes_detail))
 
+    # Real PostgreSQL + pgvector Pre-Filter SQL check (executes live on Postgres + pgvector inside Firecracker v5!)
+    pgvec_sql = root / "rag" / "pgvector_acl_lab.sql"
+    if pgvec_sql.exists():
+        sql_text = pgvec_sql.read_text(encoding="utf-8")
+        if has_real_postgres() and _port_open(5432) and psycopg is not None:
+            pgvec_ok = False
+            pgvec_detail = "pgvector query failed"
+            try:
+                with psycopg.connect("host=127.0.0.1 port=5432 user=postgres dbname=postgres", autocommit=True) as conn:
+                    cur = conn.cursor()
+                    stmts = [s.strip() for s in sql_text.split(";") if s.strip() and not all(ln.strip().startswith("--") or not ln.strip() for ln in s.splitlines())]
+                    last_rows: list[Any] = []
+                    for st in stmts:
+                        cur.execute(st)
+                        if cur.description is not None:
+                            last_rows = cur.fetchall()
+                    tenants = [r[1] for r in last_rows] if last_rows else []
+                    pgvec_ok = len(last_rows) == 2 and all(t == "small_co" for t in tenants)
+                    pgvec_detail = (
+                        f"Live Postgres+pgvector pre-filter returned {len(last_rows)} small_co rows (0 mega_corp leaks)"
+                        if pgvec_ok
+                        else f"pgvector ACL query returned {len(last_rows)} row(s) tenants={tenants}; expected 2 small_co rows!"
+                    )
+            except Exception as exc:
+                pgvec_detail = f"Live pgvector error: {str(exc)[:160]}"
+        else:
+            active_sql = "\n".join(
+                ln for ln in sql_text.splitlines() if not ln.lstrip().startswith("--")
+            ).upper()
+            # Ensure WHERE tenant_id = 'small_co' is applied BEFORE ORDER BY ... LIMIT (not post-filtered in outer subquery)
+            where_idx = active_sql.rfind("WHERE TENANT_ID")
+            order_idx = active_sql.rfind("ORDER BY EMBEDDING")
+            has_subquery_postfilter = "FROM (" in active_sql and where_idx > order_idx
+            pgvec_ok = where_idx != -1 and order_idx != -1 and where_idx < order_idx and not has_subquery_postfilter
+            pgvec_detail = (
+                "pgvector SQL pre-filters WHERE tenant_id BEFORE vector ORDER BY + LIMIT"
+                if pgvec_ok
+                else "rag/pgvector_acl_lab.sql post-filters after LIMIT (starves small_co); move WHERE tenant_id before ORDER BY"
+            )
+        checks.append(_chk("pgvector_acl_sql", "PostgreSQL pgvector Pre-Filter SQL", pgvec_ok, pgvec_detail))
+
     all_ok = all(c["passed"] for c in checks)
-    return all_ok, ("SLA healthy: hidden multi-tenant pre-filter ACL passed (0 leaks) + bounded MCP budget verified" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
+    return all_ok, ("SLA healthy: hidden multi-tenant pre-filter ACL + live pgvector SQL + bounded MCP budget verified" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
 
 
 def _verify_lab5_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:

@@ -52,6 +52,15 @@ def _fix_base_lab(root: Path, template_id: str) -> None:
             "Path('wap/dlq.jsonl').write_text('\\n'.join(json.dumps(r) for r in bad) + '\\n')\n",
             encoding="utf-8",
         )
+        pit = root / "wap" / "duckdb_pit_audit.py"
+        if pit.exists():
+            pit.write_text(
+                pit.read_text(encoding="utf-8").replace(
+                    "JOIN carrier_events e\n  ON s.shipment_id = e.shipment_id",
+                    "ASOF JOIN carrier_events e\n  ON s.shipment_id = e.shipment_id AND s.pred_ts >= e.event_ts",
+                ),
+                encoding="utf-8",
+            )
     if template_id == "lab4-rag-acl":
         provision_workspace(root, template_id, "sbx_fix", arm_fault=False)
     if template_id == "lab5-raft-internals":

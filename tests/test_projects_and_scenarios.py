@@ -33,7 +33,7 @@ def test_24_scenario_catalog_and_roulette(tmp_path: Path) -> None:
 
 
 def test_all_four_build_from_scratch_projects_starter_vs_reference(tmp_path: Path) -> None:
-    assert len(BUILD_PROJECTS) == 4
+    assert len(BUILD_PROJECTS) == 8
     for project_id in BUILD_PROJECTS:
         ws = tmp_path / project_id
         # 1. Starter stub fails all 5 stages cleanly
@@ -64,7 +64,7 @@ def test_orchestrator_endpoints_scenarios_loadgen_and_project_runner(tmp_path: P
     cat = client.get("/v1/scenarios", headers=headers)
     assert cat.status_code == 200
     body = cat.json()
-    assert len(body["projects"]) == 4
+    assert len(body["projects"]) == 8
     assert sum(len(v) for v in body["scenarios"].values()) >= 24
 
     # 2. Provision sandbox with Blind Roulette scenario
