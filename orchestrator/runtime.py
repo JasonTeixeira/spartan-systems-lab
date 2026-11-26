@@ -175,6 +175,7 @@ class StartSandboxResult:
     machine_id: str | None = None
     region: str | None = None
     private_ip: str | None = None
+    volume_id: str | None = None
 
 
 class SandboxRuntime(Protocol):
@@ -688,6 +689,46 @@ class FlyMachinesRuntime:
             time.sleep(0.2)
         raise RuntimeError(f"Firecracker MicroVM {machine_id} did not become ready in {timeout_s}s ({last_err})")
 
+    def ensure_user_volume(
+        self,
+        *,
+        tenant_id: str,
+        user_id: str,
+        size_gb: int = 2,
+    ) -> str | None:
+        """Reuse an unattached 2 GB encrypted NVMe Fly Volume for this Pro user, or provision one."""
+        if not self.api_token and self.http_sender is None:
+            return None
+        digest = hashlib.sha256(f"{tenant_id}:{user_id}".encode("utf-8")).hexdigest()[:12]
+        vol_name = f"crucible_u_{digest}"
+        try:
+            st, existing = self._request("GET", f"/apps/{self.app_name}/volumes", timeout=12.0)
+            if st == 200 and isinstance(existing, list):
+                for vol in existing:
+                    if not isinstance(vol, dict):
+                        continue
+                    if (
+                        str(vol.get("name", "")) == vol_name
+                        and str(vol.get("region", "")) == self.region
+                        and str(vol.get("state", "")) == "created"
+                        and not vol.get("attached_machine_id")
+                        and isinstance(vol.get("id"), str)
+                    ):
+                        return str(vol["id"])
+        except RuntimeError:
+            pass
+        payload = {
+            "name": vol_name,
+            "region": self.region,
+            "size_gb": max(1, min(10, int(size_gb))),
+            "encrypted": True,
+            "snapshot_retention": 5,
+        }
+        st_create, created = self._request("POST", f"/apps/{self.app_name}/volumes", payload, timeout=20.0)
+        if st_create < 400 and isinstance(created, dict) and isinstance(created.get("id"), str):
+            return str(created["id"])
+        return None
+
     def start_sandbox(
         self,
         *,
@@ -701,6 +742,8 @@ class FlyMachinesRuntime:
         vm_secret: str = "",
         arm_blind_chaos: bool = False,
         scenario_id: str | None = None,
+        user_id: str | None = None,
+        persist_volume: bool = False,
     ) -> StartSandboxResult:
         _ = network_name  # Fly provides hardware KVM + private 6pn WireGuard per MicroVM
         resolved_image = (
@@ -708,6 +751,16 @@ class FlyMachinesRuntime:
             or os.environ.get("FLY_SANDBOX_IMAGE", "").strip()
             or template.image
         )
+        attached_volume_id: str | None = None
+        if persist_volume and user_id:
+            try:
+                attached_volume_id = self.ensure_user_volume(
+                    tenant_id=tenant_id,
+                    user_id=user_id,
+                    size_gb=2,
+                )
+            except RuntimeError:
+                attached_volume_id = None
         payload = build_fly_machine_payload(
             sandbox_id=sandbox_id,
             tenant_id=tenant_id,
@@ -720,10 +773,15 @@ class FlyMachinesRuntime:
             vm_secret=vm_secret,
             arm_blind_chaos=arm_blind_chaos,
             scenario_id=scenario_id,
+            volume_id=attached_volume_id,
         )
-        resp: dict[str, Any] | None = self._try_claim_warm_machine(
-            resolved_image=resolved_image,
-            payload=payload,
+        resp: dict[str, Any] | None = (
+            None
+            if attached_volume_id
+            else self._try_claim_warm_machine(
+                resolved_image=resolved_image,
+                payload=payload,
+            )
         )
         if resp is None:
             status, cold_resp = self._request("POST", f"/apps/{self.app_name}/machines", payload)
@@ -746,7 +804,12 @@ class FlyMachinesRuntime:
             # Clean up failed VM immediately so it never leaks billing
             self.stop_sandbox(container_name=container_name, network_name=network_name, machine_id=machine_id)
             raise
-        return StartSandboxResult(machine_id=machine_id, region=actual_region, private_ip=private_ip)
+        return StartSandboxResult(
+            machine_id=machine_id,
+            region=actual_region,
+            private_ip=private_ip,
+            volume_id=attached_volume_id,
+        )
 
     def inject_fault(
         self,

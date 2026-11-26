@@ -74,15 +74,15 @@ class LabTemplateSpec(BaseModel):
     default_shell: str = "/bin/bash"
 
 
-SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v10"
+SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v11"
 
 LAB_TEMPLATES: dict[LabTemplateId, LabTemplateSpec] = {
     "lab0-free-range": LabTemplateSpec(
         id="lab0-free-range",
         module="M01",
-        title="Free-Range Enterprise Cloud Range (Postgres 16 + PgBouncer + Redis + NGINX)",
+        title="Free-Range Enterprise Cloud Range (Postgres + Redis + NGINX + OpenTofu + Prometheus + uv/Node)",
         image=SANDBOX_IMAGE,
-        summary="Open sandbox Firecracker Linux VM with ALL live daemons running (PostgreSQL 16, PgBouncer :6432, Redis 7, NGINX TLS 1.3 :8443), named checkpoints, and 1-click factory reset.",
+        summary="Open Firecracker Linux VM with ALL live daemons (PostgreSQL 15 + pgvector, PgBouncer :6432, Redis 7 :6379, NGINX TLS 1.3 :8443, FastAPI :8000), OpenTofu, Prometheus/promtool, kubectl, uv, Node.js, age encryption, Checkpoints, and 1-Click Reset.",
         archos_canvas_id="dgm_spartan-lab1-core-engine",
         needs_net_admin=True,
     ),
@@ -186,6 +186,7 @@ class ProvisionRequest(BaseModel):
     tier: SandboxTier = "free"
     arm_blind_chaos: bool = False
     scenario_id: str | None = Field(default=None, max_length=80)
+    persist_volume: bool = False
 
 
 class SandboxSession(BaseModel):
@@ -199,6 +200,7 @@ class SandboxSession(BaseModel):
     backend: str = "fly"
     fly_machine_id: str | None = None
     region: str | None = None
+    volume_id: str | None = None
     scenario_id: str | None = None
     container_name: str
     network_name: str

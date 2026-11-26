@@ -1,5 +1,6 @@
-# Crucible Hardware-Isolated Firecracker MicroVM Lab Image
-# Packs REAL production daemons (PostgreSQL 16, PgBouncer, Redis, NGINX, OpenSSL, FastAPI/Uvicorn)
+# Crucible Hardware-Isolated Firecracker MicroVM Lab Image (v11 Polyglot Cloud Range)
+# Packs REAL production daemons (PostgreSQL 15 + pgvector, PgBouncer, Redis 7, NGINX, Caddy, FastAPI/Uvicorn)
+# + Enterprise Cloud Toolchain (uv, Node.js/npm, OpenTofu, kubectl, Prometheus/promtool, age, wrk, strace, htop, ripgrep)
 # + root-owned tamper-proof grader (/opt/crucible-grader, chmod 700)
 # + unprivileged `operator` (uid 1000) shell user.
 FROM debian:bookworm-slim
@@ -9,12 +10,15 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    age \
     bash \
     ca-certificates \
+    caddy \
     curl \
     dnsutils \
     file \
     git \
+    htop \
     iproute2 \
     iptables \
     jq \
@@ -22,19 +26,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lsof \
     nano \
     nginx \
+    nodejs \
+    npm \
     openssl \
     pgbouncer \
     postgresql \
     postgresql-client \
     procps \
+    prometheus \
     python3 \
     python3-pip \
     python3-venv \
     redis-server \
+    ripgrep \
     sqlite3 \
+    strace \
     tcpdump \
     tmux \
+    unzip \
     vim-tiny \
+    wrk \
     && apt-get install -y --no-install-recommends build-essential postgresql-server-dev-15 \
     && git clone --depth 1 --branch v0.8.0 https://github.com/pgvector/pgvector.git /tmp/pgvector \
     && make -C /tmp/pgvector OPTFLAGS="" \
@@ -42,6 +53,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /tmp/pgvector \
     && apt-get purge -y --auto-remove build-essential postgresql-server-dev-15 \
     && rm -rf /var/lib/apt/lists/*
+
+# Install static Open-Source Cloud & Python binaries: uv, OpenTofu (tofu), and kubectl
+RUN ARCH="$(dpkg --print-architecture)" \
+    && UV_ARCH="$( [ "$ARCH" = "arm64" ] && echo "aarch64" || echo "x86_64" )" \
+    && curl -fsSL "https://github.com/astral-sh/uv/releases/download/0.5.14/uv-${UV_ARCH}-unknown-linux-gnu.tar.gz" -o /tmp/uv.tgz \
+    && tar -xzf /tmp/uv.tgz -C /tmp \
+    && mv "/tmp/uv-${UV_ARCH}-unknown-linux-gnu/uv" "/tmp/uv-${UV_ARCH}-unknown-linux-gnu/uvx" /usr/local/bin/ \
+    && chmod 755 /usr/local/bin/uv /usr/local/bin/uvx \
+    && rm -rf /tmp/uv.tgz "/tmp/uv-${UV_ARCH}-unknown-linux-gnu" \
+    && curl -fsSL "https://github.com/opentofu/opentofu/releases/download/v1.8.8/tofu_1.8.8_linux_${ARCH}.zip" -o /tmp/tofu.zip \
+    && unzip -q /tmp/tofu.zip tofu -d /usr/local/bin \
+    && chmod 755 /usr/local/bin/tofu \
+    && rm -f /tmp/tofu.zip \
+    && curl -fsSL "https://dl.k8s.io/release/v1.31.4/bin/linux/${ARCH}/kubectl" -o /usr/local/bin/kubectl \
+    && chmod 755 /usr/local/bin/kubectl
 
 # Create unprivileged student shell user (uid=1000, unprivileged group `users`)
 RUN useradd -m -u 1000 -g users -s /bin/bash operator

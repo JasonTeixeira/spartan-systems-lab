@@ -228,3 +228,98 @@ def test_fly_machines_runtime_boots_probes_and_destroys_firecracker_vm() -> None
     )
     assert term.status_code == 200
     assert any(m == "DELETE" and "vm_firecracker_01" in u for m, u, _ in calls)
+
+
+def test_fly_persistent_volume_pro_auto_provision_and_reuse(tmp_path) -> None:
+    """Pro users opting into persist_volume auto-provision & reuse a 2 GB encrypted Fly Volume; Free users cannot."""
+    from orchestrator.grader import provision_workspace
+    from orchestrator.models import LAB_TEMPLATES, TIER_QUOTAS, ProvisionRequest
+    from orchestrator.runtime import FlyMachinesRuntime
+    from orchestrator.service import SandboxOrchestratorService
+
+    volumes: list[dict] = []
+    machine_payloads: list[dict] = []
+
+    def fake_fly(method: str, url: str, body: dict | None):
+        if method == "GET" and url.endswith("/volumes"):
+            return 200, list(volumes)
+        if method == "POST" and url.endswith("/volumes"):
+            vol = {
+                "id": f"vol_persist_{len(volumes) + 1}",
+                "name": body["name"],
+                "region": body["region"],
+                "size_gb": body["size_gb"],
+                "encrypted": body["encrypted"],
+                "state": "created",
+                "attached_machine_id": None,
+            }
+            volumes.append(vol)
+            return 200, vol
+        if method == "POST" and url.endswith("/machines"):
+            machine_payloads.append(body or {})
+            return 200, {"id": f"vm_vol_{len(machine_payloads)}", "region": "iad", "state": "started"}
+        if method == "DELETE" and "/machines/" in url:
+            return 200, {"ok": True}
+        return 200, {}
+
+    rt = FlyMachinesRuntime(
+        app_name="crucible-sandboxes",
+        api_token="fly_test_token",
+        region="iad",
+        http_sender=fake_fly,
+    )
+    svc = SandboxOrchestratorService(runtime=rt, signing_secret="super-secret-signing-key-123456")
+
+    # 1. Free user requesting persist_volume must NOT create or mount a paid Fly Volume
+    free_sess = svc.provision(
+        ProvisionRequest(
+            tenant_id="spartan-academy",
+            user_id="free_user",
+            template_id="lab1-core-engine",
+            tier="free",
+            persist_volume=True,
+        )
+    )
+    assert free_sess.volume_id is None
+    assert len(volumes) == 0
+    assert "mounts" not in machine_payloads[-1]["config"]
+
+    # 2. Pro user requesting persist_volume creates a 2 GB encrypted NVMe volume and mounts /workspace-persist
+    pro_sess1 = svc.provision(
+        ProvisionRequest(
+            tenant_id="spartan-academy",
+            user_id="pro_user",
+            template_id="lab0-free-range",
+            tier="pro",
+            persist_volume=True,
+        )
+    )
+    assert pro_sess1.volume_id == "vol_persist_1"
+    assert len(volumes) == 1
+    assert volumes[0]["size_gb"] == 2
+    assert volumes[0]["encrypted"] is True
+    assert machine_payloads[-1]["config"]["mounts"] == [{"volume": "vol_persist_1", "path": "/workspace-persist"}]
+    svc.terminate(sandbox_id=pro_sess1.sandbox_id, tenant_id="spartan-academy", user_id="pro_user")
+
+    # 3. Next Pro session for same user reuses the existing unattached volume (no duplicate billing!)
+    pro_sess2 = svc.provision(
+        ProvisionRequest(
+            tenant_id="spartan-academy",
+            user_id="pro_user",
+            template_id="lab0-free-range",
+            tier="pro",
+            persist_volume=True,
+        )
+    )
+    assert pro_sess2.volume_id == "vol_persist_1"
+    assert len(volumes) == 1
+
+    # 4. Free-Range Server-Lifecycle starter kit files exist on disk
+    provision_workspace(tmp_path, "lab0-free-range", "sbx_test_sl", arm_fault=False)
+    sl_dir = tmp_path / "playground" / "server-lifecycle"
+    assert (sl_dir / "main.tf").exists()
+    assert (sl_dir / "alerts.yml").exists()
+    assert (sl_dir / "alerts.test.yml").exists()
+    assert (sl_dir / "backup_restore_drill.sh").exists()
+    assert "v11" in LAB_TEMPLATES["lab0-free-range"].image
+    assert TIER_QUOTAS["pro"].ttl_minutes == 120

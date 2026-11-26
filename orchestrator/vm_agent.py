@@ -217,6 +217,26 @@ def _try_harden_egress_firewall() -> None:
             subprocess.run(cmd, check=False, capture_output=True, timeout=2)
 
 
+def _setup_persistent_volume_mount() -> None:
+    """When a 2 GB Fly Volume is mounted at /workspace-persist, expose ~/persist & persistent snapshots."""
+    if not (PERSIST_DIR.exists() and PERSIST_DIR.is_dir()):
+        return
+    persist_ws = PERSIST_DIR / "workspace"
+    persist_snaps = PERSIST_DIR / "snapshots"
+    persist_ws.mkdir(parents=True, exist_ok=True)
+    persist_snaps.mkdir(parents=True, exist_ok=True)
+    if os.geteuid() == 0:
+        with contextlib.suppress(KeyError, OSError):
+            pw = pwd.getpwnam("operator")
+            os.chown(persist_ws, pw.pw_uid, pw.pw_gid)
+    link_path = WORKSPACE_DIR / "persist"
+    with contextlib.suppress(OSError):
+        if link_path.is_symlink() or not link_path.exists():
+            if link_path.is_symlink():
+                link_path.unlink()
+            link_path.symlink_to(persist_ws)
+
+
 def _bootstrap_lab() -> None:
     _try_harden_proc()
     _try_harden_egress_firewall()
@@ -230,6 +250,7 @@ def _bootstrap_lab() -> None:
         _state["active_scenario_id"] = fault.fault_id
     else:
         provision_workspace(WORKSPACE_DIR, TEMPLATE_ID, SANDBOX_ID, arm_fault=False)
+    _setup_persistent_volume_mount()
     _state["ready"] = True
 
 

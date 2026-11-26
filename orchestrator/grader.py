@@ -484,6 +484,7 @@ def _start_real_postgres_stack(root: Path, broken: bool) -> None:
 
     if shutil.which("redis-server") and not _port_open(6379):
         redis_kwargs: dict[str, Any] = {
+            "cwd": "/tmp",
             "env": _scrubbed_subprocess_env(root),
             "stdout": subprocess.DEVNULL,
             "stderr": subprocess.DEVNULL,
@@ -492,9 +493,26 @@ def _start_real_postgres_stack(root: Path, broken: bool) -> None:
             redis_kwargs["user"] = ids[0]
             redis_kwargs["group"] = ids[1]
         subprocess.Popen(
-            ["redis-server", "--daemonize", "yes", "--bind", "127.0.0.1", "--port", "6379", "--save", ""],
+            [
+                "redis-server",
+                "--daemonize",
+                "yes",
+                "--dir",
+                "/tmp",
+                "--pidfile",
+                "/tmp/crucible-redis.pid",
+                "--logfile",
+                "/tmp/crucible-redis.log",
+                "--bind",
+                "127.0.0.1",
+                "--port",
+                "6379",
+                "--save",
+                "",
+            ],
             **redis_kwargs,
         )
+        _wait_port(6379, timeout_s=4.0)
 
     api_script = root / "app" / "orders_api.py"
     api_script.parent.mkdir(parents=True, exist_ok=True)
@@ -1049,20 +1067,30 @@ def _seed_lab6(root: Path, broken: bool) -> None:
 
 
 def _seed_lab0_free_range(root: Path, broken: bool) -> None:
-    """Free-Range Enterprise Cloud Range: ALL live daemons healthy + open playground workspace."""
+    """Free-Range Enterprise Cloud Range: ALL live daemons healthy + Polyglot Server-Lifecycle starter kit."""
     _seed_lab1(root, broken=broken)
     _seed_lab2(root, broken=broken)
     pg_dir = root / "playground"
-    pg_dir.mkdir(parents=True, exist_ok=True)
+    sl_dir = pg_dir / "server-lifecycle"
+    sl_dir.mkdir(parents=True, exist_ok=True)
     (pg_dir / "sandbox_notes.md").write_text(
-        "# Free-Range Enterprise Cloud Range\n\n"
-        "Break anything, build services, run SQL/Redis/NGINX experiments, save checkpoints, or Reset anytime!\n\n"
+        "# Free-Range Enterprise Cloud Range (Crucible Firecracker KVM)\n\n"
+        "Break anything, install Python/Node SDKs (`uv`, `npm`), run real OpenTofu/Prometheus/age/PostgreSQL/Redis/NGINX/Caddy drills, save Checkpoints, or 1-Click Reset anytime!\n\n"
         "## Live Daemons Running Right Now\n"
-        "- PostgreSQL 16: `psql -h 127.0.0.1 -p 5432 -U operator -d orders`\n"
+        "- PostgreSQL 15 (+ pgvector): `psql -h 127.0.0.1 -p 5432 -U operator -d orders`\n"
         "- PgBouncer Pooler: `psql -h 127.0.0.1 -p 6432 -U operator -d orders`\n"
         "- Redis 7: `redis-cli ping`\n"
         "- NGINX TLS 1.3: `curl -k https://127.0.0.1:8443/health`\n"
-        "- Live Reload Helpers: `reload-pgbouncer`, `reload-nginx`, `pg-xray`\n",
+        "- FastAPI Orders API: `curl http://127.0.0.1:8000/health`\n\n"
+        "## Pre-Installed Open-Source Cloud & SRE Arsenal\n"
+        "- Python + `uv`: `uv venv ~/myenv && uv pip install --python ~/myenv httpx fastapi`\n"
+        "- Node.js + `npm`: `node -v && npm -v`\n"
+        "- OpenTofu (Terraform): `cd ~/playground/server-lifecycle && tofu init && tofu plan && tofu apply -auto-approve`\n"
+        "- Prometheus + `promtool`: `promtool test rules ~/playground/server-lifecycle/alerts.test.yml`\n"
+        "- Encrypted Backup/Restore (`age`): `bash ~/playground/server-lifecycle/backup_restore_drill.sh`\n"
+        "- Kubernetes CLI: `kubectl version --client`\n"
+        "- Load & Kernel SRE: `wrk -t2 -c10 -d5s http://127.0.0.1:8000/health`, `caddy version`, `strace`, `tcpdump`, `htop`, `rg`\n"
+        "- Persistent 2 GB Disk (when enabled): save files in `~/persist/` to keep them across VM sessions!\n",
         encoding="utf-8",
     )
     (pg_dir / "experiment.py").write_text(
@@ -1070,6 +1098,84 @@ def _seed_lab0_free_range(root: Path, broken: bool) -> None:
         "import os\n\n"
         "if __name__ == '__main__':\n"
         "    print('Crucible Free-Range Cloud VM ready! CWD:', os.getcwd())\n",
+        encoding="utf-8",
+    )
+    (sl_dir / "main.tf").write_text(
+        'terraform {\n'
+        '  required_version = ">= 1.4, < 2.0"\n'
+        '}\n\n'
+        'variable "release" {\n'
+        '  type    = string\n'
+        '  default = "crucible-release-A"\n'
+        '}\n\n'
+        'resource "terraform_data" "release" {\n'
+        '  input = {\n'
+        '    owner        = "crucible-free-range"\n'
+        '    release      = var.release\n'
+        '    service_kind = "server-lifecycle-lab"\n'
+        '  }\n'
+        '}\n\n'
+        'output "release_record" {\n'
+        '  value = terraform_data.release.output\n'
+        '}\n',
+        encoding="utf-8",
+    )
+    (sl_dir / "alerts.yml").write_text(
+        "groups:\n"
+        "  - name: server-lifecycle\n"
+        "    rules:\n"
+        "      - alert: APIUnavailable\n"
+        '        expr: up{job="crucible"} == 0\n'
+        "        for: 2m\n"
+        "        labels: {severity: critical}\n"
+        '        annotations: {summary: "API scrape failed; check process and database"}\n'
+        "      - alert: QueueStalled\n"
+        "        expr: server_oldest_queued_seconds > 120\n"
+        "        for: 2m\n"
+        "        labels: {severity: warning}\n"
+        '        annotations: {summary: "Oldest queued job exceeds 120s; inspect worker"}\n',
+        encoding="utf-8",
+    )
+    (sl_dir / "alerts.test.yml").write_text(
+        "rule_files: [alerts.yml]\n"
+        "evaluation_interval: 1m\n"
+        "tests:\n"
+        "  - interval: 1m\n"
+        "    input_series:\n"
+        '      - series: \'up{job="crucible"}\'\n'
+        "        values: '1 0 0 0 1 1'\n"
+        "      - series: 'server_oldest_queued_seconds'\n"
+        "        values: '0 130 190 250 0 0'\n"
+        "    alert_rule_test:\n"
+        "      - eval_time: 3m\n"
+        "        alertname: APIUnavailable\n"
+        "        exp_alerts:\n"
+        "          - exp_labels: {job: crucible, severity: critical}\n"
+        '            exp_annotations: {summary: "API scrape failed; check process and database"}\n'
+        "      - eval_time: 3m\n"
+        "        alertname: QueueStalled\n"
+        "        exp_alerts:\n"
+        "          - exp_labels: {severity: warning}\n"
+        '            exp_annotations: {summary: "Oldest queued job exceeds 120s; inspect worker"}\n'
+        "      - eval_time: 5m\n"
+        "        alertname: APIUnavailable\n"
+        "        exp_alerts: []\n",
+        encoding="utf-8",
+    )
+    (sl_dir / "backup_restore_drill.sh").write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        "WORKDIR=\"$(mktemp -d /tmp/crucible-backup-XXXXXX)\"\n"
+        "trap 'rm -rf \"$WORKDIR\"' EXIT\n"
+        "echo '[1/4] Generating ephemeral age encryption keypair...'\n"
+        "age-keygen -o \"$WORKDIR/backup.key\" 2>\"$WORKDIR/key.pub.txt\"\n"
+        "PUB=\"$(grep -o 'age1[a-z0-9]*' \"$WORKDIR/backup.key\" | head -n1)\"\n"
+        "echo '[2/4] Dumping live PostgreSQL orders table & encrypting with age...'\n"
+        "pg_dump -h 127.0.0.1 -p 5432 -U operator -d orders --data-only --table=orders | head -n 50 | age -r \"$PUB\" -o \"$WORKDIR/orders.sql.age\"\n"
+        "ls -lh \"$WORKDIR/orders.sql.age\"\n"
+        "echo '[3/4] Verifying ciphertext decryption & integrity...'\n"
+        "LINES=\"$(age -d -i \"$WORKDIR/backup.key\" \"$WORKDIR/orders.sql.age\" | wc -l)\"\n"
+        "echo \"[4/4] Encrypted backup & restore verification PASSED ($LINES SQL lines decrypted).\"\n",
         encoding="utf-8",
     )
 

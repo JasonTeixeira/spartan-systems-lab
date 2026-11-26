@@ -42,6 +42,15 @@ def _iso_from_epoch(epoch: float) -> str:
     return datetime.fromtimestamp(epoch, UTC).isoformat()
 
 
+def _extract_volume_id(security_profile: list[str]) -> str | None:
+    for item in security_profile:
+        if item.startswith("persistent-volume="):
+            val = item.split("=", 1)[1].strip()
+            if val:
+                return val
+    return None
+
+
 def _record_to_session(rec: StoredSandboxRecord, *, include_token: bool = False) -> SandboxSession:
     return SandboxSession(
         sandbox_id=rec.sandbox_id,
@@ -54,6 +63,7 @@ def _record_to_session(rec: StoredSandboxRecord, *, include_token: bool = False)
         backend=rec.backend,
         fly_machine_id=rec.fly_machine_id,
         region=rec.region,
+        volume_id=_extract_volume_id(rec.security_profile),
         container_name=rec.container_name,
         network_name=rec.network_name,
         cpu_limit=rec.cpu_limit,
@@ -193,10 +203,14 @@ class SandboxOrchestratorService:
         }
         if req.scenario_id and self.runtime.backend_name in {"fly", "linux-pty"}:
             start_kwargs["scenario_id"] = req.scenario_id
+        if self.runtime.backend_name == "fly":
+            start_kwargs["user_id"] = req.user_id
+            start_kwargs["persist_volume"] = bool(req.persist_volume and req.tier in {"pro", "enterprise"})
         start_res = self.runtime.start_sandbox(**start_kwargs)
         machine_id = start_res.machine_id if start_res else None
         region = start_res.region if start_res else None
         private_ip = start_res.private_ip if start_res else None
+        volume_id = start_res.volume_id if start_res else None
 
         token_secret = vm_secret or self._signing_secret
         token = create_terminal_token(
@@ -265,7 +279,7 @@ class SandboxOrchestratorService:
             expires_epoch=expires_epoch,
             security_profile=security_profile_summary(
                 template, quota, backend=self.runtime.backend_name
-            ),
+            ) + ([f"persistent-volume={volume_id}"] if volume_id else []),
         )
         self._store.upsert(rec)
         return _record_to_session(rec, include_token=True)
