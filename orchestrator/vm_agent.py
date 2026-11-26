@@ -25,12 +25,14 @@ import json
 import os
 import pty
 import pwd
+import re
 import resource
 import shutil
 import signal
 import ssl
 import struct
 import subprocess
+import tarfile
 import termios
 import time
 import urllib.request
@@ -89,6 +91,14 @@ IDLE_TIMEOUT_SECONDS = int(os.environ.get("SPARTAN_IDLE_TIMEOUT_SECONDS", "1200"
 ARM_INITIAL_FAULT = os.environ.get("SPARTAN_ARM_CHAOS", "0").strip().lower() in {"1", "true", "yes"}
 INITIAL_SCENARIO_ID = os.environ.get("SPARTAN_SCENARIO_ID", "").strip() or None
 WORKSPACE_DIR = Path(os.environ.get("SPARTAN_WORKSPACE_DIR", "/home/operator"))
+PERSIST_DIR = Path(os.environ.get("SPARTAN_PERSIST_DIR", "/workspace-persist"))
+SNAPSHOT_DIR = (
+    PERSIST_DIR / "snapshots"
+    if PERSIST_DIR.exists() and PERSIST_DIR.is_dir()
+    else Path(os.environ.get("SPARTAN_SNAPSHOT_DIR", "/var/lib/crucible-snapshots"))
+)
+MAX_SNAPSHOTS = 10
+SNAPSHOT_NAME_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,47}$")
 BOOT_EPOCH = time.time()
 
 _state: dict[str, Any] = {
@@ -454,6 +464,10 @@ def _collect_live_prometheus_scrape(
     return m, "\n".join(lines) + "\n"
 
 
+class SnapshotCreateBody(BaseModel):
+    name: str = Field(..., min_length=1, max_length=48)
+
+
 class ExtendTtlRequest(BaseModel):
     expires_epoch: int = Field(..., ge=1)
 
@@ -498,7 +512,7 @@ def internal_metrics() -> dict[str, Any]:
         "real_daemons": has_real_postgres() or has_real_nginx(),
         "daemons": daemons,
         "uptime_seconds": round(time.time() - BOOT_EPOCH, 1),
-        "ttl_remaining_seconds": max(0, int(EXPIRES_EPOCH - time.time())),
+        "ttl_remaining_seconds": max(0, int(int(_state.get("expires_epoch", EXPIRES_EPOCH)) - time.time())),
         "active_terminals": _state["active_ws"],
         "memory_used_mb": mem_used_mb,
         "memory_total_mb": mem_total_mb,
@@ -616,6 +630,119 @@ def internal_verify() -> dict[str, Any]:
         "detail": detail,
         "checks": checks,
         "daemons": collect_live_daemons(),
+    }
+
+
+def _safe_snapshot_path(raw_name: str) -> tuple[str, Path]:
+    clean = re.sub(r"[^a-zA-Z0-9_-]+", "-", raw_name.strip()).strip("-")[:48]
+    if not clean or not SNAPSHOT_NAME_RE.match(clean):
+        raise HTTPException(status_code=400, detail="Snapshot name must be 1-48 alphanumeric/dash/underscore chars.")
+    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    return clean, SNAPSHOT_DIR / f"{clean}.tar.gz"
+
+
+def _list_snapshot_records() -> list[dict[str, Any]]:
+    if not SNAPSHOT_DIR.exists():
+        return []
+    out: list[dict[str, Any]] = []
+    for f in sorted(SNAPSHOT_DIR.glob("*.tar.gz"), key=lambda p: p.stat().st_mtime, reverse=True):
+        st = f.stat()
+        out.append(
+            {
+                "name": f.name[:-7],
+                "size_kb": round(st.st_size / 1024.0, 1),
+                "created_at": int(st.st_mtime),
+                "persistent_volume": PERSIST_DIR.exists() and str(SNAPSHOT_DIR).startswith(str(PERSIST_DIR)),
+            }
+        )
+    return out
+
+
+@app.get("/internal/snapshots", dependencies=[Depends(_require_vm_secret)])
+def internal_list_snapshots() -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    return {
+        "snapshots": _list_snapshot_records(),
+        "persistent_volume": PERSIST_DIR.exists() and str(SNAPSHOT_DIR).startswith(str(PERSIST_DIR)),
+    }
+
+
+@app.post("/internal/snapshots", dependencies=[Depends(_require_vm_secret)])
+def internal_create_snapshot(body: SnapshotCreateBody) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    name, snap_path = _safe_snapshot_path(body.name)
+    existing = _list_snapshot_records()
+    if len(existing) >= MAX_SNAPSHOTS and not snap_path.exists():
+        raise HTTPException(
+            status_code=400,
+            detail=f"Maximum {MAX_SNAPSHOTS} checkpoints reached. Reuse an existing name to overwrite.",
+        )
+    with tarfile.open(snap_path, "w:gz") as tar:
+        for item in sorted(WORKSPACE_DIR.iterdir()):
+            if item.name in {".cache", ".local", "__pycache__", ".bash_history"}:
+                continue
+            with contextlib.suppress(OSError):
+                tar.add(item, arcname=item.name)
+    return {
+        "ok": True,
+        "snapshot": {
+            "name": name,
+            "size_kb": round(snap_path.stat().st_size / 1024.0, 1),
+            "created_at": int(snap_path.stat().st_mtime),
+        },
+        "snapshots": _list_snapshot_records(),
+    }
+
+
+@app.post("/internal/snapshots/{name}/restore", dependencies=[Depends(_require_vm_secret)])
+def internal_restore_snapshot(name: str) -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    clean, snap_path = _safe_snapshot_path(name)
+    if not snap_path.exists():
+        raise HTTPException(status_code=404, detail=f"Checkpoint '{clean}' not found.")
+    root_resolved = WORKSPACE_DIR.resolve()
+    with tarfile.open(snap_path, "r:gz") as tar:
+        for member in tar.getmembers():
+            if member.isdev() or member.issym() or member.islnk():
+                continue
+            target = (root_resolved / member.name).resolve()
+            if not str(target).startswith(str(root_resolved)):
+                raise HTTPException(status_code=400, detail="Unsafe path inside snapshot archive.")
+            tar.extract(member, path=root_resolved, filter="data")
+    if os.geteuid() == 0:
+        with contextlib.suppress(KeyError, OSError):
+            pw = pwd.getpwnam("operator")
+            for r, dirs, files in os.walk(root_resolved):
+                with contextlib.suppress(OSError):
+                    os.chown(r, pw.pw_uid, pw.pw_gid)
+                for d in dirs:
+                    with contextlib.suppress(OSError):
+                        os.chown(os.path.join(r, d), pw.pw_uid, pw.pw_gid)
+                for fn in files:
+                    with contextlib.suppress(OSError):
+                        os.chown(os.path.join(r, fn), pw.pw_uid, pw.pw_gid)
+    reload_res = reload_lab_daemon(WORKSPACE_DIR, TEMPLATE_ID)
+    return {
+        "ok": True,
+        "restored": clean,
+        "reload": reload_res,
+        "telemetry": probe_live_telemetry(WORKSPACE_DIR, TEMPLATE_ID),
+    }
+
+
+@app.post("/internal/reset", dependencies=[Depends(_require_vm_secret)])
+def internal_reset_workspace() -> dict[str, Any]:
+    _state["last_activity"] = time.time()
+    provision_workspace(WORKSPACE_DIR, TEMPLATE_ID, SANDBOX_ID, arm_fault=False)
+    _state["fault_armed"] = False
+    _state["active_scenario_id"] = None
+    reload_res = reload_lab_daemon(WORKSPACE_DIR, TEMPLATE_ID)
+    return {
+        "ok": True,
+        "template_id": TEMPLATE_ID,
+        "reload": reload_res,
+        "daemons": collect_live_daemons(),
+        "telemetry": probe_live_telemetry(WORKSPACE_DIR, TEMPLATE_ID),
     }
 
 

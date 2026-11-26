@@ -18,7 +18,7 @@ from orchestrator.scenarios_expanded import LAB_SCENARIO_CATALOG
 
 def _fix_base_lab(root: Path, template_id: str) -> None:
     """Apply clean baseline remediation for a given lab template (without touching secondary scenario files)."""
-    if template_id in {"lab1-core-engine", "lab11-p0-capstone"}:
+    if template_id in {"lab0-free-range", "lab1-core-engine", "lab11-p0-capstone"}:
         db = root / "data" / "orders.db"
         if db.exists():
             conn = sqlite3.connect(str(db))
@@ -30,7 +30,7 @@ def _fix_base_lab(root: Path, template_id: str) -> None:
             txt = pgb.read_text(encoding="utf-8")
             txt = txt.replace("default_pool_size = 2", "default_pool_size = 32")
             pgb.write_text(txt, encoding="utf-8")
-    if template_id in {"lab2-linux-tls", "lab11-p0-capstone"}:
+    if template_id in {"lab0-free-range", "lab2-linux-tls", "lab11-p0-capstone"}:
         up = root / "nginx" / "upstream.conf"
         if up.exists():
             up.write_text(up.read_text(encoding="utf-8").replace("keepalive_timeout 75s;", "keepalive_timeout 50s;"), encoding="utf-8")
@@ -212,4 +212,4 @@ def test_all_29_scenarios_fail_armed_and_pass_remediated() -> None:
                 ok_fixed, summary_fixed, checks_fixed = verify_workspace_checks(root, tpl_id)
                 assert ok_fixed is True, f"[{tpl_id}/{spec.scenario_id}] failed after remediation: {summary_fixed} checks={checks_fixed}"
 
-    assert total == 29, f"Expected 29 chaos scenarios, tested {total}"
+    assert total == 30, f"Expected 30 chaos scenarios (Free-Range + 29 P0/P1), tested {total}"

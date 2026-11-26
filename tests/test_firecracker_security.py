@@ -390,3 +390,107 @@ def test_sprint_m1_terminal_token_reissue_extend_and_o1_polling() -> None:
     # Verify service.py no longer calls reap_expired() on every request
     service_src = (Path(__file__).resolve().parent.parent / "orchestrator" / "service.py").read_text(encoding="utf-8")
     assert service_src.count("self.reap_expired()") == 0
+
+
+def test_free_range_sandbox_snapshots_restore_and_factory_reset(tmp_path: Path) -> None:
+    """Free-Range Cloud Range boots with playground files, saves/restores checkpoints, and resets cleanly."""
+    from orchestrator.models import LAB_TEMPLATES, TIER_QUOTAS
+    from orchestrator.runtime import build_fly_machine_payload
+
+    rt = LinuxPtySandboxRuntime(base_dir=tmp_path)
+    app = create_orchestrator_app(
+        api_key=TEST_API_KEY, signing_secret=TEST_SIGNING_SECRET, runtime=rt
+    )
+    client = TestClient(app)
+    headers = {"X-Spartan-Orchestrator-Key": TEST_API_KEY}
+
+    # Verify Fly Machine payload mounts persistent Fly Volume when volume_id is passed
+    vol_payload = build_fly_machine_payload(
+        sandbox_id="sbx_vol_test",
+        tenant_id="spartan-academy",
+        container_name="sbx-vol-test",
+        template=LAB_TEMPLATES["lab0-free-range"],
+        quota=TIER_QUOTAS["pro"],
+        expires_epoch=9999999999,
+        volume_id="vol_abc123",
+    )
+    assert vol_payload["config"]["mounts"] == [{"volume": "vol_abc123", "path": "/workspace-persist"}]
+
+    # Provision Free-Range Enterprise Cloud Range
+    prov = client.post(
+        "/v1/sandboxes",
+        headers=headers,
+        json={
+            "tenant_id": "spartan-academy",
+            "user_id": "u_free_range",
+            "template_id": "lab0-free-range",
+            "tier": "pro",
+        },
+    )
+    assert prov.status_code == 200
+    sid = prov.json()["sandbox_id"]
+
+    # Edit playground/experiment.py and save a named checkpoint
+    w1 = client.put(
+        f"/v1/sandboxes/{sid}/files/write",
+        headers=headers,
+        json={
+            "tenant_id": "spartan-academy",
+            "user_id": "u_free_range",
+            "path": "playground/experiment.py",
+            "content": "print('checkpoint-v1-state')\n",
+            "reload": False,
+        },
+    )
+    assert w1.status_code == 200
+
+    snap = client.post(
+        f"/v1/sandboxes/{sid}/snapshots",
+        headers=headers,
+        json={"tenant_id": "spartan-academy", "user_id": "u_free_range", "name": "before-chaos"},
+    )
+    assert snap.status_code == 200
+    assert any(s["name"] == "before-chaos" for s in snap.json()["snapshots"])
+
+    # Break playground/experiment.py
+    w2 = client.put(
+        f"/v1/sandboxes/{sid}/files/write",
+        headers=headers,
+        json={
+            "tenant_id": "spartan-academy",
+            "user_id": "u_free_range",
+            "path": "playground/experiment.py",
+            "content": "BROKEN_STATE\n",
+            "reload": False,
+        },
+    )
+    assert w2.status_code == 200
+
+    # Restore named checkpoint -> original content returns!
+    rest = client.post(
+        f"/v1/sandboxes/{sid}/snapshots/before-chaos/restore",
+        headers=headers,
+        json={"tenant_id": "spartan-academy", "user_id": "u_free_range"},
+    )
+    assert rest.status_code == 200
+    r_after = client.get(
+        f"/v1/sandboxes/{sid}/files/read",
+        headers=headers,
+        params={"tenant_id": "spartan-academy", "user_id": "u_free_range", "path": "playground/experiment.py"},
+    )
+    assert r_after.status_code == 200
+    assert "checkpoint-v1-state" in r_after.json()["content"]
+
+    # 1-Click Factory Reset -> restores pristine Free-Range starter file!
+    rst = client.post(
+        f"/v1/sandboxes/{sid}/reset",
+        headers=headers,
+        json={"tenant_id": "spartan-academy", "user_id": "u_free_range"},
+    )
+    assert rst.status_code == 200
+    r_pristine = client.get(
+        f"/v1/sandboxes/{sid}/files/read",
+        headers=headers,
+        params={"tenant_id": "spartan-academy", "user_id": "u_free_range", "path": "playground/experiment.py"},
+    )
+    assert "Crucible Free-Range Cloud VM ready!" in r_pristine.json()["content"]

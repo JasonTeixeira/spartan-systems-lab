@@ -1029,6 +1029,32 @@ def _seed_lab6(root: Path, broken: bool) -> None:
     )
 
 
+def _seed_lab0_free_range(root: Path, broken: bool) -> None:
+    """Free-Range Enterprise Cloud Range: ALL live daemons healthy + open playground workspace."""
+    _seed_lab1(root, broken=broken)
+    _seed_lab2(root, broken=broken)
+    pg_dir = root / "playground"
+    pg_dir.mkdir(parents=True, exist_ok=True)
+    (pg_dir / "sandbox_notes.md").write_text(
+        "# Free-Range Enterprise Cloud Range\n\n"
+        "Break anything, build services, run SQL/Redis/NGINX experiments, save checkpoints, or Reset anytime!\n\n"
+        "## Live Daemons Running Right Now\n"
+        "- PostgreSQL 16: `psql -h 127.0.0.1 -p 5432 -U operator -d orders`\n"
+        "- PgBouncer Pooler: `psql -h 127.0.0.1 -p 6432 -U operator -d orders`\n"
+        "- Redis 7: `redis-cli ping`\n"
+        "- NGINX TLS 1.3: `curl -k https://127.0.0.1:8443/health`\n"
+        "- Live Reload Helpers: `reload-pgbouncer`, `reload-nginx`, `pg-xray`\n",
+        encoding="utf-8",
+    )
+    (pg_dir / "experiment.py").write_text(
+        '"""Free-range Python starter script. Edit and run: python3 playground/experiment.py"""\n'
+        "import os\n\n"
+        "if __name__ == '__main__':\n"
+        "    print('Crucible Free-Range Cloud VM ready! CWD:', os.getcwd())\n",
+        encoding="utf-8",
+    )
+
+
 def _seed_lab11(root: Path, broken: bool) -> None:
     """Principal P0 Capstone: Simultaneous LIVE Postgres 16 + PgBouncer + NGINX TLS 1.3 meltdown."""
     _seed_lab1(root, broken=broken)
@@ -1042,6 +1068,7 @@ def provision_workspace(
     (root / "bin").mkdir(parents=True, exist_ok=True)
 
     seeders = {
+        "lab0-free-range": _seed_lab0_free_range,
         "lab1-core-engine": _seed_lab1,
         "lab2-linux-tls": _seed_lab2,
         "lab3-lakehouse-wap": _seed_lab3,
@@ -2113,6 +2140,7 @@ def verify_workspace_checks(root: Path, template_id: str) -> tuple[bool, str, li
     if not root.exists():
         return False, "sandbox workspace missing", [_chk("workspace", "Workspace Mounted", False, "missing")]
     verifiers = {
+        "lab0-free-range": _verify_lab11_checks,
         "lab1-core-engine": _verify_lab1_checks,
         "lab2-linux-tls": _verify_lab2_checks,
         "lab3-lakehouse-wap": _verify_lab3_checks,

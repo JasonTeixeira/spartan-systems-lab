@@ -340,6 +340,7 @@ def build_fly_machine_payload(
     vm_secret: str = "",
     arm_blind_chaos: bool = False,
     scenario_id: str | None = None,
+    volume_id: str | None = None,
 ) -> dict[str, Any]:
     """Build a hardened Fly Machines KVM Firecracker MicroVM launch payload (zero public IP)."""
     cpus = max(1, int(round(quota.cpu_limit)))
@@ -357,26 +358,29 @@ def build_fly_machine_payload(
         env["SPARTAN_SCENARIO_ID"] = scenario_id
     if vm_secret:
         env["VM_SESSION_SECRET"] = vm_secret
+    config: dict[str, Any] = {
+        "image": (image_override or template.image).strip(),
+        "auto_destroy": True,
+        "restart": {"policy": "no"},
+        "guest": {
+            "cpu_kind": "shared",
+            "cpus": cpus,
+            "memory_mb": mem_mb,
+        },
+        "env": env,
+        "metadata": {
+            "spartan_managed": "true",
+            "spartan_sandbox": sandbox_id,
+            "spartan_tenant": tenant_id,
+            "spartan_template": template.id,
+        },
+    }
+    if volume_id:
+        config["mounts"] = [{"volume": volume_id, "path": "/workspace-persist"}]
     return {
         "name": container_name,
         "region": region,
-        "config": {
-            "image": (image_override or template.image).strip(),
-            "auto_destroy": True,
-            "restart": {"policy": "no"},
-            "guest": {
-                "cpu_kind": "shared",
-                "cpus": cpus,
-                "memory_mb": mem_mb,
-            },
-            "env": env,
-            "metadata": {
-                "spartan_managed": "true",
-                "spartan_sandbox": sandbox_id,
-                "spartan_tenant": tenant_id,
-                "spartan_template": template.id,
-            },
-        },
+        "config": config,
     }
 
 
@@ -1020,6 +1024,107 @@ class FlyMachinesRuntime:
         )
         return status == 200
 
+    def list_snapshots(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid or (self.http_sender is not None and self.vm_http_sender is None):
+            return {"snapshots": [], "persistent_volume": False}
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="GET",
+            path="/internal/snapshots",
+            vm_secret=vm_secret,
+            timeout=10.0,
+        )
+        return resp if status == 200 else {"snapshots": [], "persistent_volume": False}
+
+    def create_snapshot(
+        self,
+        *,
+        container_name: str,
+        name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            raise ValueError("Firecracker machine not tracked")
+        if self.http_sender is not None and self.vm_http_sender is None:
+            return {"ok": True, "snapshot": {"name": name, "size_kb": 1.0, "created_at": int(time.time())}, "snapshots": [{"name": name, "size_kb": 1.0, "created_at": int(time.time())}]}
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="POST",
+            path="/internal/snapshots",
+            vm_secret=vm_secret,
+            body={"name": name},
+            timeout=15.0,
+        )
+        if status != 200:
+            raise ValueError(str(resp.get("detail") or resp.get("error") or f"Snapshot failed ({status})"))
+        return resp
+
+    def restore_snapshot(
+        self,
+        *,
+        container_name: str,
+        name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            raise ValueError("Firecracker machine not tracked")
+        if self.http_sender is not None and self.vm_http_sender is None:
+            return {"ok": True, "restored": name}
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="POST",
+            path=f"/internal/snapshots/{urllib.parse.quote(name, safe='')}/restore",
+            vm_secret=vm_secret,
+            body={},
+            timeout=20.0,
+        )
+        if status != 200:
+            raise ValueError(str(resp.get("detail") or resp.get("error") or f"Restore failed ({status})"))
+        return resp
+
+    def reset_workspace(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        mid = machine_id or self._machine_ids.get(container_name)
+        if not mid:
+            raise ValueError("Firecracker machine not tracked")
+        if self.http_sender is not None and self.vm_http_sender is None:
+            return {"ok": True}
+        status, resp = self._vm_request(
+            machine_id=mid,
+            private_ip=private_ip,
+            method="POST",
+            path="/internal/reset",
+            vm_secret=vm_secret,
+            body={},
+            timeout=25.0,
+        )
+        if status != 200:
+            raise ValueError(str(resp.get("detail") or resp.get("error") or f"Reset failed ({status})"))
+        return resp
+
 
 @dataclass
 class LinuxPtySandboxRuntime:
@@ -1229,3 +1334,101 @@ class LinuxPtySandboxRuntime:
         res = write_workspace_file(ws_dir, path, content)
         reload_res = reload_lab_daemon(ws_dir, template_id) if reload else None
         return {**res, "reload": reload_res, "telemetry": probe_live_telemetry(ws_dir, template_id)}
+
+    def _snap_dir(self, ws_dir: Path) -> Path:
+        d = self.base_dir / "_snapshots" / ws_dir.name
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+
+    def list_snapshots(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        _ = (machine_id, vm_secret, private_ip)
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            return {"snapshots": [], "persistent_volume": False}
+        sdir = self._snap_dir(entry[0])
+        snaps = [
+            {
+                "name": p.name[:-7],
+                "size_kb": round(p.stat().st_size / 1024.0, 1),
+                "created_at": int(p.stat().st_mtime),
+                "persistent_volume": False,
+            }
+            for p in sorted(sdir.glob("*.tar.gz"), key=lambda x: x.stat().st_mtime, reverse=True)
+        ]
+        return {"snapshots": snaps, "persistent_volume": False}
+
+    def create_snapshot(
+        self,
+        *,
+        container_name: str,
+        name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        import tarfile
+
+        _ = (machine_id, vm_secret, private_ip)
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            raise ValueError("sandbox workspace not found")
+        ws_dir = entry[0]
+        clean = "".join(c if (c.isalnum() or c in "-_") else "-" for c in name.strip()).strip("-")[:48]
+        if not clean:
+            raise ValueError("Invalid snapshot name")
+        snap_path = self._snap_dir(ws_dir) / f"{clean}.tar.gz"
+        with tarfile.open(snap_path, "w:gz") as tar:
+            for item in sorted(ws_dir.iterdir()):
+                tar.add(item, arcname=item.name)
+        listed = self.list_snapshots(container_name=container_name)
+        return {
+            "ok": True,
+            "snapshot": {"name": clean, "size_kb": round(snap_path.stat().st_size / 1024.0, 1), "created_at": int(snap_path.stat().st_mtime)},
+            **listed,
+        }
+
+    def restore_snapshot(
+        self,
+        *,
+        container_name: str,
+        name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        import tarfile
+
+        _ = (machine_id, vm_secret, private_ip)
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            raise ValueError("sandbox workspace not found")
+        ws_dir, template_id, _ = entry
+        snap_path = self._snap_dir(ws_dir) / f"{name}.tar.gz"
+        if not snap_path.exists():
+            raise ValueError(f"Checkpoint '{name}' not found")
+        with tarfile.open(snap_path, "r:gz") as tar:
+            tar.extractall(path=ws_dir, filter="data")
+        return {"ok": True, "restored": name, "telemetry": probe_live_telemetry(ws_dir, template_id)}
+
+    def reset_workspace(
+        self,
+        *,
+        container_name: str,
+        machine_id: str | None = None,
+        vm_secret: str | None = None,
+        private_ip: str | None = None,
+    ) -> dict[str, Any]:
+        _ = (machine_id, vm_secret, private_ip)
+        entry = self._workspaces.get(container_name)
+        if not entry:
+            raise ValueError("sandbox workspace not found")
+        ws_dir, template_id, sid = entry
+        provision_workspace(ws_dir, template_id, sid, arm_fault=False)
+        return {"ok": True, "template_id": template_id, "telemetry": probe_live_telemetry(ws_dir, template_id)}

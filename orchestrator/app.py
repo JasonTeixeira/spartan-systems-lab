@@ -76,6 +76,17 @@ class SandboxProjectBody(BaseModel):
     use_reference: bool = False
 
 
+class SandboxSnapshotBody(BaseModel):
+    tenant_id: str = Field(..., min_length=2, max_length=64)
+    user_id: str = Field(..., min_length=2, max_length=128)
+    name: str = Field(..., min_length=1, max_length=48)
+
+
+class SandboxOwnerBody(BaseModel):
+    tenant_id: str = Field(..., min_length=2, max_length=64)
+    user_id: str = Field(..., min_length=2, max_length=128)
+
+
 def create_orchestrator_app(
     *,
     api_key: str | None = None,
@@ -502,6 +513,58 @@ def create_orchestrator_app(
             raise HTTPException(status_code=404, detail=str(exc)) from None
         except SandboxAccessDeniedError as exc:
             raise HTTPException(status_code=403, detail=str(exc)) from None
+
+    @app.get("/v1/sandboxes/{sandbox_id}/snapshots", dependencies=[Depends(require_api_key)])
+    def list_sandbox_snapshots(
+        sandbox_id: str,
+        tenant_id: str = Query(..., min_length=2, max_length=64),
+        user_id: str = Query(..., min_length=2, max_length=128),
+    ) -> dict[str, Any]:
+        try:
+            return service.list_snapshots(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+
+    @app.post("/v1/sandboxes/{sandbox_id}/snapshots", dependencies=[Depends(require_api_key)])
+    def create_sandbox_snapshot(sandbox_id: str, req: SandboxSnapshotBody) -> dict[str, Any]:
+        try:
+            return service.create_snapshot(
+                sandbox_id=sandbox_id, tenant_id=req.tenant_id, user_id=req.user_id, name=req.name
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from None
+
+    @app.post("/v1/sandboxes/{sandbox_id}/snapshots/{name}/restore", dependencies=[Depends(require_api_key)])
+    def restore_sandbox_snapshot(sandbox_id: str, name: str, req: SandboxOwnerBody) -> dict[str, Any]:
+        try:
+            return service.restore_snapshot(
+                sandbox_id=sandbox_id, tenant_id=req.tenant_id, user_id=req.user_id, name=name
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from None
+
+    @app.post("/v1/sandboxes/{sandbox_id}/reset", dependencies=[Depends(require_api_key)])
+    def reset_sandbox(sandbox_id: str, req: SandboxOwnerBody) -> dict[str, Any]:
+        try:
+            return service.reset_sandbox(
+                sandbox_id=sandbox_id, tenant_id=req.tenant_id, user_id=req.user_id
+            )
+        except SandboxNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from None
+        except SandboxAccessDeniedError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from None
 
     @app.websocket("/v1/sandboxes/{sandbox_id}/terminal")
     async def sandbox_terminal(

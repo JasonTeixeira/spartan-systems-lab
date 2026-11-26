@@ -45,8 +45,18 @@ class ScenarioSpec:
     remediation_hint: str
 
 
-# Multi-scenario catalog across all 11 Firecracker labs (24 distinct production incidents!)
+# Multi-scenario catalog across all 12 Firecracker labs (Free-Range + 11 Incident Labs = 30 scenarios!)
 LAB_SCENARIO_CATALOG: dict[str, list[ScenarioSpec]] = {
+    "lab0-free-range": [
+        ScenarioSpec(
+            scenario_id="free_range_full_stack_sandbox",
+            template_id="lab0-free-range",
+            title="Free-Range Full-Stack Playground (Break, Snapshot & Reset)",
+            difficulty="L4-L7",
+            symptom="FREE-RANGE MODE: Live PostgreSQL 16 (:5432), PgBouncer (:6432), Redis 7 (:6379), and NGINX TLS (:8443) are all running. Break configs, test ideas, save named checkpoints, or click Reset anytime.",
+            remediation_hint="Use `pg-xray`, `psql -h 127.0.0.1 -p 5432 -U operator -d orders`, `redis-cli`, `curl -k https://127.0.0.1:8443/health`, `reload-pgbouncer`, and `reload-nginx`. Save checkpoints before risky experiments!",
+        ),
+    ],
     "lab1-core-engine": [
         ScenarioSpec(
             scenario_id="pg_missing_index_and_pool_starvation",

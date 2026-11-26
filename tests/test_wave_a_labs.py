@@ -19,7 +19,7 @@ def test_all_eleven_labs_healthy_vs_armed_and_live_file_remediation(tmp_path: Pa
     client = TestClient(app)
     headers = {"X-Spartan-Orchestrator-Key": TEST_API_KEY}
 
-    assert len(LAB_TEMPLATES) == 11
+    assert len(LAB_TEMPLATES) == 12
 
     for tpl_id in LAB_TEMPLATES:
         p = client.post(

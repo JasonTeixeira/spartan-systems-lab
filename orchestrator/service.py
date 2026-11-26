@@ -554,6 +554,68 @@ class SandboxOrchestratorService:
             private_ip=rec.private_ip,
         )
 
+    def list_snapshots(self, *, sandbox_id: str, tenant_id: str, user_id: str) -> dict[str, Any]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "list_snapshots", None)
+        if not callable(fn):
+            return {"snapshots": [], "persistent_volume": False}
+        return fn(
+            container_name=rec.container_name,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
+        )
+
+    def create_snapshot(self, *, sandbox_id: str, tenant_id: str, user_id: str, name: str) -> dict[str, Any]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "create_snapshot", None)
+        if not callable(fn):
+            raise ValueError("Snapshots not supported by current backend")
+        return fn(
+            container_name=rec.container_name,
+            name=name,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
+        )
+
+    def restore_snapshot(self, *, sandbox_id: str, tenant_id: str, user_id: str, name: str) -> dict[str, Any]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "restore_snapshot", None)
+        if not callable(fn):
+            raise ValueError("Snapshots not supported by current backend")
+        return fn(
+            container_name=rec.container_name,
+            name=name,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
+        )
+
+    def reset_sandbox(self, *, sandbox_id: str, tenant_id: str, user_id: str) -> dict[str, Any]:
+        rec = self._require_owned_record(sandbox_id=sandbox_id, tenant_id=tenant_id, user_id=user_id)
+        if rec.status != "running":
+            raise SandboxNotFoundError(f"Sandbox '{sandbox_id}' is not running")
+        fn = getattr(self.runtime, "reset_workspace", None)
+        if not callable(fn):
+            raise ValueError("Workspace reset not supported by current backend")
+        res = fn(
+            container_name=rec.container_name,
+            machine_id=rec.fly_machine_id,
+            vm_secret=rec.vm_secret,
+            private_ip=rec.private_ip,
+        )
+        rec.blind_fault_armed = False
+        rec.blind_symptom = None
+        self._store.upsert(rec)
+        return res
+
     def verify_and_issue_receipt(
         self, *, sandbox_id: str, tenant_id: str, user_id: str
     ) -> VerifySandboxResponse:

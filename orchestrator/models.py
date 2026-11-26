@@ -7,6 +7,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 LabTemplateId = Literal[
+    "lab0-free-range",
     "lab1-core-engine",
     "lab2-linux-tls",
     "lab3-lakehouse-wap",
@@ -73,9 +74,18 @@ class LabTemplateSpec(BaseModel):
     default_shell: str = "/bin/bash"
 
 
-SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v6"
+SANDBOX_IMAGE = "registry.fly.io/crucible-sandboxes:v7"
 
 LAB_TEMPLATES: dict[LabTemplateId, LabTemplateSpec] = {
+    "lab0-free-range": LabTemplateSpec(
+        id="lab0-free-range",
+        module="M01",
+        title="Free-Range Enterprise Cloud Range (Postgres 16 + PgBouncer + Redis + NGINX)",
+        image=SANDBOX_IMAGE,
+        summary="Open sandbox Firecracker Linux VM with ALL live daemons running (PostgreSQL 16, PgBouncer :6432, Redis 7, NGINX TLS 1.3 :8443), named checkpoints, and 1-click factory reset.",
+        archos_canvas_id="dgm_spartan-lab1-core-engine",
+        needs_net_admin=True,
+    ),
     "lab1-core-engine": LabTemplateSpec(
         id="lab1-core-engine",
         module="M01",
