@@ -361,29 +361,48 @@ def _start_real_postgres_stack(root: Path, broken: bool) -> None:
         _wait_port(5432, timeout_s=12.0)
 
     if _port_open(5432) and psycopg is not None:
-        # Bootstrap roles/db as postgres via local unix socket (peer auth as postgres user if root)
+        # Bootstrap roles/db as postgres via local unix socket (piped over stdin — zero bash $$ expansion!)
         pg_bootstrap_sql = (
-            "DO $$ BEGIN "
-            "IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'operator') THEN "
-            "CREATE ROLE operator WITH LOGIN PASSWORD 'crucible'; "
-            "END IF; END $$; "
+            "DO $crucible$\n"
+            "BEGIN\n"
+            "  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'operator') THEN\n"
+            "    CREATE ROLE operator WITH LOGIN PASSWORD 'crucible';\n"
+            "  END IF;\n"
+            "END\n"
+            "$crucible$;\n"
         )
-        if os.geteuid() == 0 and shutil.which("su"):
+        if os.geteuid() == 0 and (shutil.which("runuser") or shutil.which("su")):
+            pg_cmd = (
+                ["runuser", "-u", "postgres", "--", "psql", "-v", "ON_ERROR_STOP=1"]
+                if shutil.which("runuser")
+                else ["su", "-", "postgres", "-c", "psql -v ON_ERROR_STOP=1"]
+            )
             subprocess.run(
-                ["su", "-", "postgres", "-c", f"psql -v ON_ERROR_STOP=0 -c \"{pg_bootstrap_sql}\""],
+                pg_cmd,
+                input=pg_bootstrap_sql,
+                text=True,
                 check=False,
                 capture_output=True,
             )
-            subprocess.run(
-                ["su", "-", "postgres", "-c", "psql -tc \"SELECT 1 FROM pg_database WHERE datname = 'orders'\" | grep -q 1 || createdb -O operator orders"],
-                check=False,
-                capture_output=True,
+            db_check_cmd = (
+                ["runuser", "-u", "postgres", "--", "psql", "-tAc", "SELECT 1 FROM pg_database WHERE datname = 'orders'"]
+                if shutil.which("runuser")
+                else ["su", "-", "postgres", "-c", "psql -tAc \"SELECT 1 FROM pg_database WHERE datname = 'orders'\""]
             )
-            subprocess.run(
-                ["su", "-", "postgres", "-c", "psql -d orders -c 'CREATE EXTENSION IF NOT EXISTS vector;'"],
-                check=False,
-                capture_output=True,
+            chk = subprocess.run(db_check_cmd, text=True, check=False, capture_output=True)
+            if "1" not in (chk.stdout or ""):
+                createdb_cmd = (
+                    ["runuser", "-u", "postgres", "--", "createdb", "-O", "operator", "orders"]
+                    if shutil.which("runuser")
+                    else ["su", "-", "postgres", "-c", "createdb -O operator orders"]
+                )
+                subprocess.run(createdb_cmd, check=False, capture_output=True)
+            ext_cmd = (
+                ["runuser", "-u", "postgres", "--", "psql", "-d", "orders", "-c", "CREATE EXTENSION IF NOT EXISTS vector;"]
+                if shutil.which("runuser")
+                else ["su", "-", "postgres", "-c", "psql -d orders -c 'CREATE EXTENSION IF NOT EXISTS vector;'"]
             )
+            subprocess.run(ext_cmd, check=False, capture_output=True)
         else:
             with psycopg.connect("host=127.0.0.1 port=5432 user=postgres dbname=postgres", autocommit=True) as conn:
                 cur = conn.cursor()
