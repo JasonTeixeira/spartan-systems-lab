@@ -394,6 +394,31 @@ def verify_lab7(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
                 dns_ok = True
     checks.append(_chk("linux_dns", "payments.internal -> 127.0.0.1", dns_ok, "payments.internal resolves to 127.0.0.1" if dns_ok else "config/hosts.override still points payments.internal to wrong IP"))
 
+    sysctl_path = root / "config" / "sysctl.conf"
+    if sysctl_path.exists():
+        skv: dict[str, int] = {}
+        for line in sysctl_path.read_text(encoding="utf-8").splitlines():
+            s = line.strip()
+            if s and not s.startswith("#") and "=" in s:
+                k, v = s.split("=", 1)
+                try:
+                    skv[k.strip()] = int(v.strip())
+                except ValueError:
+                    pass
+        fmax = skv.get("fs.file-max", 0)
+        smax = skv.get("net.core.somaxconn", 0)
+        sys_ok = fmax >= 262144 and smax >= 1024
+        checks.append(
+            _chk(
+                "linux_sysctl",
+                "Kernel fs.file-max (>=262144) & somaxconn (>=1024)",
+                sys_ok,
+                f"fs.file-max={fmax}, net.core.somaxconn={smax}"
+                if sys_ok
+                else f"Kernel accept backlog starved: fs.file-max={fmax} (>=262144), net.core.somaxconn={smax} (>=1024)",
+            )
+        )
+
     cg_path = root / "config" / "cgroup.conf"
     if cg_path.exists():
         ckv: dict[str, str] = {}
@@ -510,8 +535,19 @@ assert lim.allow("bot", 3.0) is True
 assert lim.allow("bot", 4.0) is False, "4th request inside 10s window should be rejected!"
 assert lim.allow("other_user", 4.0) is True, "Per-client isolation broken!"
 assert lim.allow("bot", 12.5) is True, "Expired window should allow requests again!"
-print("RL_PASS")
+""" + (
+        """
+# Strict 2x window boundary burst test (fixed-window buckets fail this!)
+b = SlidingWindowLimiter(max_requests=3, window_seconds=10.0)
+assert b.allow("whale", 9.8) is True
+assert b.allow("whale", 9.9) is True
+assert b.allow("whale", 9.95) is True
+assert b.allow("whale", 10.05) is False, "2x boundary burst across t=10.0 slipped through!"
+assert b.allow("whale", 19.85) is True
 """
+        if (root / "api" / "strict_boundary.flag").exists()
+        else ""
+    ) + 'print("RL_PASS")\n'
     p1 = subprocess.run([sys.executable, "-c", rl_test], cwd=str(root), env=env_fn(root), preexec_fn=preexec_fn(), capture_output=True, text=True, timeout=8)
     rl_ok = p1.returncode == 0 and "RL_PASS" in p1.stdout
     checks.append(_chk("scale_rl", "Sliding-Window Rate Limiter (Hidden Burst Test)", rl_ok, "Enforces per-key sliding window cleanly" if rl_ok else (p1.stderr or p1.stdout).strip()[:180]))
@@ -602,12 +638,35 @@ def verify_lab9(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
     tf_ok = False
     tf_detail = "terraform/backend.tf missing"
     if tf_path.exists():
-        txt = tf_path.read_text(encoding="utf-8")
-        has_enc = bool(re.search(r"encrypt\s*=\s*true", txt))
-        has_lock = bool(re.search(r'dynamodb_table\s*=\s*"[^"]+"', txt)) or bool(re.search(r"use_lockfile\s*=\s*true", txt))
+        # Strip HCL comments (# and //) before checking so '# BUG: encrypt = true' never false-passes!
+        raw_lines = [
+            re.sub(r"(#|//).*$", "", line)
+            for line in tf_path.read_text(encoding="utf-8").splitlines()
+        ]
+        txt = "\n".join(raw_lines)
+        has_enc = bool(re.search(r"\bencrypt\s*=\s*true\b", txt))
+        has_lock = bool(re.search(r'\bdynamodb_table\s*=\s*"[^"]+"', txt)) or bool(re.search(r"\buse_lockfile\s*=\s*true\b", txt))
         tf_ok = has_enc and has_lock
-        tf_detail = "Terraform S3 backend encrypted + state locking enabled" if tf_ok else "terraform/backend.tf missing encrypt = true and/or dynamodb_table state lock"
+        tf_detail = "Terraform S3 backend encrypted + state locking enabled" if tf_ok else "terraform/backend.tf missing active encrypt = true and/or dynamodb_table state lock (comments ignored)"
     checks.append(_chk("tf_lock", "Terraform State Encryption & Locking", tf_ok, tf_detail))
+
+    trust_path = root / "iam" / "trust.json"
+    if trust_path.exists():
+        trust_ok = False
+        trust_detail = "Invalid JSON in iam/trust.json"
+        try:
+            tdoc = json.loads(trust_path.read_text(encoding="utf-8"))
+            tstmts = tdoc.get("Statement", [])
+            has_wild = any(
+                st.get("Principal") == "*"
+                or (isinstance(st.get("Principal"), dict) and "*" in str(st.get("Principal")))
+                for st in tstmts
+            )
+            trust_ok = bool(tstmts) and not has_wild
+            trust_detail = "Scoped IAM trust principal verified" if trust_ok else "iam/trust.json still allows wildcard Principal '*'"
+        except ValueError as exc:
+            trust_detail = f"Invalid JSON in iam/trust.json: {exc}"
+        checks.append(_chk("iam_trust", "IAM Trust Policy (No Wildcard Principal)", trust_ok, trust_detail))
 
     all_ok = all(c["passed"] for c in checks)
     return all_ok, ("SLA healthy: IAM least-privilege & encrypted Terraform state locking verified" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
@@ -659,7 +718,13 @@ def is_safe_egress_url(url: str) -> bool:
 
 def verify_lab10(root: Path, env_fn: Any, preexec_fn: Any) -> tuple[bool, str, list[dict[str, Any]]]:
     checks: list[dict[str, Any]] = []
-    ssrf_test = """
+    strict_rfc = (root / "vllm" / "strict_rfc1918.flag").exists()
+    extra_bad = (
+        '"https://172.16.0.5/admin", "https://192.168.1.1/router", "https://[::1]/internal",'
+        if strict_rfc
+        else ""
+    )
+    ssrf_test = f"""
 import sys; sys.path.insert(0, "mcp")
 from url_guard import is_safe_egress_url
 for bad in [
@@ -670,8 +735,9 @@ for bad in [
     "https://10.0.1.5/secrets",
     "http://docs.python.org/",
     "https://metadata.google.internal/computeMetadata/v1/",
+    {extra_bad}
 ]:
-    assert is_safe_egress_url(bad) is False, f"SSRF bypass allowed: {bad}"
+    assert is_safe_egress_url(bad) is False, f"SSRF bypass allowed: {{bad}}"
 assert is_safe_egress_url("https://api.github.com/repos") is True, "Valid HTTPS public URL blocked!"
 print("SSRF_PASS")
 """
@@ -689,8 +755,14 @@ print("SSRF_PASS")
                 doc = yaml.safe_load(raw)
                 util = float(doc.get("gpu_memory_utilization", 1.0))
                 prefix = doc.get("enable_prefix_caching") is True
-                vllm_ok = util <= 0.92 and prefix
-                vllm_detail = f"gpu_memory_utilization={util}, prefix_caching=true" if vllm_ok else f"Unsafe vLLM config: gpu_memory_utilization={util} (<=0.92) & enable_prefix_caching={prefix}"
+                max_seqs = int(doc.get("max_num_seqs", 256))
+                seqs_ok = (not strict_rfc) or max_seqs <= 256
+                vllm_ok = util <= 0.92 and prefix and seqs_ok
+                vllm_detail = (
+                    f"gpu_memory_utilization={util}, prefix_caching=true, max_num_seqs={max_seqs}"
+                    if vllm_ok
+                    else f"Unsafe vLLM config: gpu_memory_utilization={util} (<=0.92), enable_prefix_caching={prefix}, max_num_seqs={max_seqs} (<=256)"
+                )
             except Exception as exc:
                 vllm_detail = f"Invalid YAML: {exc}"
         else:

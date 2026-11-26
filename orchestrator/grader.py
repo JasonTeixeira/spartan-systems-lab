@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import pwd
+import re
 import shutil
 import socket
 import sqlite3
@@ -1021,7 +1022,7 @@ def arm_scenario_fault(
 ) -> RealLabFault:
     spec = get_scenario_spec(template_id, scenario_id=scenario_id, seed=seed)
     provision_workspace(root, template_id, sandbox_id, arm_fault=True)
-    # Apply scenario-specific secondary fault configs when a specialized scenario variant is chosen
+    # Apply scenario-specific secondary fault configs so EVERY scenario has a distinct, graded fault
     if spec.scenario_id == "pgbouncer_session_mode_starvation":
         pgb = root / "config" / "pgbouncer.ini"
         if pgb.exists():
@@ -1029,12 +1030,15 @@ def arm_scenario_fault(
             txt = txt.replace("pool_mode = transaction", "pool_mode = session")
             txt = txt.replace("max_client_conn = 500", "max_client_conn = 12")
             pgb.write_text(txt, encoding="utf-8")
+        (root / "config" / "pgbouncer-strict.flag").write_text("require_transaction_mode=1\n", encoding="utf-8")
     elif spec.scenario_id == "redis_maxmemory_noeviction_oom":
         (root / "config").mkdir(parents=True, exist_ok=True)
         (root / "config" / "redis.conf").write_text(
             "maxmemory 32mb\nmaxmemory-policy noeviction\n",
             encoding="utf-8",
         )
+        if _port_open(6379) and shutil.which("redis-cli"):
+            subprocess.run(["redis-cli", "CONFIG", "SET", "maxmemory-policy", "noeviction"], check=False, capture_output=True, timeout=3)
     elif spec.scenario_id == "pg_blocking_lock_storm":
         (root / "config").mkdir(parents=True, exist_ok=True)
         (root / "config" / "postgres-guard.conf").write_text(
@@ -1059,10 +1063,19 @@ def arm_scenario_fault(
             "WARNING: xmin horizon pinned by idle-in-transaction pid=4128 (age=1.82B txids)\n",
             encoding="utf-8",
         )
-    elif spec.scenario_id in {"nginx_weak_tls_and_missing_hsts", "nginx_413_body_and_worker_limit"}:
+    elif spec.scenario_id == "nginx_weak_tls_and_missing_hsts":
         (root / "nginx").mkdir(parents=True, exist_ok=True)
         (root / "nginx" / "security.conf").write_text(
-            "ssl_protocols TLSv1 TLSv1.1 TLSv1.2;\nclient_max_body_size 1k;\n",
+            "# BROKEN: Weak TLSv1/1.1 protocols enabled and Strict-Transport-Security header missing\n"
+            "ssl_protocols TLSv1 TLSv1.1 TLSv1.2;\n",
+            encoding="utf-8",
+        )
+    elif spec.scenario_id == "nginx_413_body_and_worker_limit":
+        (root / "nginx").mkdir(parents=True, exist_ok=True)
+        (root / "nginx" / "upload.conf").write_text(
+            "# BROKEN: Upload cap 1k causes HTTP 413 and worker_connections 16 starves traffic\n"
+            "client_max_body_size 1k;\n"
+            "worker_connections 16;\n",
             encoding="utf-8",
         )
     elif spec.scenario_id == "tc_netem_packet_loss_tail_collapse":
@@ -1077,6 +1090,37 @@ def arm_scenario_fault(
         )
         (root / "logs" / "netem.log").write_text(
             "NETEM_ALERT: eth0 qdisc netem loss 2.5% delay 45ms · TCP CUBIC cwnd collapsed to 4 segments · p99=3420ms\n",
+            encoding="utf-8",
+        )
+    elif spec.scenario_id == "wap_duplicate_event_idempotency":
+        (root / "wap").mkdir(parents=True, exist_ok=True)
+        (root / "wap" / "dedup_required.flag").write_text("require_event_id_dedup=1\n", encoding="utf-8")
+    elif spec.scenario_id == "mcp_unbounded_agent_spend_loop":
+        (root / "mcp").mkdir(parents=True, exist_ok=True)
+        (root / "mcp" / "policy.json").write_text(
+            json.dumps(
+                {
+                    "max_usd": 500.0,
+                    "max_steps": 999,
+                    "require_approval_for_writes": False,
+                    "allowed_tools": ["*"],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+    elif spec.scenario_id == "raft_gc_pause_stale_lease":
+        (root / "raft").mkdir(parents=True, exist_ok=True)
+        (root / "raft" / "lease_config.json").write_text(
+            json.dumps(
+                {
+                    "lease_ttl_ms": 60000,
+                    "require_storage_fencing": False,
+                },
+                indent=2,
+            )
+            + "\n",
             encoding="utf-8",
         )
     elif spec.scenario_id == "raft_isr_lag_and_fencing_storm":
@@ -1094,6 +1138,17 @@ def arm_scenario_fault(
             + "\n",
             encoding="utf-8",
         )
+    elif spec.scenario_id == "cilium_dns53_egress_blackhole":
+        (root / "k8s").mkdir(parents=True, exist_ok=True)
+        (root / "k8s" / "require_dns53.flag").write_text("require_dns53=1\n", encoding="utf-8")
+    elif spec.scenario_id == "linux_emfile_accept_storm":
+        (root / "config").mkdir(parents=True, exist_ok=True)
+        (root / "config" / "sysctl.conf").write_text(
+            "# BROKEN: Kernel socket backlog & file-max starved under accept storm\n"
+            "fs.file-max = 1024\n"
+            "net.core.somaxconn = 16\n",
+            encoding="utf-8",
+        )
     elif spec.scenario_id == "cgroup_oom_kill_and_cpu_throttle":
         (root / "config").mkdir(parents=True, exist_ok=True)
         (root / "logs").mkdir(parents=True, exist_ok=True)
@@ -1108,6 +1163,31 @@ def arm_scenario_fault(
             "[41822.904112] memory: usage 131072kB, limit 131072kB, failcnt 8412\n"
             "[41822.904189] Memory cgroup out of memory: Killed process 2190 (worker) total-vm:512400kB, anon-rss:128900kB (Exit 137)\n"
             "[41824.110002] cpu.stat nr_throttled=41209 throttled_usec=18429000 (cpu.max=5000 100000)\n",
+            encoding="utf-8",
+        )
+    elif spec.scenario_id == "hot_tenant_boundary_burst_and_retry":
+        (root / "api").mkdir(parents=True, exist_ok=True)
+        (root / "api" / "strict_boundary.flag").write_text("require_sliding_boundary_check=1\n", encoding="utf-8")
+    elif spec.scenario_id == "tf_concurrent_state_corruption_and_passrole":
+        (root / "iam").mkdir(parents=True, exist_ok=True)
+        (root / "iam" / "trust.json").write_text(
+            json.dumps(
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [{"Effect": "Allow", "Principal": "*", "Action": "sts:AssumeRole"}],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+    elif spec.scenario_id == "vllm_prefix_cache_bust_and_rfc1918_pivot":
+        (root / "vllm").mkdir(parents=True, exist_ok=True)
+        (root / "vllm" / "strict_rfc1918.flag").write_text("require_rfc1918_and_seqs=1\n", encoding="utf-8")
+    elif spec.scenario_id == "principal_black_friday_cascade_p0":
+        (root / "config").mkdir(parents=True, exist_ok=True)
+        (root / "config" / "redis.conf").write_text(
+            "maxmemory 32mb\nmaxmemory-policy noeviction\n",
             encoding="utf-8",
         )
     (root / "README.md").write_text(
@@ -1139,6 +1219,139 @@ def test_workspace_project(root: Path, project_id: str) -> dict[str, Any]:
 
 def _chk(cid: str, label: str, passed: bool, detail: str) -> dict[str, Any]:
     return {"id": cid, "label": label, "passed": passed, "status": "pass" if passed else "fail", "detail": detail}
+
+
+def _verify_lab1_extra_guards(root: Path) -> list[dict[str, Any]]:
+    """Verify scenario-specific Lab 1 secondary guards (PgBouncer mode, Redis eviction, Postgres lock & MVCC/WAL)."""
+    extra: list[dict[str, Any]] = []
+
+    if (root / "config" / "pgbouncer-strict.flag").exists():
+        cfg_path = root / "config" / "pgbouncer.ini"
+        mode_val = ""
+        max_conn = 0
+        if cfg_path.exists():
+            for line in cfg_path.read_text(encoding="utf-8").splitlines():
+                s = line.strip()
+                if s.startswith("pool_mode") and "=" in s:
+                    mode_val = s.split("=", 1)[1].strip().lower()
+                elif s.startswith("max_client_conn") and "=" in s:
+                    try:
+                        max_conn = int(s.split("=", 1)[1].strip())
+                    except ValueError:
+                        max_conn = 0
+        if has_real_postgres() and psycopg is not None:
+            try:
+                with psycopg.connect("host=127.0.0.1 port=6432 user=operator dbname=pgbouncer", autocommit=True, connect_timeout=3) as conn:
+                    for row in conn.execute("SHOW CONFIG").fetchall():
+                        k, v = str(row[0]).strip(), str(row[1]).strip()
+                        if k == "pool_mode":
+                            mode_val = v.lower()
+                        elif k == "max_client_conn":
+                            max_conn = int(v)
+            except Exception:
+                pass
+        mode_ok = mode_val == "transaction" and max_conn >= 200
+        extra.append(
+            _chk(
+                "pgbouncer_mode",
+                "PgBouncer Transaction Mode & max_client_conn >= 200",
+                mode_ok,
+                f"pool_mode={mode_val}, max_client_conn={max_conn}"
+                if mode_ok
+                else f"PgBouncer starved: pool_mode={mode_val or 'unset'} (need transaction), max_client_conn={max_conn} (need >= 200)",
+            )
+        )
+
+    redis_path = root / "config" / "redis.conf"
+    if redis_path.exists():
+        maxmem_mb = 0
+        policy = ""
+        for line in redis_path.read_text(encoding="utf-8").splitlines():
+            s = line.strip()
+            if not s or s.startswith("#"):
+                continue
+            parts = s.split()
+            if len(parts) >= 2 and parts[0].lower() == "maxmemory":
+                raw = parts[1].lower()
+                try:
+                    if raw.endswith("gb"):
+                        maxmem_mb = int(float(raw[:-2]) * 1024)
+                    elif raw.endswith("mb"):
+                        maxmem_mb = int(float(raw[:-2]))
+                    elif raw.endswith("m"):
+                        maxmem_mb = int(float(raw[:-1]))
+                    else:
+                        maxmem_mb = int(float(raw) / (1024 * 1024))
+                except ValueError:
+                    maxmem_mb = 0
+            elif len(parts) >= 2 and parts[0].lower() == "maxmemory-policy":
+                policy = parts[1].lower()
+        redis_ok = maxmem_mb >= 128 and policy in {"allkeys-lru", "volatile-lru", "allkeys-lfu", "volatile-lfu"}
+        extra.append(
+            _chk(
+                "redis_eviction",
+                "Redis Eviction Policy (LRU/LFU) & maxmemory >= 128mb",
+                redis_ok,
+                f"maxmemory={maxmem_mb}mb, maxmemory-policy={policy}"
+                if redis_ok
+                else f"Redis OOM risk: maxmemory={maxmem_mb}mb (>=128mb), maxmemory-policy={policy or 'unset'} (use allkeys-lru)",
+            )
+        )
+
+    guard_path = root / "config" / "postgres-guard.conf"
+    if guard_path.exists():
+        raw_guard = guard_path.read_text(encoding="utf-8")
+        kv: dict[str, str] = {}
+        for line in raw_guard.splitlines():
+            s = line.strip()
+            if s and not s.startswith("#") and "=" in s:
+                k, v = s.split("=", 1)
+                kv[k.strip()] = v.strip().rstrip("MBmbmsMS")
+        if "lock_timeout" in kv:
+            try:
+                lt = int(float(kv.get("lock_timeout", "0")))
+            except ValueError:
+                lt = 0
+            try:
+                idle_ms = int(float(kv.get("idle_in_transaction_session_timeout", "0")))
+            except ValueError:
+                idle_ms = 0
+            lock_ok = 0 < lt <= 5000 and 0 < idle_ms <= 30000
+            extra.append(
+                _chk(
+                    "pg_lock_guard",
+                    "Postgres lock_timeout & idle_in_transaction Guard",
+                    lock_ok,
+                    f"lock_timeout={lt}ms, idle_in_transaction_session_timeout={idle_ms}ms"
+                    if lock_ok
+                    else f"Unsafe lock timeouts: lock_timeout={lt} (1..5000ms), idle_in_transaction_session_timeout={idle_ms} (1..30000ms)",
+                )
+            )
+        if "autovacuum_vacuum_scale_factor" in kv or "max_wal_size" in kv:
+            try:
+                sf = float(kv.get("autovacuum_vacuum_scale_factor", "1.0"))
+            except ValueError:
+                sf = 1.0
+            try:
+                wal = int(float(kv.get("max_wal_size", "0")))
+            except ValueError:
+                wal = 0
+            try:
+                idle_ms = int(float(kv.get("idle_in_transaction_session_timeout", "0")))
+            except ValueError:
+                idle_ms = 0
+            vac_ok = sf <= 0.05 and wal >= 2048 and 0 < idle_ms <= 30000
+            extra.append(
+                _chk(
+                    "pg_mvcc_wal",
+                    "Postgres MVCC Autovacuum & WAL Guard",
+                    vac_ok,
+                    f"scale_factor={sf}, max_wal_size={wal}MB, idle_tx_timeout={idle_ms}ms"
+                    if vac_ok
+                    else f"Unsafe MVCC/WAL config: scale_factor={sf} (<=0.05), max_wal_size={wal} (>=2048), idle_tx={idle_ms} (1..30000)",
+                )
+            )
+    return extra
 
 
 def _verify_lab1_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
@@ -1200,39 +1413,7 @@ def _verify_lab1_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
             api_detail = f"/api/orders probe failed: {exc}"
         checks.append(_chk("orders_api", "Orders API :8000 Live", api_ok, api_detail))
 
-        guard_path = root / "config" / "postgres-guard.conf"
-        if guard_path.exists():
-            raw_guard = guard_path.read_text(encoding="utf-8")
-            kv: dict[str, str] = {}
-            for line in raw_guard.splitlines():
-                s = line.strip()
-                if s and not s.startswith("#") and "=" in s:
-                    k, v = s.split("=", 1)
-                    kv[k.strip()] = v.strip().rstrip("MBmbmsMS")
-            if "autovacuum_vacuum_scale_factor" in kv or "max_wal_size" in kv:
-                try:
-                    sf = float(kv.get("autovacuum_vacuum_scale_factor", "1.0"))
-                except ValueError:
-                    sf = 1.0
-                try:
-                    wal = int(float(kv.get("max_wal_size", "0")))
-                except ValueError:
-                    wal = 0
-                try:
-                    idle_ms = int(float(kv.get("idle_in_transaction_session_timeout", "0")))
-                except ValueError:
-                    idle_ms = 0
-                vac_ok = sf <= 0.05 and wal >= 2048 and 0 < idle_ms <= 30000
-                checks.append(
-                    _chk(
-                        "pg_mvcc_wal",
-                        "Postgres MVCC Autovacuum & WAL Guard",
-                        vac_ok,
-                        f"scale_factor={sf}, max_wal_size={wal}MB, idle_tx_timeout={idle_ms}ms"
-                        if vac_ok
-                        else f"Unsafe MVCC/WAL config: scale_factor={sf} (<=0.05), max_wal_size={wal} (>=2048), idle_tx={idle_ms} (1..30000)",
-                    )
-                )
+        checks.extend(_verify_lab1_extra_guards(root))
 
         all_ok = all(c["passed"] for c in checks)
         summary = (
@@ -1285,39 +1466,7 @@ def _verify_lab1_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
             f"default_pool_size={pool_val}" if pool_ok else f"PgBouncer default_pool_size={pool_val} too low (need >= 25)",
         )
     )
-    guard_path = root / "config" / "postgres-guard.conf"
-    if guard_path.exists():
-        raw_guard = guard_path.read_text(encoding="utf-8")
-        kv: dict[str, str] = {}
-        for line in raw_guard.splitlines():
-            s = line.strip()
-            if s and not s.startswith("#") and "=" in s:
-                k, v = s.split("=", 1)
-                kv[k.strip()] = v.strip().rstrip("MBmbmsMS")
-        if "autovacuum_vacuum_scale_factor" in kv or "max_wal_size" in kv:
-            try:
-                sf = float(kv.get("autovacuum_vacuum_scale_factor", "1.0"))
-            except ValueError:
-                sf = 1.0
-            try:
-                wal = int(float(kv.get("max_wal_size", "0")))
-            except ValueError:
-                wal = 0
-            try:
-                idle_ms = int(float(kv.get("idle_in_transaction_session_timeout", "0")))
-            except ValueError:
-                idle_ms = 0
-            vac_ok = sf <= 0.05 and wal >= 2048 and 0 < idle_ms <= 30000
-            checks.append(
-                _chk(
-                    "pg_mvcc_wal",
-                    "Postgres MVCC Autovacuum & WAL Guard",
-                    vac_ok,
-                    f"scale_factor={sf}, max_wal_size={wal}MB, idle_tx_timeout={idle_ms}ms"
-                    if vac_ok
-                    else f"Unsafe MVCC/WAL config: scale_factor={sf} (<=0.05), max_wal_size={wal} (>=2048), idle_tx={idle_ms} (1..30000)",
-                )
-            )
+    checks.extend(_verify_lab1_extra_guards(root))
     all_ok = all(c["passed"] for c in checks)
     summary = (
         f"SLA healthy: indexed query plan ({plan}) + default_pool_size={pool_val}"
@@ -1374,6 +1523,49 @@ def _verify_lab2_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
             prestop_ok = "preStop" in dep_raw
             prestop_detail = "preStop hook present" if prestop_ok else "deploy/rollout.yaml missing preStop hook"
     checks.append(_chk("k8s_prestop", "K8s preStop Drain Hook", prestop_ok, prestop_detail))
+
+    sec_path = root / "nginx" / "security.conf"
+    if sec_path.exists():
+        sec_lines = [l.strip() for l in sec_path.read_text(encoding="utf-8").splitlines() if l.strip() and not l.strip().startswith("#")]
+        sec_body = "\n".join(sec_lines)
+        has_weak_tls = bool(re.search(r"\bTLSv1(?:\.0|\.1)?(?:\s|;|$)", sec_body))
+        has_modern_tls = bool(re.search(r"\bTLSv1\.[23]\b", sec_body))
+        has_hsts = "strict-transport-security" in sec_body.lower()
+        sec_ok = (not has_weak_tls) and has_modern_tls and has_hsts
+        checks.append(
+            _chk(
+                "nginx_tls_hsts",
+                "NGINX Modern TLS 1.2/1.3 & HSTS Header",
+                sec_ok,
+                "TLSv1.2/1.3 only + Strict-Transport-Security enabled"
+                if sec_ok
+                else "nginx/security.conf must disable TLSv1/TLSv1.1 and add Strict-Transport-Security header",
+            )
+        )
+
+    up_path = root / "nginx" / "upload.conf"
+    if up_path.exists():
+        up_lines = [l.strip() for l in up_path.read_text(encoding="utf-8").splitlines() if l.strip() and not l.strip().startswith("#")]
+        up_body = "\n".join(up_lines)
+        body_mb = 0
+        m_body = re.search(r"client_max_body_size\s+(\d+)([kmgKMG]?)", up_body)
+        if m_body:
+            val = int(m_body.group(1))
+            unit = m_body.group(2).lower()
+            body_mb = val * 1024 if unit == "g" else (val if unit == "m" else (val / 1024.0 if unit == "k" else val / (1024 * 1024)))
+        m_wk = re.search(r"worker_connections\s+(\d+)", up_body)
+        wk_conn = int(m_wk.group(1)) if m_wk else 0
+        up_ok = body_mb >= 10 and wk_conn >= 1024
+        checks.append(
+            _chk(
+                "nginx_upload_workers",
+                "NGINX Upload Limit (>=10m) & worker_connections (>=1024)",
+                up_ok,
+                f"client_max_body_size={body_mb:g}m, worker_connections={wk_conn}"
+                if up_ok
+                else f"Upload/worker limit too low: body={body_mb:g}m (>=10m), worker_connections={wk_conn} (>=1024)",
+            )
+        )
 
     netem_path = root / "config" / "netem.conf"
     if netem_path.exists():
@@ -1447,6 +1639,7 @@ def _verify_lab3_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
         c = [_chk("wap_exec", "WAP Publish Gate", False, "wap/publish_gate.py missing")]
         return False, "wap/publish_gate.py missing", c
 
+    dedup_required = (root / "wap" / "dedup_required.flag").exists()
     hidden_batch = [
         {"event_id": "h_1", "tenant_id": "alpha", "revenue_cents": 1200},
         {"event_id": "h_2", "tenant_id": None, "revenue_cents": 5000},
@@ -1455,6 +1648,9 @@ def _verify_lab3_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
         {"event_id": "h_5", "revenue_cents": 4100},
         {"event_id": "h_6", "tenant_id": "gamma", "revenue_cents": 2500},
     ]
+    if dedup_required:
+        hidden_batch.append({"event_id": "h_1", "tenant_id": "alpha", "revenue_cents": 1200})
+        hidden_batch.append({"event_id": "h_4", "tenant_id": "beta", "revenue_cents": 8900})
     checks: list[dict[str, Any]] = []
     with tempfile.TemporaryDirectory(prefix="crucible-grade-lab3-") as td:
         td_path = Path(td)
@@ -1486,10 +1682,20 @@ def _verify_lab3_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
             dlq = [json.loads(l) for l in dlq_path.read_text(encoding="utf-8").splitlines() if l.strip()]
             clean_ok = not any(not (isinstance(r.get("tenant_id"), str) and r["tenant_id"].strip()) for r in curated)
             clean_detail = "0 poisoned rows in curated.jsonl" if clean_ok else "curated.jsonl still contains NULL/blank tenant_id rows!"
-            count_ok = len(curated) == 3 and len(dlq) == 3
-            count_detail = f"3 clean curated, 3 poisoned quarantined" if count_ok else f"Expected 3 curated + 3 DLQ, got curated={len(curated)} dlq={len(dlq)}"
+            curated_ids = [r.get("event_id") for r in curated]
+            unique_ok = len(curated_ids) == len(set(curated_ids))
+            expected_dlq = 5 if dedup_required else 3
+            count_ok = len(curated) == 3 and (len(dlq) == expected_dlq if not dedup_required else unique_ok)
+            count_detail = (
+                f"3 unique clean curated, duplicates & poisoned quarantined"
+                if (count_ok and unique_ok)
+                else f"Expected 3 unique curated rows (dedup_required={dedup_required}), got curated={len(curated)} unique={len(set(curated_ids))} dlq={len(dlq)}"
+            )
         checks.append(_chk("wap_quarantine", "Zero Poisoned Rows Published", clean_ok, clean_detail))
-        checks.append(_chk("wap_counts", "Hidden 6-Row Audit Split (3/3)", count_ok, count_detail))
+        checks.append(_chk("wap_counts", "Hidden Adversarial Audit Split", count_ok, count_detail))
+        if dedup_required:
+            dedup_pass = bool(exec_ok and curated_path.exists() and len([json.loads(l).get("event_id") for l in curated_path.read_text(encoding="utf-8").splitlines() if l.strip()]) == len(set(json.loads(l).get("event_id") for l in curated_path.read_text(encoding="utf-8").splitlines() if l.strip())) == 3)
+            checks.append(_chk("wap_dedup", "Idempotent event_id Deduplication", dedup_pass, "0 duplicate event_ids in curated.jsonl" if dedup_pass else "Duplicate event_ids leaked into curated.jsonl!"))
     all_ok = all(c["passed"] for c in checks)
     return all_ok, ("SLA healthy: WAP gate passed hidden 6-row adversarial audit (3 clean published, 3 poisoned quarantined)" if all_ok else next(c["detail"] for c in checks if not c["passed"])), checks
 
@@ -1548,6 +1754,17 @@ print("HIDDEN_ACL_PASS")
             budget_detail = f"max_usd=${max_usd}, max_steps={max_steps}" if budget_ok else f"Unsafe caps: max_usd={max_usd} (<=2), max_steps={max_steps} (<=12)"
             writes_ok = policy.get("require_approval_for_writes") is True
             writes_detail = "require_approval_for_writes=true" if writes_ok else "require_approval_for_writes must be true"
+            if "allowed_tools" in policy:
+                tools = policy.get("allowed_tools")
+                tools_ok = isinstance(tools, list) and len(tools) >= 1 and "*" not in tools
+                checks.append(
+                    _chk(
+                        "mcp_allowlist",
+                        "MCP Explicit Tool Allowlist (No Wildcard)",
+                        tools_ok,
+                        f"Scoped allowlist: {tools}" if tools_ok else "mcp/policy.json allowed_tools must be a non-empty list without '*'",
+                    )
+                )
         except ValueError as exc:
             budget_detail = f"Invalid JSON: {exc}"
     checks.append(_chk("mcp_budget", "Bounded MCP Budget Caps", budget_ok, budget_detail))
@@ -1591,6 +1808,24 @@ print("HIDDEN_RAFT_PASS")
         ok = proc.returncode == 0 and "HIDDEN_RAFT_PASS" in proc.stdout
         detail = "All stale zombie writes rejected; committed term preserved" if ok else (proc.stderr or proc.stdout).strip()[:180]
     checks = [_chk("raft_fencing", "Monotonic Split-Brain Fencing (Hidden Suite)", ok, detail)]
+
+    lease_path = root / "raft" / "lease_config.json"
+    if lease_path.exists():
+        lease_ok = False
+        lease_detail = "Invalid JSON in raft/lease_config.json"
+        try:
+            lcfg = json.loads(lease_path.read_text(encoding="utf-8"))
+            ttl = int(lcfg.get("lease_ttl_ms", 999999))
+            req_fence = lcfg.get("require_storage_fencing") is True
+            lease_ok = 0 < ttl <= 10000 and req_fence
+            lease_detail = (
+                f"lease_ttl_ms={ttl}, require_storage_fencing=true"
+                if lease_ok
+                else f"Unsafe lease config: lease_ttl_ms={ttl} (<=10000), require_storage_fencing={req_fence}"
+            )
+        except Exception as exc:
+            lease_detail = f"Invalid raft/lease_config.json: {exc}"
+        checks.append(_chk("raft_lease", "Bounded Leader Lease & Storage Fencing Guard", lease_ok, lease_detail))
 
     cluster_path = root / "raft" / "cluster.json"
     if cluster_path.exists():
@@ -1641,6 +1876,16 @@ def _verify_lab6_checks(root: Path) -> tuple[bool, str, list[dict[str, Any]]]:
                                     pass
                 np_ok = isinstance(np_doc, dict) and np_doc.get("kind") == "NetworkPolicy" and "Egress" in policy_types and ("TCP", 6432) in ports_found
                 np_detail = "Egress TCP:6432 (PgBouncer) allowed" if np_ok else "NetworkPolicy egress still blocks TCP port 6432"
+                if (root / "k8s" / "require_dns53.flag").exists():
+                    dns53_ok = ("UDP", 53) in ports_found or ("TCP", 53) in ports_found
+                    checks.append(
+                        _chk(
+                            "k8s_dns53",
+                            "NetworkPolicy CoreDNS Egress :53 Allowed",
+                            dns53_ok,
+                            "CoreDNS port 53 egress allowed" if dns53_ok else "NetworkPolicy egress still blocks CoreDNS port 53 (UDP/TCP)",
+                        )
+                    )
             except Exception as exc:
                 np_detail = f"Invalid YAML: {exc}"
         else:
