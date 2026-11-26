@@ -709,7 +709,7 @@ def internal_restore_snapshot(name: str) -> dict[str, Any]:
             target = (root_resolved / member.name).resolve()
             if not str(target).startswith(str(root_resolved)):
                 raise HTTPException(status_code=400, detail="Unsafe path inside snapshot archive.")
-            tar.extract(member, path=root_resolved, filter="data")
+            tar.extract(member, path=root_resolved)
     if os.geteuid() == 0:
         with contextlib.suppress(KeyError, OSError):
             pw = pwd.getpwnam("operator")
