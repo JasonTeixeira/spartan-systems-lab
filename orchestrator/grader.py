@@ -1074,6 +1074,28 @@ def _seed_lab0_free_range(root: Path, broken: bool) -> None:
     pg_dir = root / "playground"
     sl_dir = pg_dir / "server-lifecycle"
     sl_dir.mkdir(parents=True, exist_ok=True)
+    labs_dir = root / "labs"
+    labs_dir.mkdir(parents=True, exist_ok=True)
+    (labs_dir / "foundations.py").write_text(
+        '"""Run: python3 labs/foundations.py --text \'hello useful servers\'. No network or writes."""\n\n'
+        "import argparse\n"
+        "import json\n\n\n"
+        "def analyze(text: str) -> dict[str, int]:\n"
+        "    if not text.strip():\n"
+        '        raise ValueError("text must not be blank")\n'
+        '    return {"words": len(text.split()), "characters": len(text)}\n\n\n'
+        "def main():\n"
+        "    parser = argparse.ArgumentParser()\n"
+        '    parser.add_argument("--text", required=True)\n'
+        "    args = parser.parse_args()\n"
+        "    try:\n"
+        "        print(json.dumps(analyze(args.text)))\n"
+        "    except ValueError as exc:\n"
+        "        parser.error(str(exc))\n\n\n"
+        'if __name__ == "__main__":\n'
+        "    main()\n",
+        encoding="utf-8",
+    )
     (pg_dir / "sandbox_notes.md").write_text(
         "# Free-Range Enterprise Cloud Range (Crucible Firecracker KVM)\n\n"
         "Break anything, install Python/Node SDKs (`uv`, `npm`), run real OpenTofu/Prometheus/age/PostgreSQL/Redis/NGINX/Caddy drills, save Checkpoints, or 1-Click Reset anytime!\n\n"
